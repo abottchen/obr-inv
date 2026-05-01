@@ -191,15 +191,10 @@ export function mountGmView(opts: GmViewOpts): () => void {
     },
   );
 
+  // main.ts already calls ensureRecord(selfId, ...) before mounting,
+  // so the GM's tab is guaranteed to exist by the time we read here.
   void (async () => {
     records = await listInventoryRecords();
-    if (!records[opts.selfId]) {
-      await writeRecord(opts.selfId, {
-        name: opts.selfName, color: opts.selfColor,
-        items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-      });
-      records = await listInventoryRecords();
-    }
     renderAll();
   })();
 

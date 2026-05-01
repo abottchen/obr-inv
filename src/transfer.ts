@@ -50,7 +50,28 @@ export async function transferItem(req: TransferRequest): Promise<void> {
   try {
     await writeRecord(req.fromPlayerId, newSender);
   } catch (err) {
-    await writeRecord(req.toPlayerId, recipient).catch(() => {});
+    // Sender write failed *after* recipient was already credited.
+    // Re-read recipient (could have changed concurrently) and back out
+    // the qty we just added; if that fails, surface a loud error so
+    // operators can reconcile manually rather than silently double-crediting.
+    try {
+      const fresh = await getRecord(req.toPlayerId);
+      if (fresh) {
+        const reverted = {
+          ...fresh,
+          items: fresh.items
+            .map(([id, c]) =>
+              id === req.itemId ? ([id, c - req.qty] as [string, number]) : ([id, c] as [string, number]),
+            )
+            .filter(([, c]) => c > 0),
+        };
+        await writeRecord(req.toPlayerId, reverted);
+      }
+    } catch (rollbackErr) {
+      console.error("[transfer] rollback failed; recipient may be double-credited", {
+        req, rollbackErr,
+      });
+    }
     throw err;
   }
 
