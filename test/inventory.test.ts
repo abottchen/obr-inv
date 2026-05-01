@@ -59,7 +59,7 @@ describe("inventory", () => {
   });
 
   it("totalWeight sums weight × count, ignoring null/missing", () => {
-    const items = [["a1", 2] as [string, number], ["b2", 4]];
+    const items: [string, number][] = [["a1", 2], ["b2", 4]];
     const catalog: CatalogItem[] = [
       cat({ id: "a1", weight: 1.5 }),
       cat({ id: "b2", weight: null as any }),

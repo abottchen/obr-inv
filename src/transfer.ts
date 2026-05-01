@@ -19,11 +19,6 @@ interface TransferRequest {
   qty: number;
 }
 
-async function gmPlayerIds(): Promise<string[]> {
-  const players = await OBR.party.getPlayers();
-  return players.filter((p) => p.role === "GM").map((p) => p.id);
-}
-
 export async function transferItem(req: TransferRequest): Promise<void> {
   const sender = await getRecord(req.fromPlayerId);
   const recipient = await getRecord(req.toPlayerId);
@@ -46,8 +41,8 @@ export async function transferItem(req: TransferRequest): Promise<void> {
         currentBytes: err.currentBytes,
         cap: err.cap,
       };
-      const targets = await gmPlayerIds();
-      await OBR.broadcast.sendMessage(BROADCAST_CHANNEL, msg, { destination: targets });
+      // Broadcast to all clients; GM listeners filter by role.
+      await OBR.broadcast.sendMessage(BROADCAST_CHANNEL, msg, { destination: "ALL" });
     }
     throw err;
   }
@@ -66,7 +61,6 @@ export async function transferItem(req: TransferRequest): Promise<void> {
     itemName: req.itemName,
     quantity: req.qty,
   };
-  await OBR.broadcast.sendMessage(BROADCAST_CHANNEL, note, {
-    destination: [req.toPlayerId],
-  });
+  // Broadcast to all clients; recipient listener filters by toPlayerId.
+  await OBR.broadcast.sendMessage(BROADCAST_CHANNEL, note, { destination: "ALL" });
 }

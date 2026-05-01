@@ -36,7 +36,8 @@ describe("transferItem", () => {
         && (b.data as any).type === "transfer-received",
     );
     expect(transferMsg).toBeTruthy();
-    expect(transferMsg?.targets).toEqual(["bob"]);
+    expect((transferMsg?.data as any).toPlayerId).toBe("bob");
+    expect(transferMsg?.destination).toBe("ALL");
   });
 
   it("rejects and emits over-cap broadcast when recipient would overflow", async () => {
@@ -66,7 +67,8 @@ describe("transferItem", () => {
       (b) => (b.data as any).type === "over-cap",
     );
     expect(overCapMsg).toBeTruthy();
-    expect(overCapMsg?.targets).toEqual(["gm"]);
+    expect(overCapMsg?.destination).toBe("ALL");
+    expect((overCapMsg?.data as any).triggeringPlayerName).toBe("Alice");
   });
 
   it("rejects when recipient has no inventory record", async () => {

@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 
 const store = new Map<string, unknown>();
-const broadcasts: Array<{ channel: string; data: unknown; targets?: string[] }> = [];
+const broadcasts: Array<{ channel: string; data: unknown; destination?: "REMOTE" | "LOCAL" | "ALL" }> = [];
 const broadcastListeners: Record<string, Array<(ev: { data: unknown }) => void>> = {};
 let role: "PLAYER" | "GM" = "PLAYER";
 let selfId = "player-self";
@@ -42,8 +42,8 @@ export const OBR = {
   party: { getPlayers: vi.fn(async () => players) },
   broadcast: {
     sendMessage: vi.fn(
-      async (channel: string, data: unknown, opts?: { destination?: string[] }) => {
-        broadcasts.push({ channel, data, targets: opts?.destination });
+      async (channel: string, data: unknown, opts?: { destination?: "REMOTE" | "LOCAL" | "ALL" }) => {
+        broadcasts.push({ channel, data, destination: opts?.destination });
         for (const l of broadcastListeners[channel] ?? []) l({ data });
       },
     ),
