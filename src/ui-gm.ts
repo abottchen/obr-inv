@@ -3,34 +3,44 @@ import { mountShell } from "./ui-shell";
 import { showDescription } from "./ui-description";
 import { showTransfer, buildTargets } from "./ui-transfer";
 import { openAddDialog, closeAddDialog } from "./ui-add-dialog";
+import { openCustomsDialog } from "./ui-customs-dialog";
+import { openCustomsPanel, reloadCustomsPanel } from "./ui-customs-panel";
 import {
-  listInventoryRecords, writeRecord, inventoryByteSize, onRoomMetadataChange,
+  listInventoryRecords, onCustomsChange, onRoomMetadataChange,
+  roomDataByteSize, writeCustoms, writeRecord,
 } from "./metadata";
 import {
   addItem, incrementItem, decrementItem, removeItem,
 } from "./inventory";
+import { addCustom } from "./customs";
 import { transferItem } from "./transfer";
 import { buildExport, downloadExport } from "./export";
+import { resolvedCatalog } from "./catalog";
 import {
   BROADCAST_CHANNEL, STORAGE_CAP_BYTES,
   METER_YELLOW_RATIO, METER_RED_RATIO,
 } from "./constants";
 import { OverCapError } from "./types";
 import type {
-  CatalogItem, PlayerInventoryRecord, BroadcastMessage,
+  CatalogItem, CustomItemsRecord, PlayerInventoryRecord, BroadcastMessage,
 } from "./types";
 
 export interface GmViewOpts {
   root: HTMLElement;
   catalog: CatalogItem[];
   catalogUrl: string;
+  /** Customs already loaded by main.ts (post-reconciliation). The view
+   *  subscribes to onCustomsChange for further updates. */
+  initialCustoms: CustomItemsRecord;
   selfId: string;
   selfName: string;
   selfColor: string;
 }
 
 export function mountGmView(opts: GmViewOpts): () => void {
-  const byId = new Map(opts.catalog.map((c) => [c.id, c]));
+  let customs: CustomItemsRecord = opts.initialCustoms;
+  let merged = resolvedCatalog(opts.catalog, customs);
+  let byId = new Map(merged.map((c) => [c.id, c]));
 
   const wrap = document.createElement("div");
   wrap.style.display = "flex";
@@ -74,6 +84,20 @@ export function mountGmView(opts: GmViewOpts): () => void {
       t.onclick = () => { activePid = pid; renderAll(); };
       tabsEl.appendChild(t);
     }
+    const customsBtn = document.createElement("button");
+    customsBtn.className = "tab-customs";
+    customsBtn.textContent = "✱";
+    customsBtn.title = "Manage custom items";
+    customsBtn.onclick = () => {
+      openCustomsPanel({
+        catalog: opts.catalog,
+        initialCustoms: customs,
+        records,
+        onError: gmHandleErr,
+      });
+    };
+    tabsEl.appendChild(customsBtn);
+
     const dl = document.createElement("button");
     dl.className = "tab-download";
     dl.textContent = "⤓";
@@ -86,7 +110,7 @@ export function mountGmView(opts: GmViewOpts): () => void {
   };
 
   const renderMeter = async () => {
-    const bytes = await inventoryByteSize();
+    const bytes = await roomDataByteSize();
     const ratio = bytes / STORAGE_CAP_BYTES;
     const fill = meterEl.querySelector(".meter-fill") as HTMLElement;
     const text = meterEl.querySelector(".meter-text") as HTMLElement;
@@ -96,6 +120,22 @@ export function mountGmView(opts: GmViewOpts): () => void {
     text.textContent = `${(bytes / 1024).toFixed(1)} KB / ${(STORAGE_CAP_BYTES / 1024).toFixed(0)} KB`;
   };
 
+  const openCreateItem = (prefillName?: string): void => {
+    openCustomsDialog({
+      resolved: merged,
+      prefillName,
+      onSave: async (item) => {
+        const next = addCustom(customs, item);
+        await writeCustoms(next);
+        // Local state will refresh via onCustomsChange, but pre-update
+        // so the next render after Save reflects it immediately.
+        customs = next;
+        merged = resolvedCatalog(opts.catalog, customs);
+        byId = new Map(merged.map((c) => [c.id, c]));
+      },
+    });
+  };
+
   const renderShell = () => {
     const rec = records[activePid];
     if (!rec) return;
@@ -103,36 +143,36 @@ export function mountGmView(opts: GmViewOpts): () => void {
     // shell's transient UI state (lock toggle, search text, collapsed
     // categories) across metadata changes. Different tab → full remount.
     if (shellRefs && mountedShellPid === activePid) {
-      shellRefs.rerender(rec, opts.catalog);
+      shellRefs.rerender(rec, merged);
       return;
     }
     if (shellRefs) shellRefs.destroy();
     mountedShellPid = activePid;
-    shellRefs = mountShell(shellRoot, rec, opts.catalog, {
+    shellRefs = mountShell(shellRoot, rec, merged, {
       onIncrement: async (id) => {
         const r = records[activePid]; if (!r) return;
         try { await writeRecord(activePid, incrementItem(r, id)); }
-        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, opts.catalog); }
+        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, merged); }
       },
       onDecrement: async (id) => {
         const r = records[activePid]; if (!r) return;
         try { await writeRecord(activePid, decrementItem(r, id)); }
-        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, opts.catalog); }
+        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, merged); }
       },
       onRemove: async (id) => {
         const r = records[activePid]; if (!r) return;
         try { await writeRecord(activePid, removeItem(r, id)); }
-        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, opts.catalog); }
+        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, merged); }
       },
       onCurrencyChange: async (f, v) => {
         const r = records[activePid]; if (!r) return;
         const u = { ...r, currency: { ...r.currency, [f]: v } };
         try { await writeRecord(activePid, u); }
-        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, opts.catalog); }
+        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, merged); }
       },
       onAddClick: () => {
         openAddDialog({
-          catalog: opts.catalog,
+          catalog: merged,
           onAdd: async (id, qty) => {
             const r = records[activePid]; if (!r) return;
             try {
@@ -140,8 +180,15 @@ export function mountGmView(opts: GmViewOpts): () => void {
               closeAddDialog();
             } catch (e) { gmHandleErr(e); }
           },
+          onCreateCustom: (prefill) => {
+            // Close the add-dialog so the customs dialog has full focus;
+            // the GM can re-open the add-dialog after creating to add it.
+            closeAddDialog();
+            openCreateItem(prefill);
+          },
         });
       },
+      onCreateCustomClick: () => openCreateItem(),
       onDescription: (id, anchor) => showDescription(anchor, byId.get(id) ?? null, id),
       onTransfer: async (id, anchor) => {
         const r = records[activePid]; if (!r) return;
@@ -190,6 +237,17 @@ export function mountGmView(opts: GmViewOpts): () => void {
     records = next;
     if (!records[activePid]) activePid = opts.selfId;
     renderAll();
+    // The customs panel's reference counts depend on inventory records;
+    // refresh it so deletes still surface accurate "in N inventories" text.
+    reloadCustomsPanel();
+  });
+
+  const unsubCustoms = onCustomsChange((next) => {
+    customs = next;
+    merged = resolvedCatalog(opts.catalog, customs);
+    byId = new Map(merged.map((c) => [c.id, c]));
+    renderAll();
+    reloadCustomsPanel();
   });
 
   const unsubBroadcast = OBR.broadcast.onMessage(
@@ -213,7 +271,9 @@ export function mountGmView(opts: GmViewOpts): () => void {
     renderAll();
   })();
 
-  return () => { unsubMeta(); unsubBroadcast(); shellRefs?.destroy(); };
+  return () => {
+    unsubMeta(); unsubCustoms(); unsubBroadcast(); shellRefs?.destroy();
+  };
 }
 
 function showOverCapModal(args: {

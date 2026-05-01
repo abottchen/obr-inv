@@ -4,30 +4,34 @@ import { showDescription } from "./ui-description";
 import { showTransfer, buildTargets } from "./ui-transfer";
 import { openAddDialog, closeAddDialog } from "./ui-add-dialog";
 import {
-  writeRecord, listInventoryRecords, onRoomMetadataChange,
+  writeRecord, listInventoryRecords, onCustomsChange, onRoomMetadataChange,
 } from "./metadata";
 import {
   addItem, incrementItem, decrementItem, removeItem,
 } from "./inventory";
 import { transferItem } from "./transfer";
+import { resolvedCatalog } from "./catalog";
 import { BROADCAST_CHANNEL } from "./constants";
 import type {
-  CatalogItem, PlayerInventoryRecord, BroadcastMessage,
+  CatalogItem, CustomItemsRecord, PlayerInventoryRecord, BroadcastMessage,
 } from "./types";
 import { OverCapError } from "./types";
 
 export interface PlayerViewOpts {
   root: HTMLElement;
   catalog: CatalogItem[];
+  initialCustoms: CustomItemsRecord;
   playerId: string;
   initialRecord: PlayerInventoryRecord;
 }
 
 export function mountPlayerView(opts: PlayerViewOpts): () => void {
-  const byId = new Map(opts.catalog.map((c) => [c.id, c]));
+  let customs = opts.initialCustoms;
+  let merged = resolvedCatalog(opts.catalog, customs);
+  let byId = new Map(merged.map((c) => [c.id, c]));
   let current = opts.initialRecord;
 
-  const refs = mountShell(opts.root, current, opts.catalog, {
+  const refs = mountShell(opts.root, current, merged, {
     onIncrement: async (id) => {
       try { await writeRecord(opts.playerId, incrementItem(current, id)); }
       catch (e) { revertOptimistic(); rethrowIfNotCap(e); }
@@ -49,7 +53,7 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
     },
     onAddClick: () => {
       openAddDialog({
-        catalog: opts.catalog,
+        catalog: merged,
         onAdd: async (id, qty) => {
           try {
             await writeRecord(opts.playerId, addItem(current, id, qty));
@@ -95,7 +99,14 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
     const me = records[opts.playerId];
     if (!me) return;
     current = me;
-    refs.rerender(current, opts.catalog);
+    refs.rerender(current, merged);
+  });
+
+  const unsubCustoms = onCustomsChange((next) => {
+    customs = next;
+    merged = resolvedCatalog(opts.catalog, customs);
+    byId = new Map(merged.map((c) => [c.id, c]));
+    refs.rerender(current, merged);
   });
 
   const unsubBroadcast = OBR.broadcast.onMessage(
@@ -111,11 +122,11 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
   );
 
   function revertOptimistic() {
-    refs.rerender(current, opts.catalog);
+    refs.rerender(current, merged);
   }
   function rethrowIfNotCap(e: unknown) {
     if (!(e instanceof OverCapError)) throw e;
   }
 
-  return () => { unsubMeta(); unsubBroadcast(); refs.destroy(); };
+  return () => { unsubMeta(); unsubCustoms(); unsubBroadcast(); refs.destroy(); };
 }

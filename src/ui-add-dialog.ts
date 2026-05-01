@@ -4,6 +4,9 @@ import type { CatalogItem } from "./types";
 export interface AddDialogOpts {
   catalog: CatalogItem[];
   onAdd: (itemId: string, qty: number) => Promise<void> | void;
+  /** GM-only: when set and the search yields no results, the empty
+   *  state shows a "Create '<query>' as custom item" affordance. */
+  onCreateCustom?: (prefillName: string) => void;
 }
 
 let active: HTMLElement | null = null;
@@ -141,10 +144,28 @@ export function openAddDialog(opts: AddDialogOpts): void {
       groups.get(item.category)!.push(item);
     }
     if (groups.size === 0) {
-      const empty = document.createElement("div");
-      empty.className = "empty-state";
-      empty.textContent = q ? `No items match "${search.value}"` : "Catalog is empty";
-      body.appendChild(empty);
+      // GM searching with no hit → offer to create a custom item with
+      // the query pre-filled as the name. Falls back to the plain
+      // empty-state row for players (and for the empty-search case,
+      // since "Create ''" wouldn't be useful).
+      if (opts.onCreateCustom && search.value.trim().length > 0) {
+        const cta = document.createElement("div");
+        cta.className = "empty-cta";
+        const msg = document.createElement("div");
+        msg.textContent = `No items match "${search.value}"`;
+        cta.appendChild(msg);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = `+ Create "${search.value.trim()}" as custom item`;
+        btn.onclick = () => opts.onCreateCustom!(search.value.trim());
+        cta.appendChild(btn);
+        body.appendChild(cta);
+      } else {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = q ? `No items match "${search.value}"` : "Catalog is empty";
+        body.appendChild(empty);
+      }
       return;
     }
     for (const [cat, entries] of groups.entries()) {

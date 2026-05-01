@@ -258,7 +258,7 @@ The GM curates which customs become canonical — some are session-specific narr
 
 | Situation | Behavior |
 |---|---|
-| Save would push total metadata over 8 KB | `OverCapError` thrown; dialog stays open; an inline error row appears at the top of the dialog: "Storage full — remove items or another player's gear before saving." (GM is the actor; no broadcast needed.) |
+| Save would push total metadata over the cap | `OverCapError` thrown; dialog stays open; an inline error row appears at the top of the dialog: "Storage full — remove items or another player's gear before saving." (GM is the actor; no broadcast needed.) |
 | User submits with required field blank | Save button stays disabled. No submission. |
 | Image URL fails to load at render time | Browser native fallback (broken image). Row falls back to placeholder via the existing `if (item?.icon)` check (we explicitly check for non-empty string before setting `background-image`). |
 | Two GMs simultaneously edit the customs key | Last-write-wins on OBR's side. Per-key write queue protects against same-client races. Cross-client conflicts are rare (typically one GM per room) and recoverable via the next `onMetadataChange` event. |
@@ -268,8 +268,8 @@ The GM curates which customs become canonical — some are session-specific narr
 ## 10. Module changes (high-level)
 
 - `src/types.ts` — add `CustomItem = CatalogItem` (alias for clarity), `CustomItemsRecord = CustomItem[]`.
-- `src/constants.ts` — bump `STORAGE_CAP_BYTES` to 8192. Add `CUSTOMS_KEY`.
-- `src/metadata.ts` — add `getCustoms()`, `writeCustoms(items)`, both going through the existing write queue and cap guard. Update `inventoryByteSize()` → rename to `roomDataByteSize()` so it reflects what it actually measures (or keep the name and document the broadened scope).
+- `src/constants.ts` — add `CUSTOMS_KEY`. (`STORAGE_CAP_BYTES` stays at 5120 per §3.)
+- `src/metadata.ts` — add `getCustoms()`, `writeCustoms(items)`, both going through the existing write queue and cap guard. Rename `inventoryByteSize()` → `roomDataByteSize()` so the name reflects the broadened scope (inventories + customs).
 - `src/catalog.ts` — add `resolvedCatalog(remote, customs)` and use it everywhere a catalog array is consumed by UI/export. Update consumers accordingly.
 - `src/customs.ts` *(new)* — pure helpers: `addCustom`, `updateCustom`, `removeCustom`, `findReferences(id, allRecords)` for the delete confirmation.
 - `src/ui-customs-dialog.ts` *(new)* — create/edit form.

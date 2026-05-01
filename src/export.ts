@@ -1,5 +1,6 @@
-import { listInventoryRecords } from "./metadata";
-import type { CatalogItem } from "./types";
+import { resolvedCatalog } from "./catalog";
+import { getCustoms, listInventoryRecords } from "./metadata";
+import type { CatalogItem, CustomItem } from "./types";
 
 export interface ExportEntryHydrated {
   id: string;
@@ -29,6 +30,7 @@ export interface ExportFile {
   exportedAt: string;
   catalogUrl: string;
   catalogVersion: string;
+  customItems: CustomItem[];
   inventories: Record<string, ExportInventory>;
 }
 
@@ -43,8 +45,14 @@ async function sha1(text: string): Promise<string> {
 export async function buildExport(
   catalog: CatalogItem[], catalogUrl: string,
 ): Promise<ExportFile> {
-  const records = await listInventoryRecords();
-  const byId = new Map(catalog.map((c) => [c.id, c]));
+  const [records, customs] = await Promise.all([
+    listInventoryRecords(),
+    getCustoms(),
+  ]);
+  // Hydrate against the merged catalog so a custom item's row in a
+  // player's inventory still resolves to a full record at export time.
+  const merged = resolvedCatalog(catalog, customs);
+  const byId = new Map(merged.map((c) => [c.id, c]));
   const inventories: Record<string, ExportInventory> = {};
   for (const [pid, rec] of Object.entries(records)) {
     const items: ExportEntry[] = rec.items.map(([id, count]) => {
@@ -65,6 +73,7 @@ export async function buildExport(
     exportedAt: new Date().toISOString(),
     catalogUrl,
     catalogVersion: await sha1(JSON.stringify(catalog)),
+    customItems: customs,
     inventories,
   };
 }

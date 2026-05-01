@@ -10,6 +10,10 @@ export interface ShellHandlers extends Omit<RowHandlers, "onIncrement" | "onDecr
     field: "pp" | "gp" | "sp" | "cp", value: number,
   ) => Promise<void>;
   onAddClick: () => void;
+  /** GM-only entry point for creating a custom item. Omit on the
+   *  player view to suppress the button; the shell hides it when
+   *  this handler is not provided. */
+  onCreateCustomClick?: () => void;
 }
 
 export interface ShellRefs {
@@ -49,11 +53,25 @@ export function mountShell(
   const weightEl = document.createElement("span");
   weightEl.textContent = "⚖ 0 lb";
   footer.appendChild(weightEl);
+  // Trailing cluster: optional "+ Create item" (GM only) followed by
+  // the always-present "+ Add to inventory" button.
+  const actions = document.createElement("div");
+  actions.style.display = "flex";
+  actions.style.gap = "6px";
+  if (handlers.onCreateCustomClick) {
+    const createBtn = document.createElement("button");
+    createBtn.className = "btn-create";
+    createBtn.textContent = "+ Create item";
+    createBtn.title = "Create a one-off custom item (GM only)";
+    createBtn.onclick = handlers.onCreateCustomClick;
+    actions.appendChild(createBtn);
+  }
   const addBtn = document.createElement("button");
   addBtn.className = "btn-add";
   addBtn.textContent = "+ Add to inventory";
   addBtn.onclick = handlers.onAddClick;
-  footer.appendChild(addBtn);
+  actions.appendChild(addBtn);
+  footer.appendChild(actions);
   wrap.appendChild(footer);
 
   const gold = document.createElement("div");
