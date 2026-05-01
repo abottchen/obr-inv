@@ -76,14 +76,17 @@ export function mountShell(
     cell.appendChild(inp);
     const stepper = document.createElement("div");
     stepper.className = "ccy-stepper";
+    const stepFor = (e: MouseEvent): number =>
+      e.ctrlKey || e.metaKey ? 100 : e.shiftKey ? 10 : 1;
+    const tooltip = `click ±1, shift+click ±10, ctrl+click ±100`;
     const up = document.createElement("button");
     up.type = "button"; up.className = "ccy-step ccy-up";
-    up.textContent = "▲"; up.title = `Increase ${f}`;
-    up.onclick = () => commit((parseInt(inp.value, 10) || 0) + 1);
+    up.textContent = "▲"; up.title = `Increase ${f} (${tooltip})`;
+    up.onclick = (e) => commit((parseInt(inp.value, 10) || 0) + stepFor(e));
     const down = document.createElement("button");
     down.type = "button"; down.className = "ccy-step ccy-down";
-    down.textContent = "▼"; down.title = `Decrease ${f}`;
-    down.onclick = () => commit((parseInt(inp.value, 10) || 0) - 1);
+    down.textContent = "▼"; down.title = `Decrease ${f} (${tooltip})`;
+    down.onclick = (e) => commit((parseInt(inp.value, 10) || 0) - stepFor(e));
     stepper.appendChild(up);
     stepper.appendChild(down);
     cell.appendChild(stepper);

@@ -9,7 +9,7 @@
     "title": "Inventory (dev)",
     "icon": "http://localhost:5173/icon.svg",
     "popover": "http://localhost:5173/index.html",
-    "height": 520,
-    "width": 380
+    "height": 640,
+    "width": 460
   }
 }

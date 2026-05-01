@@ -69,27 +69,29 @@ export const LIST_CSS = `
   padding: 6px 12px; cursor: pointer;
 }
 .gold-strip {
-  display: flex; gap: 6px; padding: 6px 8px;
+  display: flex; gap: 4px; padding: 6px 8px;
   border-top: 1px solid var(--border); background: var(--bg-0);
 }
 .gold-cell {
-  flex: 1; display: flex; align-items: center; gap: 3px;
+  flex: 1 1 0; min-width: 0;
+  display: flex; align-items: center; gap: 2px;
   background: var(--bg-1); border: 1px solid var(--border);
-  border-radius: 4px; padding: 0 4px;
+  border-radius: 4px; padding: 0 3px;
 }
 .gold-cell:focus-within { border-color: var(--accent); }
 .gold-cell label {
   color: var(--accent-soft); text-transform: uppercase;
-  font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
   flex-shrink: 0;
 }
 .gold-cell input {
-  flex: 1; min-width: 0;
+  flex: 1 1 0; width: 0; min-width: 0;
   background: transparent; color: var(--text);
   border: none; outline: none;
   padding: 4px 0;
   font-variant-numeric: tabular-nums;
   text-align: right;
+  font-size: 12px;
 }
 .gold-cell input::-webkit-outer-spin-button,
 .gold-cell input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -99,10 +101,10 @@ export const LIST_CSS = `
   flex-shrink: 0;
 }
 .ccy-step {
-  width: 14px; height: 11px; padding: 0;
+  width: 12px; height: 10px; padding: 0;
   background: var(--bg-2); color: var(--accent-soft);
   border: 1px solid var(--border); border-radius: 2px;
-  font-size: 8px; line-height: 1; cursor: pointer;
+  font-size: 7px; line-height: 1; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
 }
 .ccy-step:hover {
