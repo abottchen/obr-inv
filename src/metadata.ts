@@ -1,8 +1,8 @@
 import OBR from "@owlbear-rodeo/sdk";
 import {
-  METADATA_KEY_PREFIX, STORAGE_CAP_BYTES,
+  CUSTOMS_KEY, METADATA_KEY_PREFIX, STORAGE_CAP_BYTES,
 } from "./constants";
-import type { PlayerInventoryRecord } from "./types";
+import type { CustomItemsRecord, PlayerInventoryRecord } from "./types";
 import { OverCapError } from "./types";
 import { pruneZeros } from "./inventory";
 
@@ -11,7 +11,8 @@ export function recordKey(playerId: string): string {
 }
 
 export function isRecordKey(key: string): boolean {
-  return key.startsWith(METADATA_KEY_PREFIX);
+  // CUSTOMS_KEY shares the v1 prefix but is not a player inventory.
+  return key.startsWith(METADATA_KEY_PREFIX) && key !== CUSTOMS_KEY;
 }
 
 export function playerIdFromKey(key: string): string {
@@ -34,10 +35,26 @@ export async function getRecord(playerId: string): Promise<PlayerInventoryRecord
   return (v as PlayerInventoryRecord | undefined) ?? null;
 }
 
-export async function inventoryByteSize(): Promise<number> {
-  const all = await listInventoryRecords();
-  return new TextEncoder().encode(JSON.stringify(all)).byteLength;
+/**
+ * Total byte size of all room metadata owned by this extension —
+ * inventories AND the customs key. Named for the broader scope.
+ * Used by the GM-side storage meter and the cap guard.
+ */
+export async function roomDataByteSize(): Promise<number> {
+  const md = await OBR.room.getMetadata();
+  const owned: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(md)) {
+    if (k === CUSTOMS_KEY || isRecordKey(k)) owned[k] = v;
+  }
+  return new TextEncoder().encode(JSON.stringify(owned)).byteLength;
 }
+
+/**
+ * @deprecated Prefer roomDataByteSize. Retained as a thin alias because
+ * existing tests + UI call sites import it; both names point at the
+ * same broadened accounting (inventories + customs).
+ */
+export const inventoryByteSize = roomDataByteSize;
 
 const queues = new Map<string, Promise<unknown>>();
 
@@ -62,7 +79,7 @@ export function writeRecord(
     const projectedBytes = new TextEncoder()
       .encode(JSON.stringify(projected)).byteLength;
     if (projectedBytes > STORAGE_CAP_BYTES) {
-      const currentBytes = await inventoryByteSize();
+      const currentBytes = await roomDataByteSize();
       throw new OverCapError(
         currentBytes,
         STORAGE_CAP_BYTES,
@@ -76,6 +93,44 @@ export function writeRecord(
 export async function deleteRecord(playerId: string): Promise<void> {
   return enqueue(recordKey(playerId), async () => {
     await OBR.room.setMetadata({ [recordKey(playerId)]: undefined });
+  });
+}
+
+export async function getCustoms(): Promise<CustomItemsRecord> {
+  const md = await OBR.room.getMetadata();
+  const v = md[CUSTOMS_KEY];
+  if (!Array.isArray(v)) return [];
+  return v as CustomItemsRecord;
+}
+
+export function writeCustoms(items: CustomItemsRecord): Promise<void> {
+  return enqueue(CUSTOMS_KEY, async () => {
+    const md = await OBR.room.getMetadata();
+    const projected: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(md)) {
+      if (k.startsWith(METADATA_KEY_PREFIX)) projected[k] = v;
+    }
+    projected[CUSTOMS_KEY] = items;
+    const projectedBytes = new TextEncoder()
+      .encode(JSON.stringify(projected)).byteLength;
+    if (projectedBytes > STORAGE_CAP_BYTES) {
+      const currentBytes = await roomDataByteSize();
+      throw new OverCapError(
+        currentBytes,
+        STORAGE_CAP_BYTES,
+        `write customs (${items.length} items)`,
+      );
+    }
+    await OBR.room.setMetadata({ [CUSTOMS_KEY]: items });
+  });
+}
+
+export function onCustomsChange(
+  cb: (customs: CustomItemsRecord) => void,
+): () => void {
+  return OBR.room.onMetadataChange((md) => {
+    const v = md[CUSTOMS_KEY];
+    cb(Array.isArray(v) ? (v as CustomItemsRecord) : []);
   });
 }
 
