@@ -29,6 +29,9 @@ export function openAddDialog(opts: AddDialogOpts): void {
   search.className = "shell-search";
   search.placeholder = "Search items by name...";
   search.style.margin = "8px";
+  // .shell-search has flex:1 for the inventory header (horizontal flex). In this
+  // dialog the parent is a column flex, so flex:1 would grow it vertically.
+  search.style.flex = "0 0 auto";
   overlay.appendChild(search);
 
   const body = document.createElement("div");

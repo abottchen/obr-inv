@@ -42,7 +42,7 @@ The extension is the moral cousin of `obr-quick-store` and reuses many of its pa
 | Add-item workflow | Anyone with the panel open can use the "Add to inventory" dialog (button visible when unlocked). GM populates initially; players self-add only into their own. |
 | Catalog schema | `id` (6-char NanoID, required) + `name`, `category`, `icon`, `description` (required) + `rarity`, `weight` (optional, app tolerates null/missing). Unknown extra fields preserved. |
 | Currency | Full pp/gp/sp/cp split. Stored as a fixed object on each inventory record. |
-| ± UX | Single global lock/unlock toggle for the panel. Locked = ± and × hidden, "Add" hidden. Unlocked = controls visible. Currency inputs always editable. |
+| ± UX | Single global lock/unlock toggle for the panel. Locked = ± and × hidden on rows. Unlocked = those controls visible. Adding items, currency inputs, descriptions, and transfers are not destructive and are always available regardless of lock state. |
 | Search | Name-only across both inventory list and add dialog. |
 | Right-click popover | Anchored to the row, clamped inside the iframe so it never clips. |
 | Count → 0 | Stays visible in the UI as a ghost row while the popover is open. Persisted writes always strip zero-count entries. Closing the popover means zero rows are gone next open. |
@@ -222,7 +222,7 @@ Top-to-bottom layout:
 1. Sticky header: name-only search input (left), lock toggle 🔒/🔓 (right).
 2. Scrollable list: category header rows (chevron + name + count, click to collapse/expand) followed by item rows. Categories with zero matches under search are hidden entirely. Empty-search state shows the full structure.
 3. Item row: `[icon 28 px] [name, flex] [×count, tabular-nums] [⊖ ⊕ ✕]`. The `⊖ ⊕ ✕` cluster only renders when unlocked.
-4. Footer strip: total weight on the left (`⚖ 47.5 lb`, sums `weight × count` ignoring null/missing weights), "Add to inventory" button on the right (only when unlocked).
+4. Footer strip: total weight on the left (`⚖ 47.5 lb`, sums `weight × count` ignoring null/missing weights), "Add to inventory" button on the right (always visible — adding is non-destructive).
 5. Gold strip: four labeled `<input type="number">` for pp/gp/sp/cp. Always editable. Commits on blur or Enter. Negative values rejected (input element minimum 0).
 
 Per-popover-session (not persisted): which categories are collapsed, current search text. A reopen starts fresh.
@@ -298,9 +298,9 @@ Triggered by `shift+contextmenu` on a row body (works regardless of lock state).
 ### 6.8 Lock toggle interactions
 
 - Single toggle in the inventory header (always visible to the inventory's owner / GM viewing a tab).
-- Locked: ± and × buttons hidden from rows; "Add to inventory" footer button hidden.
-- Currency inputs and shift+right-click transfers always work regardless of lock state.
-- Toggling the lock while the add dialog or transfer popover is open closes them.
+- Locked: ± and × buttons hidden from rows.
+- Always available regardless of lock state: the Add-to-inventory button, currency inputs, right-click description popover, and shift+right-click transfer. Adding items and transfers are not destructive in the "you can lose what you have" sense; the lock exists specifically to prevent accidental ± / × on existing rows.
+- Toggling the lock does not affect any open overlays.
 
 ## 7. Error handling
 

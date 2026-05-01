@@ -1,8 +1,5 @@
 import { renderList, type ListState, type RowHandlers } from "./ui-list";
 import { totalWeight } from "./inventory";
-import { closeAddDialog } from "./ui-add-dialog";
-import { closeTransfer } from "./ui-transfer";
-import { closeDescription } from "./ui-description";
 import type { CatalogItem, PlayerInventoryRecord } from "./types";
 
 export interface ShellHandlers extends Omit<RowHandlers, "onIncrement" | "onDecrement" | "onRemove"> {
@@ -91,7 +88,6 @@ export function mountShell(
     lockBtn.textContent = unlocked ? "🔓" : "🔒";
     lockBtn.classList.toggle("unlocked", unlocked);
     lockBtn.title = unlocked ? "Click to lock editing" : "Click to unlock editing";
-    addBtn.style.display = unlocked ? "" : "none";
   };
 
   const rerender = (record: PlayerInventoryRecord, cat: CatalogItem[]) => {
@@ -146,10 +142,6 @@ export function mountShell(
   });
   lockBtn.onclick = () => {
     unlocked = !unlocked;
-    // Close any open editing overlays so they can't outlive a state change.
-    closeAddDialog();
-    closeTransfer();
-    closeDescription();
     updateLockUI();
     rerender(currentRecord, currentCatalog);
   };
