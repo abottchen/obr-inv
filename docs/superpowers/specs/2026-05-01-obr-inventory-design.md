@@ -246,7 +246,8 @@ Triggered by the footer button when unlocked. Renders as a full-popover overlay 
 3. Scrollable list: same collapsible category structure as the inventory list. Each row shows icon, rarity-colored name, optional weight (small dim), inline `qty` input (default 1), and a `+` button.
 4. Double-click anywhere on a row adds `qty` items. The `+` button does the same.
 5. Drag-and-drop: a "drop to add" zone appears as a sticky bar at the bottom of the dialog while a row is being dragged (the dialog itself is a full-popover overlay, so the inventory list is not a drop target). Dropping a row onto that zone adds `qty` items, same as double-click. If `drop` events are unreliable inside the OBR iframe (no drop event within 100 ms of `dragend`), the feature degrades silently — double-click remains the reliable path.
-6. Dismiss on ✕, Esc, or click outside the dialog.
+6. Right-click on a row's icon or name opens the description popover (same component as in the inventory list). Useful when browsing unfamiliar items.
+7. Dismiss on ✕, Esc, or click outside the dialog.
 
 ### 6.5 Right-click description popover
 

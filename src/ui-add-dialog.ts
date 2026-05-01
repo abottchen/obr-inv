@@ -1,3 +1,4 @@
+import { showDescription } from "./ui-description";
 import type { CatalogItem } from "./types";
 
 export interface AddDialogOpts {
@@ -83,6 +84,16 @@ export function openAddDialog(opts: AddDialogOpts): void {
       const q = Math.max(1, parseInt(qty.value, 10) || 1);
       await opts.onAdd(item.id, q);
     };
+
+    // Right-click the row body (icon + name area, not the qty/+ controls)
+    // to show the description popover.
+    for (const el of [icon, name]) {
+      el.addEventListener("contextmenu", (ev) => {
+        ev.preventDefault();
+        const me = ev as MouseEvent;
+        showDescription({ x: me.clientX, y: me.clientY }, item);
+      });
+    }
 
     row.addEventListener("dragstart", (e) => {
       dragId = item.id;
