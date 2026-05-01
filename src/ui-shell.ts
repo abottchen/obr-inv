@@ -160,11 +160,17 @@ export function mountShell(
   });
   body.addEventListener("click", (e) => {
     const t = e.target as HTMLElement;
-    const cat = t.closest<HTMLElement>(".cat-header")?.dataset.category;
-    if (cat) {
-      if (collapsed.has(cat)) collapsed.delete(cat); else collapsed.add(cat);
-      rerender(currentRecord, currentCatalog);
-    }
+    const headerEl = t.closest<HTMLElement>(".cat-header");
+    if (!headerEl) return;
+    const cat = headerEl.dataset.category;
+    if (!cat) return;
+    const willCollapse = !collapsed.has(cat);
+    if (willCollapse) collapsed.add(cat); else collapsed.delete(cat);
+    // Toggle data-collapsed on the persistent .cat-group element so the
+    // CSS grid-rows transition animates. A full rerender would replace
+    // the DOM and skip the transition.
+    const group = headerEl.closest<HTMLElement>(".cat-group");
+    if (group) group.dataset.collapsed = willCollapse ? "true" : "false";
   });
   lockBtn.onclick = () => {
     unlocked = !unlocked;

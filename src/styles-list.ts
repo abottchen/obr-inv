@@ -27,7 +27,20 @@ export const LIST_CSS = `
   cursor: pointer; user-select: none;
   text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;
 }
-.cat-header .chev { width: 10px; display: inline-block; }
+.cat-header .chev {
+  width: 10px;
+  display: inline-block;
+  transform-origin: 50% 55%;
+  transition: transform 180ms ease;
+}
+.cat-group[data-collapsed="true"] .chev { transform: rotate(-90deg); }
+.cat-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 220ms ease;
+}
+.cat-group[data-collapsed="true"] .cat-body { grid-template-rows: 0fr; }
+.cat-body-inner { overflow: hidden; min-height: 0; }
 .inv-row {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 8px; margin-bottom: 4px;

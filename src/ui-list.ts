@@ -44,15 +44,29 @@ export function renderList(
 
   for (const [cat, entries] of byCat.entries()) {
     const collapsed = state.collapsed.has(cat);
+
+    const group = document.createElement("div");
+    group.className = "cat-group";
+    group.dataset.category = cat;
+    group.dataset.collapsed = collapsed ? "true" : "false";
+
     const header = document.createElement("div");
     header.className = "cat-header";
     header.dataset.category = cat;
-    header.innerHTML = `<span><span class="chev">${collapsed ? "▸" : "▾"}</span> ${escape(cat)}</span><span>(${entries.length})</span>`;
-    container.appendChild(header);
-    if (collapsed) continue;
+    header.innerHTML = `<span><span class="chev">▾</span> ${escape(cat)}</span><span>(${entries.length})</span>`;
+    group.appendChild(header);
+
+    const bodyEl = document.createElement("div");
+    bodyEl.className = "cat-body";
+    const inner = document.createElement("div");
+    inner.className = "cat-body-inner";
     for (const { entry, item } of entries) {
-      container.appendChild(renderRow(entry, item, state.unlocked, search, handlers));
+      inner.appendChild(renderRow(entry, item, state.unlocked, search, handlers));
     }
+    bodyEl.appendChild(inner);
+    group.appendChild(bodyEl);
+
+    container.appendChild(group);
   }
 }
 

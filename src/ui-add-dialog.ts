@@ -127,18 +127,33 @@ export function openAddDialog(opts: AddDialogOpts): void {
       return;
     }
     for (const [cat, entries] of groups.entries()) {
+      const isCollapsed = collapsed.has(cat);
+
+      const group = document.createElement("div");
+      group.className = "cat-group";
+      group.dataset.category = cat;
+      group.dataset.collapsed = isCollapsed ? "true" : "false";
+
       const ch = document.createElement("div");
       ch.className = "cat-header";
       ch.dataset.category = cat;
-      const isCollapsed = collapsed.has(cat);
-      ch.innerHTML = `<span><span class="chev">${isCollapsed ? "▸" : "▾"}</span> ${escapeHtml(cat)}</span><span>(${entries.length})</span>`;
+      ch.innerHTML = `<span><span class="chev">▾</span> ${escapeHtml(cat)}</span><span>(${entries.length})</span>`;
       ch.onclick = () => {
-        if (collapsed.has(cat)) collapsed.delete(cat); else collapsed.add(cat);
-        render();
+        const willCollapse = !collapsed.has(cat);
+        if (willCollapse) collapsed.add(cat); else collapsed.delete(cat);
+        group.dataset.collapsed = willCollapse ? "true" : "false";
       };
-      body.appendChild(ch);
-      if (isCollapsed) continue;
-      for (const item of entries) body.appendChild(renderAddRow(item));
+      group.appendChild(ch);
+
+      const bodyEl = document.createElement("div");
+      bodyEl.className = "cat-body";
+      const inner = document.createElement("div");
+      inner.className = "cat-body-inner";
+      for (const item of entries) inner.appendChild(renderAddRow(item));
+      bodyEl.appendChild(inner);
+      group.appendChild(bodyEl);
+
+      body.appendChild(group);
     }
   };
 
