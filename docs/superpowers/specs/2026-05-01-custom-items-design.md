@@ -35,15 +35,15 @@ Let the GM create one-off items mid-session that don't exist in the published ca
 |---|---|
 | Storage key | New single key `com.abottchen.obr-inv/v1/customs`, value is `CustomItem[]`. |
 | Schema | Same as `CatalogItem` (id, name, category, icon, description, optional rarity, optional weight). No additional fields in v1 — keeps merged-lookup logic dead-simple. |
-| Storage cap | Bump from 5120 → 8192 bytes (8 KB). Meter on the GM panel counts both inventory keys and the customs key against this cap. |
+| Storage cap | Unchanged at 5120 bytes. Meter on the GM panel counts both inventory keys and the customs key against this cap. Revisit if customs usage actually pushes usage near the limit. |
 | ID generation | 6-char NanoID, same alphabet as catalog. Generated client-side at create time. Regenerate on collision (probabilistically near-zero). |
-| Lookup precedence | When an ID exists in both the remote catalog and the local customs, the catalog wins. Custom is treated as inert until the GM deletes it. |
+| Lookup precedence | When an ID exists in both the remote catalog and the local customs, the catalog wins. The custom entry is also auto-deleted from metadata on the next GM boot — see §6.1. This makes promotion a one-step process from the GM's perspective. |
 | Image fallback | If `icon` is empty/missing, the row icon shows `❓` (same fallback as the missing-from-catalog state in existing UI). |
 | Player access | GM-only for create/edit/delete. Players see customs in lists/popovers like any other item, can add to their own inventory and transfer. |
 | Edit | In-place via the same dialog as create, prefilled. |
 | Delete | Confirmation modal listing affected inventories (player name + count). Confirm deletes the custom; affected inventory rows become unresolved (existing fallback). |
 | Export | Existing export wrapper gains a `customItems: CatalogItem[]` field. Promoted by hand into the catalog repo's `items.json`. |
-| Reconciliation after promotion | None automatic. GM deletes promoted customs from metadata via the same delete UI. The "shadowed by catalog" indicator (see §6.5) surfaces which customs are safe to delete. |
+| Reconciliation after promotion | Automatic on GM boot — see §6.1. Any custom whose ID has appeared in the catalog is removed from metadata silently. A console message lists what was reaped. |
 | Concurrency | Customs writes go through the same per-key `enqueue` queue used elsewhere. Cross-client races on the customs key are last-write-wins on OBR's side, which is acceptable for an admin-only concern. |
 
 ## 4. Data model
@@ -73,7 +73,7 @@ Empty `icon` resolves to the placeholder at render time; we never substitute a U
 
 ### 4.2 Cap
 
-`STORAGE_CAP_BYTES` becomes **8192**. The GM-side meter computes:
+`STORAGE_CAP_BYTES` stays at **5120**. The GM-side meter computes:
 
 ```
 total = sum(byteLen(metadata[k])) for k in {
@@ -82,7 +82,7 @@ total = sum(byteLen(metadata[k])) for k in {
 }
 ```
 
-Yellow at 75%, red at 90% — same thresholds, scaled to the new cap.
+Yellow at 75%, red at 90% — same thresholds. If the cap turns out to be too tight in practice (a few sessions with heavy custom usage), bump it then. Auto-promotion-cleanup (§6.4) keeps customs from accumulating indefinitely.
 
 ### 4.3 Merged catalog lookup
 
@@ -115,8 +115,8 @@ function generateUnusedItemId(existing: Set<string>): string {
 
 ### 5.1 Entry points
 
-- **Primary**: a "+ Create item" button in the GM-only header of the add-to-inventory dialog (next to the close button). Hidden for players.
-- **Secondary**: when search in the add dialog yields no results AND the user is the GM, the empty state shows a "Create '<query>' as custom item" affordance with the name pre-filled. Reduces clicks for the common "I want X, X doesn't exist, make X" path.
+- **Primary**: a "+ Create item" button in the inventory shell footer, immediately to the left of the existing "+ Add to inventory" button. Visible only when the local user is the GM. Footer layout becomes: `[ ⚖ weight ]  …  [ + Create item ] [ + Add to inventory ]`.
+- **Secondary**: when search in the add dialog yields no results AND the user is the GM, the empty state shows a "Create '<query>' as custom item" affordance with the name pre-filled. Reduces clicks for the common "I want X, X doesn't exist, make X" path. Considered v1 — the empty-state hook is low-risk (small extra branch in `ui-add-dialog.ts`'s render) and meaningfully reduces friction.
 
 ### 5.2 Create / edit dialog
 
@@ -166,9 +166,10 @@ A small button on the GM tab strip (alongside the download icon) opens a modal l
 - Item icon (or placeholder), name, category, count of references in inventories.
 - Edit pencil → opens the create/edit dialog prefilled.
 - Delete trash → confirmation modal.
-- "Shadowed by catalog" pill if the ID also exists in the remote catalog (meaning the catalog version wins on lookup; safe to delete).
 
 Footer of the modal: total count, total bytes, current usage band (green/yellow/red).
+
+No "shadowed by catalog" indicator is needed — collisions are reaped automatically on GM boot per §6.4, so any custom visible in this panel is genuinely live.
 
 ### 5.4 Delete confirmation
 
@@ -194,7 +195,28 @@ If the item is in zero inventories, skip the body and show a one-line confirmati
 
 No new UI on the player side. Players see customs as ordinary rows. Right-click description and shift+right-click transfer work normally.
 
-## 6. Export behavior
+## 6. Promotion-completion reconciliation
+
+### 6.1 Auto-cleanup on GM boot
+
+When the GM client boots and the catalog has finished loading, the bootstrap runs a one-shot reconciliation step before mounting the UI:
+
+```
+let customs = await getCustoms();
+const catalogIds = new Set(catalog.map(c => c.id));
+const survivors = customs.filter(c => !catalogIds.has(c.id));
+if (survivors.length !== customs.length) {
+  const removed = customs.filter(c => catalogIds.has(c.id));
+  console.info(`[obr-inv] Removed ${removed.length} promoted custom items: ${removed.map(c => c.name).join(", ")}`);
+  await writeCustoms(survivors);
+}
+```
+
+Players don't run this — they don't have authority over the customs key, and metadata writes from a non-GM are extra noise on the channel. The GM is the one who notices and the one who can act, so the GM is the one who reconciles.
+
+If two GMs are in the room at the same time, both attempt the reconciliation; the per-key write queue serializes them and the second one is a no-op (nothing to remove). Safe.
+
+## 7. Export behavior
 
 The download wrapper gains a `customItems` field:
 
@@ -220,7 +242,7 @@ The download wrapper gains a `customItems` field:
 
 Inventory hydration uses the merged catalog (catalog + customs) so a custom item's row in a player's inventory still hydrates to a full record at export time. If a custom is missing from the customs array AND the catalog (shouldn't happen if we export both fresh), it falls through to `_unresolved: true` as before.
 
-## 7. Promotion workflow
+## 8. Promotion workflow
 
 After the session, the GM:
 
@@ -228,11 +250,11 @@ After the session, the GM:
 2. Opens `obr-inv-catalog/items.json` and pastes the entries (or a subset — they may want to discard one-offs like "flower" that were narrative beats). The IDs already exist; no regeneration needed.
 3. `node scripts/add-item.mjs --validate` to sanity-check.
 4. Commits to the catalog repo. Pages redeploys.
-5. Back in OBR (next session or sooner), the GM opens the custom-items panel. Items they promoted now show "Shadowed by catalog". GM bulk-deletes those.
+5. Next time the GM opens an OBR room with that catalog URL, the auto-reconciliation pass (§6.1) silently drops the now-promoted customs from metadata. Inventory rows that used those IDs continue to resolve cleanly (catalog wins on lookup).
 
-This is fully manual but explicit. We're not automating the promotion because the GM should curate which customs become canonical (some are session-specific narrative beats; others are reusable).
+The GM curates which customs become canonical — some are session-specific narrative beats and stay as customs (or get manually deleted); others are reusable and warrant promotion. The cleanup step is gone from the GM's checklist.
 
-## 8. Error handling
+## 9. Error handling
 
 | Situation | Behavior |
 |---|---|
@@ -243,7 +265,7 @@ This is fully manual but explicit. We're not automating the promotion because th
 | GM deletes a custom that's in an active player's inventory | Player's row becomes `❓` "missing from catalog" on next `onMetadataChange`. No data loss in their inventory record (the ID + count remain). Re-creating the item with the same ID restores resolution. |
 | Network blip during save | The write is rejected; dialog shows a toast "Couldn't save — try again." Form state is preserved. |
 
-## 9. Module changes (high-level)
+## 10. Module changes (high-level)
 
 - `src/types.ts` — add `CustomItem = CatalogItem` (alias for clarity), `CustomItemsRecord = CustomItem[]`.
 - `src/constants.ts` — bump `STORAGE_CAP_BYTES` to 8192. Add `CUSTOMS_KEY`.
@@ -256,11 +278,11 @@ This is fully manual but explicit. We're not automating the promotion because th
 - `src/ui-gm.ts` — wire up the customs panel button on the tab strip; subscribe to customs metadata; pass merged catalog to `mountShell`.
 - `src/ui-player.ts` — subscribe to customs metadata; pass merged catalog to `mountShell` on each rerender.
 - `src/export.ts` — include `customItems` in the export wrapper.
-- `src/main.ts` — load customs at boot alongside the remote catalog.
+- `src/main.ts` — load customs at boot alongside the remote catalog. For GM clients, run the §6.1 reconciliation pass before mounting the UI.
 
 Total new files: 3. Total touched files: ~7. Comparable to a single subsystem in the original spec.
 
-## 10. Tests
+## 11. Tests
 
 - **`customs.test.ts`** — pure ops on `CustomItem[]`: add, update (id-stable), remove, `findReferences` (counts entries across a fake records map).
 - **`catalog.test.ts`** — extend with `resolvedCatalog` cases: catalog wins on collision, customs added when absent from catalog, identity (no aliasing of the catalog array).
@@ -270,7 +292,7 @@ Total new files: 3. Total touched files: ~7. Comparable to a single subsystem in
 
 Approximately 8–12 new test cases.
 
-## 11. Open questions
+## 12. Open questions
 
 None blocking. A couple of items worth a follow-up conversation if/when we do v2:
 
@@ -278,7 +300,7 @@ None blocking. A couple of items worth a follow-up conversation if/when we do v2
 - Custom item edit history / undo. Not in scope.
 - A "categories" management UI (rename, merge, reorder). Not in scope; the combobox handles 95% of the need.
 
-## 12. Out of scope
+## 13. Out of scope
 
 - Automated promotion to the catalog repo (PR-creation flow, pushed to a remote git).
 - Image upload to a hosting service.
