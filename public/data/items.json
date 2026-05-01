@@ -1,0 +1,38 @@
+[
+  {
+    "id": "h7p2Xy",
+    "name": "Healing Potion",
+    "category": "Consumables",
+    "icon": "https://5e.tools/img/items/XPHB/Potion%20of%20Healing.webp",
+    "description": "When you drink this potion, you regain 2d4 + 2 hit points.",
+    "rarity": "common",
+    "weight": 0.5
+  },
+  {
+    "id": "torch1",
+    "name": "Torch",
+    "category": "Adventuring Gear",
+    "icon": "https://5e.tools/img/items/XPHB/Torch.webp",
+    "description": "A torch burns for 1 hour, providing bright light in a 20-foot radius.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "rope50",
+    "name": "Rope, Hempen (50 ft)",
+    "category": "Adventuring Gear",
+    "icon": "https://5e.tools/img/items/XPHB/Rope%2C%20Hempen.webp",
+    "description": "Rope has 2 hit points and can be burst with a DC 17 Strength check.",
+    "rarity": "common",
+    "weight": 10
+  },
+  {
+    "id": "arrow1",
+    "name": "Arrows (20)",
+    "category": "Ammunition",
+    "icon": "https://5e.tools/img/items/XPHB/Arrow.webp",
+    "description": "Standard arrows, used with shortbows and longbows.",
+    "rarity": "common",
+    "weight": 1
+  }
+]

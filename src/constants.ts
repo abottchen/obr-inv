@@ -8,8 +8,10 @@ export const STORAGE_CAP_BYTES = 5120;
 export const METER_YELLOW_RATIO = 0.75;
 export const METER_RED_RATIO = 0.90;
 
-export const DEFAULT_CATALOG_URL =
-  "https://abottchen.github.io/obr-inv-catalog/items.json";
+// Relative URL: resolves against the page that loaded the extension,
+// so dev (vite serving public/) and prod (Pages serving dist/) both
+// fetch the catalog from the same domain that hosts the extension.
+export const DEFAULT_CATALOG_URL = "./data/items.json";
 
 export const RARITIES = [
   "common",
