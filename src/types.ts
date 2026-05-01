@@ -13,6 +13,15 @@ export interface CatalogItem {
   [extra: string]: unknown;
 }
 
+/**
+ * Custom (ad-hoc) items live in room metadata under CUSTOMS_KEY and
+ * are structurally identical to CatalogItem. The alias documents
+ * intent at call sites and lets us evolve the two independently
+ * later without a migration.
+ */
+export type CustomItem = CatalogItem;
+export type CustomItemsRecord = CustomItem[];
+
 export type InventoryEntry = [itemId: string, count: number];
 
 export interface Currency { pp: number; gp: number; sp: number; cp: number; }

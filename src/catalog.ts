@@ -1,5 +1,5 @@
 import { RARITIES } from "./constants";
-import type { CatalogItem, Rarity } from "./types";
+import type { CatalogItem, CustomItem, Rarity } from "./types";
 
 const REQUIRED: ReadonlyArray<keyof CatalogItem> = [
   "id", "name", "category", "icon", "description",
@@ -56,6 +56,24 @@ export function parseCatalog(raw: unknown): CatalogItem[] {
     out.push(item);
   }
   return out;
+}
+
+/**
+ * Merge the published catalog with locally-defined custom items.
+ * Catalog wins on id collision (a hint that the GM has promoted the
+ * custom into the catalog repo; the §6.1 reconciliation pass sweeps
+ * the stale metadata entry on next GM boot). Returns a new array;
+ * the input arrays are not mutated.
+ */
+export function resolvedCatalog(
+  remote: CatalogItem[], customs: CustomItem[],
+): CatalogItem[] {
+  const map = new Map<string, CatalogItem>();
+  for (const item of remote) map.set(item.id, item);
+  for (const item of customs) {
+    if (!map.has(item.id)) map.set(item.id, item);
+  }
+  return Array.from(map.values());
 }
 
 export async function fetchCatalog(url: string): Promise<CatalogItem[]> {

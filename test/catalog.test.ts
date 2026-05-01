@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { parseCatalog, fetchCatalog, __resetCatalogCache } from "../src/catalog";
+import {
+  parseCatalog, fetchCatalog, resolvedCatalog, __resetCatalogCache,
+} from "../src/catalog";
+import type { CatalogItem, CustomItem } from "../src/types";
 
 describe("parseCatalog", () => {
   it("accepts a fully-specified item", () => {
@@ -79,5 +82,46 @@ describe("fetchCatalog", () => {
     const f = (globalThis as any).fetch as ReturnType<typeof vi.fn>;
     f.mockRejectedValue(new Error("net"));
     await expect(fetchCatalog(url)).rejects.toThrow();
+  });
+});
+
+describe("resolvedCatalog", () => {
+  const remote: CatalogItem[] = [
+    { id: "h1", name: "Healing Potion", category: "Consumables",
+      icon: "u", description: "d", rarity: "uncommon" },
+    { id: "s2", name: "Sword", category: "Weapons",
+      icon: "u", description: "d" },
+  ];
+
+  it("includes all remote items plus customs that aren't in the catalog", () => {
+    const customs: CustomItem[] = [
+      { id: "c1", name: "Flower", category: "Misc", icon: "", description: "d" },
+    ];
+    const merged = resolvedCatalog(remote, customs);
+    expect(merged).toHaveLength(3);
+    expect(merged.map((c) => c.id).sort()).toEqual(["c1", "h1", "s2"]);
+  });
+
+  it("catalog wins on id collision (custom shadowed)", () => {
+    const customs: CustomItem[] = [
+      { id: "h1", name: "Custom name", category: "Misc",
+        icon: "", description: "stale" },
+    ];
+    const merged = resolvedCatalog(remote, customs);
+    const h1 = merged.find((c) => c.id === "h1");
+    expect(h1?.name).toBe("Healing Potion");
+    expect(h1?.category).toBe("Consumables");
+  });
+
+  it("does not alias the input arrays (caller can mutate inputs safely)", () => {
+    const merged = resolvedCatalog(remote, []);
+    merged.push({
+      id: "z", name: "z", category: "z", icon: "", description: "z",
+    });
+    expect(remote).toHaveLength(2);
+  });
+
+  it("empty inputs yield empty result", () => {
+    expect(resolvedCatalog([], [])).toEqual([]);
   });
 });
