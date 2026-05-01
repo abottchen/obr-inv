@@ -62,15 +62,31 @@ export function mountShell(
   for (const f of ["pp", "gp", "sp", "cp"] as const) {
     const cell = document.createElement("div");
     cell.className = "gold-cell";
-    cell.innerHTML = `<label>${f}</label>`;
+    const lbl = document.createElement("label");
+    lbl.textContent = f;
+    cell.appendChild(lbl);
     const inp = document.createElement("input");
     inp.type = "number"; inp.min = "0"; inp.value = "0";
-    inp.onchange = () => {
-      const v = Math.max(0, parseInt(inp.value, 10) || 0);
-      inp.value = String(v);
-      void handlers.onCurrencyChange(f, v);
+    const commit = (v: number) => {
+      const clamped = Math.max(0, Math.floor(v));
+      inp.value = String(clamped);
+      void handlers.onCurrencyChange(f, clamped);
     };
+    inp.onchange = () => commit(parseInt(inp.value, 10) || 0);
     cell.appendChild(inp);
+    const stepper = document.createElement("div");
+    stepper.className = "ccy-stepper";
+    const up = document.createElement("button");
+    up.type = "button"; up.className = "ccy-step ccy-up";
+    up.textContent = "▲"; up.title = `Increase ${f}`;
+    up.onclick = () => commit((parseInt(inp.value, 10) || 0) + 1);
+    const down = document.createElement("button");
+    down.type = "button"; down.className = "ccy-step ccy-down";
+    down.textContent = "▼"; down.title = `Decrease ${f}`;
+    down.onclick = () => commit((parseInt(inp.value, 10) || 0) - 1);
+    stepper.appendChild(up);
+    stepper.appendChild(down);
+    cell.appendChild(stepper);
     gold.appendChild(cell);
     ccyInputs[f] = inp;
   }

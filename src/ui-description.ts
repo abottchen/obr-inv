@@ -11,19 +11,25 @@ export function showDescription(
   closeDescription();
   const pop = document.createElement("div");
   pop.className = "popover description-popover";
+  if (item?.rarity) pop.dataset.rarity = item.rarity;
 
-  const title = document.createElement("h4");
+  const header = document.createElement("div");
+  header.className = "desc-header";
+
   if (item?.icon) {
-    const i = document.createElement("div");
-    i.className = "inv-icon";
-    i.style.backgroundImage = `url("${item.icon}")`;
-    title.appendChild(i);
+    const ic = document.createElement("div");
+    ic.className = "desc-icon";
+    ic.style.backgroundImage = `url("${item.icon}")`;
+    header.appendChild(ic);
   }
-  const span = document.createElement("span");
-  span.textContent = item?.name ?? `[${fallbackId ?? "?"}] (missing from catalog)`;
-  if (item?.rarity) span.style.color = `var(--rarity-${(item.rarity as string).replace(" ", "-")})`;
-  title.appendChild(span);
-  pop.appendChild(title);
+
+  const title = document.createElement("div");
+  title.className = "desc-title";
+  title.textContent = item?.name ?? `[${fallbackId ?? "?"}] (missing from catalog)`;
+  if (item?.rarity) title.dataset.rarity = item.rarity;
+  header.appendChild(title);
+
+  pop.appendChild(header);
 
   if (item && (item.rarity || typeof item.weight === "number")) {
     const meta = document.createElement("div");

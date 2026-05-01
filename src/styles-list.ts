@@ -72,14 +72,44 @@ export const LIST_CSS = `
   display: flex; gap: 6px; padding: 6px 8px;
   border-top: 1px solid var(--border); background: var(--bg-0);
 }
-.gold-cell { flex: 1; display: flex; align-items: center; gap: 4px; }
-.gold-cell label { color: var(--text-dim); text-transform: uppercase; font-size: 10px; }
-.gold-cell input {
-  width: 100%; background: var(--bg-1); color: var(--text);
-  border: 1px solid var(--border); border-radius: 4px;
-  padding: 4px 6px; outline: none;
+.gold-cell {
+  flex: 1; display: flex; align-items: center; gap: 3px;
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0 4px;
 }
-.gold-cell input:focus { border-color: var(--accent); }
+.gold-cell:focus-within { border-color: var(--accent); }
+.gold-cell label {
+  color: var(--accent-soft); text-transform: uppercase;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.gold-cell input {
+  flex: 1; min-width: 0;
+  background: transparent; color: var(--text);
+  border: none; outline: none;
+  padding: 4px 0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.gold-cell input::-webkit-outer-spin-button,
+.gold-cell input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.gold-cell input { -moz-appearance: textfield; appearance: textfield; }
+.ccy-stepper {
+  display: flex; flex-direction: column; gap: 1px;
+  flex-shrink: 0;
+}
+.ccy-step {
+  width: 14px; height: 11px; padding: 0;
+  background: var(--bg-2); color: var(--accent-soft);
+  border: 1px solid var(--border); border-radius: 2px;
+  font-size: 8px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.ccy-step:hover {
+  background: var(--accent); color: #fff;
+  border-color: var(--accent-soft);
+}
+.ccy-step:active { transform: translateY(1px); }
 
 .empty-state { padding: 24px 8px; text-align: center; color: var(--text-dim); }
 `;
