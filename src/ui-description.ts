@@ -29,6 +29,14 @@ export function showDescription(
   if (item?.rarity) title.dataset.rarity = item.rarity;
   header.appendChild(title);
 
+  const close = document.createElement("button");
+  close.type = "button";
+  close.className = "popover-close";
+  close.textContent = "✕";
+  close.title = "Close";
+  close.onclick = closeDescription;
+  header.appendChild(close);
+
   pop.appendChild(header);
 
   if (item && (item.rarity || typeof item.weight === "number")) {

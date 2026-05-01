@@ -34,7 +34,23 @@ export const DIALOG_CSS = `
   flex-shrink: 0;
 }
 .description-popover .desc-title {
+  flex: 1; min-width: 0;
   font-size: 14px; font-weight: 600; line-height: 1.25;
+}
+.popover-close {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  line-height: 1;
+}
+.popover-close:hover {
+  background: var(--bg-1);
+  color: var(--text);
 }
 .description-popover .desc-title[data-rarity="uncommon"]  { color: var(--rarity-uncommon); }
 .description-popover .desc-title[data-rarity="rare"]      { color: var(--rarity-rare); }
