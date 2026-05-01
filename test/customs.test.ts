@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   addCustom, distinctCategories, findReferences,
-  generateUnusedItemId, nanoId6, removeCustom, updateCustom,
+  generateUnusedItemId, nanoId6, reconcileCustoms,
+  removeCustom, updateCustom,
 } from "../src/customs";
 import type {
   CatalogItem, CustomItem, PlayerInventoryRecord,
@@ -118,5 +119,39 @@ describe("distinctCategories", () => {
 
   it("returns [] for empty input", () => {
     expect(distinctCategories([])).toEqual([]);
+  });
+});
+
+describe("reconcileCustoms", () => {
+  const cat = (id: string): CatalogItem => ({
+    id, name: id, category: "C", icon: "u", description: "d",
+  });
+
+  it("returns the input unchanged when no customs", () => {
+    const r = reconcileCustoms([cat("a"), cat("b")], []);
+    expect(r.survivors).toEqual([]);
+    expect(r.removed).toEqual([]);
+  });
+
+  it("returns the input unchanged when no collision", () => {
+    const customs = [cust({ id: "x1" }), cust({ id: "x2" })];
+    const r = reconcileCustoms([cat("a"), cat("b")], customs);
+    expect(r.survivors).toEqual(customs);
+    expect(r.removed).toEqual([]);
+  });
+
+  it("partitions customs into survivors and removed", () => {
+    const flower = cust({ id: "x1", name: "flower" });
+    const promoted = cust({ id: "a", name: "promoted" });
+    const r = reconcileCustoms([cat("a")], [flower, promoted]);
+    expect(r.survivors).toEqual([flower]);
+    expect(r.removed).toEqual([promoted]);
+  });
+
+  it("handles all-promoted case (survivors empty, removed non-empty)", () => {
+    const customs = [cust({ id: "a" }), cust({ id: "b" })];
+    const r = reconcileCustoms([cat("a"), cat("b")], customs);
+    expect(r.survivors).toEqual([]);
+    expect(r.removed).toEqual(customs);
   });
 });

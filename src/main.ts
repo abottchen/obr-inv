@@ -9,6 +9,7 @@ import { injectBaseStyles, injectStyles } from "./styles";
 import { LIST_CSS } from "./styles-list";
 import { DIALOG_CSS } from "./styles-dialog";
 import { DEFAULT_CATALOG_URL, CONFIG_KEY } from "./constants";
+import { reconcileCustoms } from "./customs";
 import type { CatalogItem, CustomItemsRecord, ExtensionConfig } from "./types";
 
 OBR.onReady(async () => {
@@ -46,16 +47,14 @@ OBR.onReady(async () => {
   // are present; the second pass is a no-op.
   let customs: CustomItemsRecord = await getCustoms();
   if (role === "GM" && customs.length > 0) {
-    const catalogIds = new Set(catalog.map((c) => c.id));
-    const survivors = customs.filter((c) => !catalogIds.has(c.id));
-    if (survivors.length !== customs.length) {
-      const removed = customs.filter((c) => catalogIds.has(c.id));
-      console.info(
-        `[obr-inv] Removed ${removed.length} promoted custom item${removed.length === 1 ? "" : "s"}: ${removed.map((c) => c.name).join(", ")}`,
-      );
+    const { survivors, removed } = reconcileCustoms(catalog, customs);
+    if (removed.length > 0) {
       try {
         await writeCustoms(survivors);
         customs = survivors;
+        console.info(
+          `[obr-inv] Removed ${removed.length} promoted custom item${removed.length === 1 ? "" : "s"}: ${removed.map((c) => c.name).join(", ")}`,
+        );
       } catch (err) {
         console.warn("[obr-inv] reconciliation write failed", err);
       }

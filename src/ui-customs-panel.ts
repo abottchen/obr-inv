@@ -131,14 +131,17 @@ export function openCustomsPanel(opts: CustomsPanelOpts): void {
         resolved: resolvedCatalog(opts.catalog, customs),
         initial: c,
         onSave: async (updated) => {
+          // OverCapError is the dialog's own concern — let it bubble so
+          // the dialog can show its inline cap-full banner. Anything else
+          // gets surfaced via the GM's error channel; we still rethrow so
+          // the dialog stays open for the user to retry.
           try {
             const next = updateCustom(customs, updated);
             await writeCustoms(next);
             customs = next;
             render();
           } catch (err) {
-            if (err instanceof OverCapError) throw err;
-            opts.onError?.(err);
+            if (!(err instanceof OverCapError)) opts.onError?.(err);
             throw err;
           }
         },

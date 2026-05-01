@@ -79,6 +79,31 @@ export function findReferences(
 }
 
 /**
+ * Compute the §6.1 promotion-completion reconciliation: customs whose
+ * id has appeared in the published catalog are dropped from metadata.
+ * Returns { survivors, removed } so the caller can log + persist.
+ * Pure — caller owns the SDK side effects.
+ */
+export interface ReconcileResult {
+  survivors: CustomItemsRecord;
+  removed: CustomItemsRecord;
+}
+
+export function reconcileCustoms(
+  catalog: CatalogItem[], customs: CustomItemsRecord,
+): ReconcileResult {
+  if (customs.length === 0) return { survivors: customs, removed: [] };
+  const catalogIds = new Set(catalog.map((c) => c.id));
+  const survivors: CustomItemsRecord = [];
+  const removed: CustomItemsRecord = [];
+  for (const c of customs) {
+    if (catalogIds.has(c.id)) removed.push(c);
+    else survivors.push(c);
+  }
+  return { survivors, removed };
+}
+
+/**
  * Distinct categories drawn from the resolved (catalog ∪ customs) set.
  * Used to seed the create-item dialog's category combobox.
  */

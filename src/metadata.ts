@@ -49,13 +49,6 @@ export async function roomDataByteSize(): Promise<number> {
   return new TextEncoder().encode(JSON.stringify(owned)).byteLength;
 }
 
-/**
- * @deprecated Prefer roomDataByteSize. Retained as a thin alias because
- * existing tests + UI call sites import it; both names point at the
- * same broadened accounting (inventories + customs).
- */
-export const inventoryByteSize = roomDataByteSize;
-
 const queues = new Map<string, Promise<unknown>>();
 
 function enqueue<T>(key: string, op: () => Promise<T>): Promise<T> {

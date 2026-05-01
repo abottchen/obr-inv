@@ -71,4 +71,25 @@ describe("buildExport", () => {
     const row = exp.inventories.p1.items[0];
     expect(row).toMatchObject({ id: "a1", name: "Item A", category: "C" });
   });
+
+  it("inventory entry referencing a deleted custom serializes as _unresolved", async () => {
+    // Player has a custom; GM deletes it; export still includes the row
+    // marked unresolved (count preserved, no catalog row to hydrate against).
+    await writeCustoms([
+      { id: "ghost1", name: "Soon Gone", category: "Misc",
+        icon: "", description: "..." },
+    ]);
+    await writeRecord("p1", {
+      name: "Alice", color: "#fff",
+      items: [["ghost1", 4]],
+      currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
+    });
+    await writeCustoms([]); // GM deletes the custom
+
+    const exp = await buildExport(cat, "https://example.test/items.json");
+    expect(exp.customItems).toEqual([]);
+    expect(exp.inventories.p1.items).toEqual([
+      { id: "ghost1", count: 4, _unresolved: true },
+    ]);
+  });
 });
