@@ -110,16 +110,16 @@ function renderRow(
   }
 
   // Right-click and shift+right-click open description / transfer.
-  // Bound to the icon+name+count area only — not the buttons.
-  const interactiveZone = [icon, name, cnt];
-  for (const el of interactiveZone) {
-    el.addEventListener("contextmenu", (ev) => {
-      ev.preventDefault();
-      const me = ev as MouseEvent;
-      if (me.shiftKey) h.onTransfer(id, { x: me.clientX, y: me.clientY });
-      else h.onDescription(id, { x: me.clientX, y: me.clientY });
-    });
-  }
+  // Bound to the whole row so the entire visual element is hit-testable;
+  // exempt the ± / × buttons so right-clicking those does nothing surprising.
+  row.addEventListener("contextmenu", (ev) => {
+    const t = ev.target as HTMLElement;
+    if (t.closest(".btn-step, .btn-x")) return;
+    ev.preventDefault();
+    const me = ev as MouseEvent;
+    if (me.shiftKey) h.onTransfer(id, { x: me.clientX, y: me.clientY });
+    else h.onDescription(id, { x: me.clientX, y: me.clientY });
+  });
 
   return row;
 }

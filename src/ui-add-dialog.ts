@@ -85,15 +85,15 @@ export function openAddDialog(opts: AddDialogOpts): void {
       await opts.onAdd(item.id, q);
     };
 
-    // Right-click the row body (icon + name area, not the qty/+ controls)
+    // Right-click anywhere in the row (except the qty input and + button)
     // to show the description popover.
-    for (const el of [icon, name]) {
-      el.addEventListener("contextmenu", (ev) => {
-        ev.preventDefault();
-        const me = ev as MouseEvent;
-        showDescription({ x: me.clientX, y: me.clientY }, item);
-      });
-    }
+    row.addEventListener("contextmenu", (ev) => {
+      const t = ev.target as HTMLElement;
+      if (t.closest(".btn-plus, input")) return;
+      ev.preventDefault();
+      const me = ev as MouseEvent;
+      showDescription({ x: me.clientX, y: me.clientY }, item);
+    });
 
     row.addEventListener("dragstart", (e) => {
       dragId = item.id;
