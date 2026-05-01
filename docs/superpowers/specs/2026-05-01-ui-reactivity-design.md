@@ -95,29 +95,35 @@ Exports `FEEDBACK_CSS`. Injected once from `main.ts` as `obr-inv-feedback-styles
 
 ### 4.3 Changes to `src/ui-list.ts`
 
-- Receive a `PulseTracker` in `RowHandlers` (or as a sibling param to `state`).
-- In `renderRow`, after building the row, call `tracker.consume(id)`. If non-null:
+- Extend `ListState` with `tracker: PulseTracker` and `phantomRemoves: Set<string>` (removed-this-render ids whose row should still appear once with `data-pulse="remove"`).
+- Build the per-category render list from `state.items` *plus* synthetic entries `[id, 0]` for every id in `phantomRemoves` — pulled from `state.catalog` for icon/name. The existing zero-count filter already accepts ghosts; phantom-remove ids are treated as one-shot ghosts for filtering purposes.
+- In `renderRow`, after building the row, call `state.tracker.consume(id)`. If non-null:
   - Set `row.dataset.pulse = entry.kind`.
   - If `entry.delta != null`, render `<span class="inv-delta">±N</span>` inside `.inv-count`. Otherwise `<span class="inv-delta"></span>` (CSS hides empty).
 - The `.inv-count` element gets `position: relative` (in `styles-list.ts`) so `.inv-delta` can absolute-position relative to it.
-- For `received` entries: after the row is appended to its category body, queue (a) auto-expand if its `.cat-group[data-collapsed="true"]`, and (b) `row.scrollIntoView({ block: "center", behavior: motionAllowed ? "smooth" : "auto" })`. The "motionAllowed" check uses `window.matchMedia("(prefers-reduced-motion: reduce)").matches`.
+- For `received` entries: after the row is appended to its category body, call `row.scrollIntoView({ block: "center", behavior: motionAllowed ? "smooth" : "auto" })`. The category-expand for `received` is handled by the shell *before* render (see 4.4) so it's a no-op here. The "motionAllowed" check uses `window.matchMedia("(prefers-reduced-motion: reduce)").matches`.
 
 ### 4.4 Changes to `src/ui-shell.ts`
 
 - Construct one `PulseTracker` per shell instance. The shell already tracks transient state (search, lock, collapsed, ghosts) — the tracker fits the same lifecycle. Destroyed when the shell is destroyed (GM tab switch).
 - Hold `prevRecord: PlayerInventoryRecord | null = null`.
-- In `rerender(record, cat)`: compute `marks = tracker.diff(prevRecord, record)`, call `tracker.mark(marks)`, then update `prevRecord = record`, then call `renderList`.
-- For removes specifically: when `marks` contains a `remove` entry for id X, also add X to the `ghosts` set for this single render — so `renderList` still emits a row with `data-pulse="remove"`. After the render, remove X from `ghosts` again so the next rerender doesn't keep it. (The existing ghost logic was added for decrement→0 stickiness; this extends it to "carry one render past disappearance.")
+- In `rerender(record, cat)`:
+  1. `marks = tracker.diff(prevRecord, record)`.
+  2. Compute `phantomRemoves = new Set(...)` of every id in `marks` whose entry kind is `"remove"`.
+  3. **Auto-expand for received**: walk every `received` mark; resolve its category from the catalog; delete that category from the `collapsed` Set. The render that follows will emit `data-collapsed="false"` for that group, exposing the row in the same frame the pulse plays.
+  4. `tracker.mark(marks)` — stamps timestamps and applies precedence.
+  5. `prevRecord = record`.
+  6. Call `renderList(body, { ...state, tracker, phantomRemoves }, handlers)`. `phantomRemoves` is local to this call only — never persisted.
+- Expose a small new method on `ShellRefs`: `markReceived(itemId, quantity)` that calls `tracker.mark(new Map([[itemId, { kind: "received", delta: quantity }]]))`. This keeps the tracker encapsulated; callers don't see it.
 
 ### 4.5 Changes to `src/ui-player.ts`
 
 - Add a broadcast handler branch: when `msg.type === "transfer-received"` and `msg.toPlayerId === opts.playerId`:
   ```ts
-  shellTracker.mark(new Map([[msg.itemId, { kind: "received", delta: msg.quantity }]]));
-  // The metadata change that follows will diff to "inc"; precedence keeps "received".
-  refs.rerender(current, opts.catalog);  // optional kick, in case metadata is slow
+  refs.markReceived(msg.itemId, msg.quantity);
+  refs.rerender(current, opts.catalog);  // kick a render in case the broadcast beats the metadata event
   ```
-  Where `shellTracker` is exposed by the shell (small new ref on `ShellRefs`).
+  `markReceived` is the small new method on `ShellRefs` (see 4.4). The metadata change that follows will diff to `inc`; precedence keeps `received`.
 - The existing `OBR.notification.show(...)` toast stays — the in-row pulse complements it for users who have the panel visible.
 
 ### 4.6 Changes to `src/ui-gm.ts`
@@ -329,8 +335,9 @@ Use `vi.useFakeTimers()`, the existing `__testHooks.reset()` mock pattern, and `
 - Mount shell at record A. Trigger `rerender(record_B)` where B has `h1` count incremented by 1. Assert the row for `h1` has `data-pulse="inc"` and `.inv-delta` text is `"+1"`.
 - Same for decrement: `data-pulse="dec"`, delta `"−1"`.
 - Add: rerender to a record with a new id `x1`. Assert row exists, `data-pulse="add"`, delta = positive count.
-- Remove (no ghost): rerender to a record where `h1` is gone. Assert row still rendered with `data-pulse="remove"`. Trigger one more rerender — row is gone.
-- Precedence: simulate the player view path — call `tracker.mark({h1: received(+2)})` via the exposed shell ref, then trigger rerender from a metadata change with `h1` count + 2. Assert `data-pulse="received"`.
+- Phantom remove: rerender to a record where `h1` is gone. Assert the row is still in the DOM with `data-pulse="remove"`. Trigger one more identical rerender — the row is gone (no `data-pulse="remove"` lingering).
+- Precedence: simulate the player view path — call `shellRefs.markReceived("h1", 2)`, then trigger rerender from a metadata change with `h1` count + 2. Assert `data-pulse="received"` (not `inc`).
+- Auto-expand: rerender starting from a state where the `received`-id's category is in `collapsed`. Assert the category is no longer collapsed after the rerender.
 - Eviction: trigger an `inc` pulse. Advance fake timer past 700ms. Trigger an unrelated rerender. Assert row no longer has `data-pulse`.
 
 ### 7.3 Manual verification checklist
@@ -361,8 +368,8 @@ None blocking. Possible future work:
 |---|---|
 | `src/ui-feedback.ts` | New: `PulseTracker` interface, `createPulseTracker`, `PulseKind` type, durations, priority. |
 | `src/styles-feedback.ts` | New: `FEEDBACK_CSS` string with all keyframes and reduced-motion branch. |
-| `src/ui-list.ts` | Read tracker on row build; set `data-pulse`; render `.inv-delta`; received-only side effects (auto-expand category, scroll into view). |
-| `src/ui-shell.ts` | Construct tracker per shell; diff prev/next on rerender; mark before rendering; expose tracker on `ShellRefs` for the player view. |
+| `src/ui-list.ts` | Extend `ListState` with `tracker` and `phantomRemoves`; render synthetic rows for phantom removes; read tracker on row build to set `data-pulse` and `.inv-delta`; `scrollIntoView` for received entries. |
+| `src/ui-shell.ts` | Construct tracker per shell; diff prev/next on rerender; auto-expand collapsed categories for `received` marks; mark before rendering; expose `markReceived(itemId, qty)` on `ShellRefs`. |
 | `src/ui-player.ts` | On `transfer-received` broadcast, mark the relevant id with `received` kind, then trigger rerender. |
 | `src/ui-gm.ts` | No code changes (standard pulses apply via the shell). Verify nothing breaks across tab switches. |
 | `src/main.ts` | One extra `injectStyles(FEEDBACK_CSS, ...)` call. |
