@@ -1,4 +1,5 @@
 import { clampToFrame } from "./frame";
+import { escapeHtml } from "./escape";
 import type { PlayerInventoryRecord } from "./types";
 
 let active: HTMLElement | null = null;
@@ -37,7 +38,7 @@ export function showTransfer(opts: ShowTransferOpts): void {
   list.className = "transfer-list";
   for (const t of opts.targets) {
     const b = document.createElement("button");
-    b.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${escapeAttr(t.color)}"></span> → ${escape(t.name)}`;
+    b.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${escapeHtml(t.color)}"></span> → ${escapeHtml(t.name)}`;
     b.onclick = async () => {
       const q = parseInt(
         (pop.querySelector(".transfer-qty") as HTMLInputElement).value, 10,
@@ -89,9 +90,3 @@ export function buildTargets(
     .map(([id, rec]) => ({ id, name: rec.name, color: rec.color }));
 }
 
-function escape(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  }[c]!));
-}
-function escapeAttr(s: string): string { return escape(s); }

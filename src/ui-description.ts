@@ -1,4 +1,5 @@
 import { clampToFrame } from "./frame";
+import { isSafeIconUrl } from "./escape";
 import type { CatalogItem } from "./types";
 
 let active: HTMLElement | null = null;
@@ -16,7 +17,7 @@ export function showDescription(
   const header = document.createElement("div");
   header.className = "desc-header";
 
-  if (item?.icon) {
+  if (item?.icon && isSafeIconUrl(item.icon)) {
     const ic = document.createElement("div");
     ic.className = "desc-icon";
     ic.style.backgroundImage = `url("${item.icon}")`;

@@ -1,4 +1,5 @@
 import { showDescription } from "./ui-description";
+import { escapeHtml, isSafeIconUrl } from "./escape";
 import type { CatalogItem } from "./types";
 
 export interface AddDialogOpts {
@@ -61,7 +62,9 @@ export function openAddDialog(opts: AddDialogOpts): void {
 
     const icon = document.createElement("div");
     icon.className = "inv-icon";
-    if (item.icon) icon.style.backgroundImage = `url("${item.icon}")`;
+    if (item.icon && isSafeIconUrl(item.icon)) {
+      icon.style.backgroundImage = `url("${item.icon}")`;
+    }
     row.appendChild(icon);
 
     const name = document.createElement("div");
@@ -168,7 +171,10 @@ export function openAddDialog(opts: AddDialogOpts): void {
       }
       return;
     }
-    for (const [cat, entries] of groups.entries()) {
+    const sortedCats = [...groups.entries()].sort(
+      ([a], [b]) => a.localeCompare(b),
+    );
+    for (const [cat, entries] of sortedCats) {
       const isCollapsed = collapsed.has(cat);
 
       const group = document.createElement("div");
@@ -230,8 +236,3 @@ function onEsc(e: KeyboardEvent): void {
   if (e.key === "Escape") closeAddDialog();
 }
 
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  }[c]!));
-}

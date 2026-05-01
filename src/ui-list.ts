@@ -1,3 +1,4 @@
+import { escapeHtml, isSafeIconUrl } from "./escape";
 import type { CatalogItem, InventoryEntry, Rarity } from "./types";
 
 export interface RowHandlers {
@@ -42,7 +43,10 @@ export function renderList(
     return;
   }
 
-  for (const [cat, entries] of byCat.entries()) {
+  const sortedCats = [...byCat.entries()].sort(
+    ([a], [b]) => a.localeCompare(b),
+  );
+  for (const [cat, entries] of sortedCats) {
     const collapsed = state.collapsed.has(cat);
 
     const group = document.createElement("div");
@@ -53,7 +57,7 @@ export function renderList(
     const header = document.createElement("div");
     header.className = "cat-header";
     header.dataset.category = cat;
-    header.innerHTML = `<span><span class="chev">▾</span> ${escape(cat)}</span><span>(${entries.length})</span>`;
+    header.innerHTML = `<span><span class="chev">▾</span> ${escapeHtml(cat)}</span><span>(${entries.length})</span>`;
     group.appendChild(header);
 
     const bodyEl = document.createElement("div");
@@ -89,13 +93,16 @@ function renderRow(
 
   const icon = document.createElement("div");
   icon.className = "inv-icon";
-  if (item?.icon) icon.style.backgroundImage = `url("${item.icon}")`;
-  else icon.textContent = "❓";
+  if (item?.icon && isSafeIconUrl(item.icon)) {
+    icon.style.backgroundImage = `url("${item.icon}")`;
+  } else {
+    icon.textContent = "❓";
+  }
   row.appendChild(icon);
 
   const name = document.createElement("div");
   name.className = "inv-name";
-  name.innerHTML = item ? highlight(item.name, search) : escape(`[${id}] (missing from catalog)`);
+  name.innerHTML = item ? highlight(item.name, search) : escapeHtml(`[${id}] (missing from catalog)`);
   row.appendChild(name);
 
   const cnt = document.createElement("div");
@@ -138,18 +145,12 @@ function renderRow(
   return row;
 }
 
-function escape(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  }[c]!));
-}
-
 function highlight(text: string, search: string): string {
-  if (!search) return escape(text);
+  if (!search) return escapeHtml(text);
   const lower = text.toLowerCase();
   const idx = lower.indexOf(search);
-  if (idx < 0) return escape(text);
-  return escape(text.slice(0, idx))
-    + `<mark>${escape(text.slice(idx, idx + search.length))}</mark>`
-    + escape(text.slice(idx + search.length));
+  if (idx < 0) return escapeHtml(text);
+  return escapeHtml(text.slice(0, idx))
+    + `<mark>${escapeHtml(text.slice(idx, idx + search.length))}</mark>`
+    + escapeHtml(text.slice(idx + search.length));
 }

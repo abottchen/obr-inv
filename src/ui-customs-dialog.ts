@@ -1,5 +1,6 @@
 import { RARITIES } from "./constants";
 import { generateUnusedItemId, distinctCategories } from "./customs";
+import { isSafeIconUrl } from "./escape";
 import type { CatalogItem, CustomItem, Rarity } from "./types";
 import { OverCapError } from "./types";
 
@@ -160,12 +161,12 @@ export function openCustomsDialog(opts: CustomsDialogOpts): void {
   document.body.appendChild(back);
 
   const validate = (): boolean => {
+    const url = iconInput.value.trim();
     const ok =
       nameInput.value.trim().length > 0
       && categoryInput.value.trim().length > 0
       && descInput.value.trim().length > 0
-      && (iconInput.value.trim() === ""
-          || /^https?:\/\//i.test(iconInput.value.trim()));
+      && (url === "" || isSafeIconUrl(url));
     saveBtn.disabled = !ok;
     return ok;
   };

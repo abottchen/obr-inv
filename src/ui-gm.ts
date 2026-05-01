@@ -16,6 +16,7 @@ import { addCustom } from "./customs";
 import { transferItem } from "./transfer";
 import { buildExport, downloadExport } from "./export";
 import { resolvedCatalog } from "./catalog";
+import { escapeHtml } from "./escape";
 import {
   BROADCAST_CHANNEL, STORAGE_CAP_BYTES,
   METER_YELLOW_RATIO, METER_RED_RATIO,
@@ -297,8 +298,3 @@ function showOverCapModal(args: {
   (m.querySelector(".ok-btn") as HTMLButtonElement).onclick = () => back.remove();
 }
 
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  }[c]!));
-}

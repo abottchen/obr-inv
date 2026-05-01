@@ -76,7 +76,7 @@ export function mountShell(
 
   const gold = document.createElement("div");
   gold.className = "gold-strip";
-  const ccyInputs: Record<string, HTMLInputElement> = {} as any;
+  const ccyInputs = {} as Record<"pp" | "gp" | "sp" | "cp", HTMLInputElement>;
   const tip = "Type a number to set, +N to add, -N to subtract";
   for (const f of ["pp", "gp", "sp", "cp"] as const) {
     const cell = document.createElement("div");
