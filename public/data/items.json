@@ -1,38 +1,2647 @@
 [
   {
-    "id": "h7p2Xy",
-    "name": "Healing Potion",
-    "category": "Consumables",
-    "icon": "https://5e.tools/img/items/XPHB/Potion%20of%20Healing.webp",
-    "description": "When you drink this potion, you regain 2d4 + 2 hit points.",
+    "id": "j1U8Wc",
+    "name": "Padded Armor",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Padded%20Armor.webp",
+    "description": "AC 11 + Dex modifier. Stealth: Disadvantage. Padded armor consists of quilted layers of cloth and batting. (Light Armor \u2014 1 Minute to Don or Doff)",
     "rarity": "common",
-    "weight": 0.5
+    "weight": 8
   },
   {
-    "id": "torch1",
-    "name": "Torch",
-    "category": "Adventuring Gear",
-    "icon": "https://5e.tools/img/items/XPHB/Torch.webp",
-    "description": "A torch burns for 1 hour, providing bright light in a 20-foot radius.",
-    "rarity": "common",
-    "weight": 1
-  },
-  {
-    "id": "rope50",
-    "name": "Rope, Hempen (50 ft)",
-    "category": "Adventuring Gear",
-    "icon": "https://5e.tools/img/items/XPHB/Rope%2C%20Hempen.webp",
-    "description": "Rope has 2 hit points and can be burst with a DC 17 Strength check.",
+    "id": "ikpaoI",
+    "name": "Leather Armor",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Leather%20Armor.webp",
+    "description": "AC 11 + Dex modifier. The breastplate and shoulder protectors of this armor are made of leather that has been stiffened by being boiled in oil. The rest of the armor is made of softer and more flexible materials. (Light Armor \u2014 1 Minute to Don or Doff)",
     "rarity": "common",
     "weight": 10
   },
   {
-    "id": "arrow1",
-    "name": "Arrows (20)",
-    "category": "Ammunition",
-    "icon": "https://5e.tools/img/items/XPHB/Arrow.webp",
-    "description": "Standard arrows, used with shortbows and longbows.",
+    "id": "JfxD6j",
+    "name": "Studded Leather Armor",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Studded%20Leather%20Armor.webp",
+    "description": "AC 12 + Dex modifier. Made from tough but flexible leather, studded leather is reinforced with close-set rivets or spikes. (Light Armor \u2014 1 Minute to Don or Doff)",
+    "rarity": "common",
+    "weight": 13
+  },
+  {
+    "id": "HOGshE",
+    "name": "Hide Armor",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Hide%20Armor.webp",
+    "description": "AC 12 + Dex modifier (max 2). This crude armor consists of thick furs and pelts. It is commonly worn by barbarian tribes, evil humanoids, and other folk who lack access to the tools and materials needed to create better armor. (Medium Armor \u2014 5 Minutes to Don, 1 Minute to Doff)",
+    "rarity": "common",
+    "weight": 12
+  },
+  {
+    "id": "tZhFaw",
+    "name": "Chain Shirt",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Chain%20Shirt.webp",
+    "description": "AC 13 + Dex modifier (max 2). Made of interlocking metal rings, a chain shirt is worn between layers of clothing or leather. This armor offers modest protection to the wearer's upper body and allows the sound of the rings rubbing against one another to be muffled by outer layers. (Medium Armor \u2014 5 Minutes to Don, 1 Minute to Doff)",
+    "rarity": "common",
+    "weight": 20
+  },
+  {
+    "id": "W9Re1Q",
+    "name": "Scale Mail",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Scale%20Mail.webp",
+    "description": "AC 14 + Dex modifier (max 2). Stealth: Disadvantage. This armor consists of a coat and leggings (and perhaps a separate skirt) of leather covered with overlapping pieces of metal, much like the scales of a fish. The suit includes gauntlets. (Medium Armor \u2014 5 Minutes to Don, 1 Minute to Doff)",
+    "rarity": "common",
+    "weight": 45
+  },
+  {
+    "id": "IXdyrp",
+    "name": "Breastplate",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Breastplate.webp",
+    "description": "AC 14 + Dex modifier (max 2). This armor consists of a fitted metal chest piece worn with supple leather. Although it leaves the legs and arms relatively unprotected, this armor provides good protection for the wearer's vital organs while leaving the wearer relatively unencumbered. (Medium Armor \u2014 5 Minutes to Don, 1 Minute to Doff)",
+    "rarity": "common",
+    "weight": 20
+  },
+  {
+    "id": "ErdJfT",
+    "name": "Half Plate Armor",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Half%20Plate%20Armor.webp",
+    "description": "AC 15 + Dex modifier (max 2). Stealth: Disadvantage. Half plate consists of shaped metal plates that cover most of the wearer's body. It does not include leg protection beyond simple greaves that are attached with leather straps. (Medium Armor \u2014 5 Minutes to Don, 1 Minute to Doff)",
+    "rarity": "common",
+    "weight": 40
+  },
+  {
+    "id": "QX4pF4",
+    "name": "Ring Mail",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Ring%20Mail.webp",
+    "description": "AC 14. Stealth: Disadvantage. This armor is leather armor with heavy rings sewn into it. The rings help reinforce the armor against blows from swords and axes. Ring mail is inferior to chain mail, and it's usually worn only by those who can't afford better armor. (Heavy Armor \u2014 10 Minutes to Don, 5 Minutes to Doff)",
+    "rarity": "common",
+    "weight": 40
+  },
+  {
+    "id": "u4tUoL",
+    "name": "Chain Mail",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Chain%20Mail.webp",
+    "description": "AC 16. Strength: 13. Stealth: Disadvantage. Made of interlocking metal rings, chain mail includes a layer of quilted fabric worn underneath the mail to prevent chafing and to cushion the impact of blows. The suit includes gauntlets. (Heavy Armor \u2014 10 Minutes to Don, 5 Minutes to Doff)",
+    "rarity": "common",
+    "weight": 55
+  },
+  {
+    "id": "P1giMu",
+    "name": "Splint Armor",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Splint%20Armor.webp",
+    "description": "AC 17. Strength: 15. Stealth: Disadvantage. This armor is made of narrow vertical strips of metal riveted to a backing of leather that is worn over cloth padding. Flexible chain mail protects the joints. (Heavy Armor \u2014 10 Minutes to Don, 5 Minutes to Doff)",
+    "rarity": "common",
+    "weight": 60
+  },
+  {
+    "id": "H2i09n",
+    "name": "Plate Armor",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Plate%20Armor.webp",
+    "description": "AC 18. Strength: 15. Stealth: Disadvantage. Plate consists of shaped, interlocking metal plates to cover the entire body. A suit of plate includes gauntlets, heavy leather boots, a visored helmet, and thick layers of padding underneath the armor. Buckles and straps distribute the weight over the body. (Heavy Armor \u2014 10 Minutes to Don, 5 Minutes to Doff)",
+    "rarity": "common",
+    "weight": 65
+  },
+  {
+    "id": "eeaEdx",
+    "name": "Shield",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Shield.webp",
+    "description": "AC +2. A shield is made from wood or metal and is carried in one hand. Wielding a shield increases your Armor Class by 2. You can benefit from only one shield at a time. (Utilize Action to Don or Doff)",
+    "rarity": "common",
+    "weight": 6
+  },
+  {
+    "id": "3pS9vi",
+    "name": "Club",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Club.webp",
+    "description": "1d4 Bludgeoning. Properties: Light. Mastery: Slow. Weight: 2 lb. (Simple Melee Weapon)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "IWKpKo",
+    "name": "Dagger",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Dagger.webp",
+    "description": "1d4 Piercing. Properties: Finesse, Light, Thrown (Range 20/60). Mastery: Nick. Weight: 1 lb. (Simple Melee Weapon)",
     "rarity": "common",
     "weight": 1
+  },
+  {
+    "id": "OZgkjr",
+    "name": "Greatclub",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Greatclub.webp",
+    "description": "1d8 Bludgeoning. Properties: Two-Handed. Mastery: Push. Weight: 10 lb. (Simple Melee Weapon)",
+    "rarity": "common",
+    "weight": 10
+  },
+  {
+    "id": "ZYTIXA",
+    "name": "Handaxe",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Handaxe.webp",
+    "description": "1d6 Slashing. Properties: Light, Thrown (Range 20/60). Mastery: Vex. Weight: 2 lb. (Simple Melee Weapon)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "tvJSR9",
+    "name": "Javelin",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Javelin.webp",
+    "description": "1d6 Piercing. Properties: Thrown (Range 30/120). Mastery: Slow. Weight: 2 lb. (Simple Melee Weapon)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "yEdvBb",
+    "name": "Light Hammer",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Light%20Hammer.webp",
+    "description": "1d4 Bludgeoning. Properties: Light, Thrown (Range 20/60). Mastery: Nick. Weight: 2 lb. (Simple Melee Weapon)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "cHecsZ",
+    "name": "Mace",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Mace.webp",
+    "description": "1d6 Bludgeoning. Mastery: Sap. Weight: 4 lb. (Simple Melee Weapon)",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "FGwVSM",
+    "name": "Quarterstaff",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Quarterstaff.webp",
+    "description": "1d6 Bludgeoning. Properties: Versatile (1d8). Mastery: Topple. Weight: 4 lb. (Simple Melee Weapon)",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "tduIvF",
+    "name": "Sickle",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Sickle.webp",
+    "description": "1d4 Slashing. Properties: Light. Mastery: Nick. Weight: 2 lb. (Simple Melee Weapon)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "M4C8fx",
+    "name": "Spear",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Spear.webp",
+    "description": "1d6 Piercing. Properties: Thrown (Range 20/60), Versatile (1d8). Mastery: Sap. Weight: 3 lb. (Simple Melee Weapon)",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "zlHtL1",
+    "name": "Dart",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Dart.webp",
+    "description": "1d4 Piercing. Properties: Finesse, Thrown (Range 20/60). Mastery: Vex. Weight: 1/4 lb. (Simple Ranged Weapon)",
+    "rarity": "common",
+    "weight": 0.25
+  },
+  {
+    "id": "77BWxZ",
+    "name": "Light Crossbow",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Light%20Crossbow.webp",
+    "description": "1d8 Piercing. Properties: Ammunition (Range 80/320; Bolt), Loading, Two-Handed. Mastery: Slow. Weight: 5 lb. (Simple Ranged Weapon)",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "4qGJ4t",
+    "name": "Shortbow",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Shortbow.webp",
+    "description": "1d6 Piercing. Properties: Ammunition (Range 80/320; Arrow), Two-Handed. Mastery: Vex. Weight: 2 lb. (Simple Ranged Weapon)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "Dqxatx",
+    "name": "Sling",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Sling.webp",
+    "description": "1d4 Bludgeoning. Properties: Ammunition (Range 30/120; Bullet). Mastery: Slow. (Simple Ranged Weapon)",
+    "rarity": "common"
+  },
+  {
+    "id": "UrJl1r",
+    "name": "Battleaxe",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Battleaxe.webp",
+    "description": "1d8 Slashing. Properties: Versatile (1d10). Mastery: Topple. Weight: 4 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "YlPJdn",
+    "name": "Flail",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Flail.webp",
+    "description": "1d8 Bludgeoning. Mastery: Sap. Weight: 2 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "fb6bUU",
+    "name": "Glaive",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Glaive.webp",
+    "description": "1d10 Slashing. Properties: Heavy, Reach, Two-Handed. Mastery: Graze. Weight: 6 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 6
+  },
+  {
+    "id": "Ic4kQS",
+    "name": "Greataxe",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Greataxe.webp",
+    "description": "1d12 Slashing. Properties: Heavy, Two-Handed. Mastery: Cleave. Weight: 7 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 7
+  },
+  {
+    "id": "hUE07J",
+    "name": "Greatsword",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Greatsword.webp",
+    "description": "2d6 Slashing. Properties: Heavy, Two-Handed. Mastery: Graze. Weight: 6 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 6
+  },
+  {
+    "id": "51xsgJ",
+    "name": "Halberd",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Halberd.webp",
+    "description": "1d10 Slashing. Properties: Heavy, Reach, Two-Handed. Mastery: Cleave. Weight: 6 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 6
+  },
+  {
+    "id": "szeKWw",
+    "name": "Lance",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Lance.webp",
+    "description": "1d10 Piercing. Properties: Heavy, Reach, Two-Handed (unless mounted). Mastery: Topple. Weight: 6 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 6
+  },
+  {
+    "id": "4R5Fwz",
+    "name": "Longsword",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Longsword.webp",
+    "description": "1d8 Slashing. Properties: Versatile (1d10). Mastery: Sap. Weight: 3 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "WdQ5Ur",
+    "name": "Maul",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Maul.webp",
+    "description": "2d6 Bludgeoning. Properties: Heavy, Two-Handed. Mastery: Topple. Weight: 10 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 10
+  },
+  {
+    "id": "EifPlf",
+    "name": "Morningstar",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Morningstar.webp",
+    "description": "1d8 Piercing. Mastery: Sap. Weight: 4 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "DY83jp",
+    "name": "Pike",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Pike.webp",
+    "description": "1d10 Piercing. Properties: Heavy, Reach, Two-Handed. Mastery: Push. Weight: 18 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 18
+  },
+  {
+    "id": "2ALTn8",
+    "name": "Rapier",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Rapier.webp",
+    "description": "1d8 Piercing. Properties: Finesse. Mastery: Vex. Weight: 2 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "niMV7U",
+    "name": "Scimitar",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Scimitar.webp",
+    "description": "1d6 Slashing. Properties: Finesse, Light. Mastery: Nick. Weight: 3 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "4PfuJO",
+    "name": "Shortsword",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Shortsword.webp",
+    "description": "1d6 Piercing. Properties: Finesse, Light. Mastery: Vex. Weight: 2 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "Fg8ovD",
+    "name": "Trident",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Trident.webp",
+    "description": "1d8 Piercing. Properties: Thrown (Range 20/60), Versatile (1d10). Mastery: Topple. Weight: 4 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "Nt591w",
+    "name": "War Pick",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/War%20Pick.webp",
+    "description": "1d8 Piercing. Properties: Versatile (1d10). Mastery: Sap. Weight: 2 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "fkGL4Y",
+    "name": "Warhammer",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Warhammer.webp",
+    "description": "1d8 Bludgeoning. Properties: Versatile (1d10). Mastery: Push. Weight: 5 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "fcB2IT",
+    "name": "Whip",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Whip.webp",
+    "description": "1d4 Slashing. Properties: Finesse, Reach. Mastery: Slow. Weight: 3 lb. (Martial Melee Weapon)",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "RWEHW0",
+    "name": "Blowgun",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Blowgun.webp",
+    "description": "1 Piercing. Properties: Ammunition (Range 25/100; Needle), Loading. Mastery: Vex. Weight: 1 lb. (Martial Ranged Weapon)",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "5W20YZ",
+    "name": "Hand Crossbow",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Hand%20Crossbow.webp",
+    "description": "1d6 Piercing. Properties: Ammunition (Range 30/120; Bolt), Light, Loading. Mastery: Vex. Weight: 3 lb. (Martial Ranged Weapon)",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "KMiQd9",
+    "name": "Heavy Crossbow",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Heavy%20Crossbow.webp",
+    "description": "1d10 Piercing. Properties: Ammunition (Range 100/400; Bolt), Heavy, Loading, Two-Handed. Mastery: Push. Weight: 18 lb. (Martial Ranged Weapon)",
+    "rarity": "common",
+    "weight": 18
+  },
+  {
+    "id": "p5btDh",
+    "name": "Longbow",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Longbow.webp",
+    "description": "1d8 Piercing. Properties: Ammunition (Range 150/600; Arrow), Heavy, Two-Handed. Mastery: Slow. Weight: 2 lb. (Martial Ranged Weapon)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "jLljty",
+    "name": "Musket",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Musket.webp",
+    "description": "1d12 Piercing. Properties: Ammunition (Range 40/120; Bullet), Loading, Two-Handed. Mastery: Slow. Weight: 10 lb. (Martial Ranged Weapon)",
+    "rarity": "common",
+    "weight": 10
+  },
+  {
+    "id": "I1Rrxi",
+    "name": "Pistol",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Pistol.webp",
+    "description": "1d10 Piercing. Properties: Ammunition (Range 30/90; Bullet), Loading. Mastery: Vex. Weight: 3 lb. (Martial Ranged Weapon)",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "x8P1JV",
+    "name": "Alchemist's Supplies",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/bubbling-flask.svg",
+    "description": "Ability: Intelligence. Weight: 8 lb. Utilize: Identify a substance (DC 15), or start a fire (DC 15). Craft: Acid, Alchemist's Fire, Component Pouch, Oil, Paper, Perfume. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 8
+  },
+  {
+    "id": "3N2odx",
+    "name": "Brewer's Supplies",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/beer-bottle.svg",
+    "description": "Ability: Intelligence. Weight: 9 lb. Utilize: Detect poisoned drink (DC 15), or identify alcohol (DC 10). Craft: Antitoxin. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 9
+  },
+  {
+    "id": "mWeVnx",
+    "name": "Calligrapher's Supplies",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/quill-ink.svg",
+    "description": "Ability: Dexterity. Weight: 5 lb. Utilize: Write text with impressive flourishes that guard against forgery (DC 15). Craft: Ink, Spell Scroll. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "eQs6iX",
+    "name": "Carpenter's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/hammer-nails.svg",
+    "description": "Ability: Strength. Weight: 6 lb. Utilize: Seal or pry open a door or container (DC 20). Craft: Club, Greatclub, Quarterstaff, Barrel, Chest, Ladder, Pole, Portable Ram, Torch. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 6
+  },
+  {
+    "id": "6n8zm1",
+    "name": "Cartographer's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/treasure-map.svg",
+    "description": "Ability: Wisdom. Weight: 6 lb. Utilize: Draft a map of a small area (DC 15). Craft: Map. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 6
+  },
+  {
+    "id": "jllJzy",
+    "name": "Cobbler's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/boots.svg",
+    "description": "Ability: Dexterity. Weight: 5 lb. Utilize: Modify footwear to give Advantage on the wearer's next Dexterity (Acrobatics) check (DC 10). Craft: Climber's Kit. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "zoqGuA",
+    "name": "Cook's Utensils",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/fork-knife-spoon.svg",
+    "description": "Ability: Wisdom. Weight: 8 lb. Utilize: Improve food's flavor (DC 10), or detect spoiled or poisoned food (DC 15). Craft: Rations. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 8
+  },
+  {
+    "id": "FHJVAC",
+    "name": "Glassblower's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/round-bottom-flask.svg",
+    "description": "Ability: Intelligence. Weight: 5 lb. Utilize: Discern what a glass object held in the past 24 hours (DC 15). Craft: Glass Bottle, Magnifying Glass, Spyglass, Vial. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "4zAEuH",
+    "name": "Jeweler's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/emerald-necklace.svg",
+    "description": "Ability: Intelligence. Weight: 2 lb. Utilize: Discern a gem's value (DC 15). Craft: Arcane Focus, Holy Symbol. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "QTHQAh",
+    "name": "Leatherworker's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/leather-armor.svg",
+    "description": "Ability: Dexterity. Weight: 5 lb. Utilize: Add a design to a leather item (DC 10). Craft: Sling, Whip, Hide Armor, Leather Armor, Studded Leather Armor, Backpack, Crossbow Bolt Case, Map or Scroll Case, Parchment, Pouch, Quiver, Waterskin. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "EIZDZX",
+    "name": "Mason's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/stone-crafting.svg",
+    "description": "Ability: Strength. Weight: 8 lb. Utilize: Chisel a symbol or hole in stone (DC 10). Craft: Block and Tackle. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 8
+  },
+  {
+    "id": "jy5p8K",
+    "name": "Painter's Supplies",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/paint-brush.svg",
+    "description": "Ability: Wisdom. Weight: 5 lb. Utilize: Paint a recognizable image of something you've seen (DC 10). Craft: Druidic Focus, Holy Symbol. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "crXWZM",
+    "name": "Potter's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/painted-pottery.svg",
+    "description": "Ability: Intelligence. Weight: 3 lb. Utilize: Discern what a ceramic object held in the past 24 hours (DC 15). Craft: Jug, Lamp. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "EfN2cu",
+    "name": "Smith's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/anvil.svg",
+    "description": "Ability: Strength. Weight: 8 lb. Utilize: Pry open a door or container (DC 20). Craft: Any Melee weapon (except Club, Greatclub, Quarterstaff, and Whip), Medium armor (except Hide), Heavy armor, Ball Bearings, Bucket, Caltrops, Chain, Crowbar, Firearm Bullets, Grappling Hook, Iron Pot, Iron Spikes, Sling Bullets. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 8
+  },
+  {
+    "id": "9FM0jR",
+    "name": "Tinker's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/tinker.svg",
+    "description": "Ability: Dexterity. Weight: 10 lb. Utilize: Assemble a Tiny item composed of scrap, which falls apart in 1 minute (DC 20). Craft: Musket, Pistol, Bell, Bullseye Lantern, Flask, Hooded Lantern, Hunter's Trap, Lock, Manacles, Mirror, Shovel, Signal Whistle, Tinderbox. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 10
+  },
+  {
+    "id": "Nbey0j",
+    "name": "Weaver's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/sewing-string.svg",
+    "description": "Ability: Dexterity. Weight: 5 lb. Utilize: Mend a tear in clothing (DC 10), or sew a Tiny design (DC 10). Craft: Padded Armor, Basket, Bedroll, Blanket, Fine Clothes, Net, Robe, Rope, Sack, String, Tent, Traveler's Clothes. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "0TPcDh",
+    "name": "Woodcarver's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/wood-axe.svg",
+    "description": "Ability: Dexterity. Weight: 5 lb. Utilize: Carve a pattern in wood (DC 10). Craft: Club, Greatclub, Quarterstaff, Ranged weapons (except Pistol, Musket, and Sling), Arcane Focus, Arrows, Bolts, Druidic Focus, Ink Pen, Needles. (Artisan's Tools)",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "B4HhuI",
+    "name": "Disguise Kit",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/double-face-mask.svg",
+    "description": "Ability: Charisma. Weight: 3 lb. Utilize: Apply makeup (DC 10). Craft: Costume.",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "kwyEd8",
+    "name": "Forgery Kit",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/wax-seal.svg",
+    "description": "Ability: Dexterity. Weight: 5 lb. Utilize: Mimic 10 or fewer words of someone else's handwriting (DC 15), or duplicate a wax seal (DC 20).",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "rakLJG",
+    "name": "Dice Set",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/perspective-dice-six-faces-random.svg",
+    "description": "Ability: Wisdom. Utilize: Discern whether someone is cheating (DC 10), or win the game (DC 20). (Gaming Set)",
+    "rarity": "common"
+  },
+  {
+    "id": "1yCfa7",
+    "name": "Dragonchess Set",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/card-joker.svg",
+    "description": "Ability: Wisdom. Utilize: Discern whether someone is cheating (DC 10), or win the game (DC 20). (Gaming Set)",
+    "rarity": "common",
+    "weight": 0.5
+  },
+  {
+    "id": "EC0qsd",
+    "name": "Playing Cards",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/card-exchange.svg",
+    "description": "Ability: Wisdom. Utilize: Discern whether someone is cheating (DC 10), or win the game (DC 20). (Gaming Set)",
+    "rarity": "common"
+  },
+  {
+    "id": "NlNgCm",
+    "name": "Three-Dragon Ante Set",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/card-exchange.svg",
+    "description": "Ability: Wisdom. Utilize: Discern whether someone is cheating (DC 10), or win the game (DC 20). (Gaming Set)",
+    "rarity": "common"
+  },
+  {
+    "id": "dgpmod",
+    "name": "Herbalism Kit",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/flower-twirl.svg",
+    "description": "Ability: Intelligence. Weight: 3 lb. Utilize: Identify a plant (DC 10). Craft: Antitoxin, Candle, Healer's Kit, Potion of Healing.",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "kuRv3d",
+    "name": "Bagpipes",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/bagpipes.svg",
+    "description": "Ability: Charisma. Weight: 6 lb. Utilize: Play a known tune (DC 10), or improvise a song (DC 15). (Musical Instrument)",
+    "rarity": "common",
+    "weight": 6
+  },
+  {
+    "id": "lmZmqe",
+    "name": "Drum",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/drum.svg",
+    "description": "Ability: Charisma. Weight: 3 lb. Utilize: Play a known tune (DC 10), or improvise a song (DC 15). (Musical Instrument)",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "JyAWuO",
+    "name": "Dulcimer",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/xylophone.svg",
+    "description": "Ability: Charisma. Weight: 10 lb. Utilize: Play a known tune (DC 10), or improvise a song (DC 15). (Musical Instrument)",
+    "rarity": "common",
+    "weight": 10
+  },
+  {
+    "id": "laKEfh",
+    "name": "Flute",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/flute.svg",
+    "description": "Ability: Charisma. Weight: 1 lb. Utilize: Play a known tune (DC 10), or improvise a song (DC 15). (Musical Instrument)",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "fF8w8S",
+    "name": "Horn",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/trumpet.svg",
+    "description": "Ability: Charisma. Weight: 2 lb. Utilize: Play a known tune (DC 10), or improvise a song (DC 15). (Musical Instrument)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "gQ6dDn",
+    "name": "Lute",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/guitar.svg",
+    "description": "Ability: Charisma. Weight: 2 lb. Utilize: Play a known tune (DC 10), or improvise a song (DC 15). (Musical Instrument)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "vBYxjE",
+    "name": "Lyre",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/lyre.svg",
+    "description": "Ability: Charisma. Weight: 2 lb. Utilize: Play a known tune (DC 10), or improvise a song (DC 15). (Musical Instrument)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "6Qpkiw",
+    "name": "Pan Flute",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/pan-flute.svg",
+    "description": "Ability: Charisma. Weight: 2 lb. Utilize: Play a known tune (DC 10), or improvise a song (DC 15). (Musical Instrument)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "CsZEqU",
+    "name": "Shawm",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/saxophone.svg",
+    "description": "Ability: Charisma. Weight: 1 lb. Utilize: Play a known tune (DC 10), or improvise a song (DC 15). (Musical Instrument)",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "5ToxAE",
+    "name": "Viol",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/zajkonur/violin.svg",
+    "description": "Ability: Charisma. Weight: 1 lb. Utilize: Play a known tune (DC 10), or improvise a song (DC 15). (Musical Instrument)",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "ALU32T",
+    "name": "Navigator's Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/sextant.svg",
+    "description": "Ability: Wisdom. Weight: 2 lb. Utilize: Plot a course (DC 10), or determine position by stargazing (DC 15).",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "KxnV9t",
+    "name": "Poisoner's Kit",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/poison-bottle.svg",
+    "description": "Ability: Intelligence. Weight: 2 lb. Utilize: Detect a poisoned object (DC 10). Craft: Basic Poison.",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "LTynzh",
+    "name": "Thieves' Tools",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/lockpicks.svg",
+    "description": "Ability: Dexterity. Weight: 1 lb. Utilize: Pick a lock (DC 15), or disarm a trap (DC 15).",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "jW1lpa",
+    "name": "Acid",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/bubbling-flask.svg",
+    "description": "Weight: 1 lb. As an Attack action, you can throw a vial of Acid at a creature or object within 20 ft. Target must succeed on a Dex save (DC 8 + Dex mod + Prof) or take 2d6 Acid damage.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "z4GuUt",
+    "name": "Alchemist's Fire",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/fire-bottle.svg",
+    "description": "Weight: 1 lb. As an Attack action, you can throw a flask at a creature or object within 20 ft. Target must succeed on a Dex save (DC 8 + Dex mod + Prof) or take 1d4 Fire damage and start burning.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "OpRVd4",
+    "name": "Arrows (20)",
+    "category": "Ammunition",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/quiver.svg",
+    "description": "Weight: 1 lb. Ammunition for weapons with the Ammunition property. Stored in a Quiver. (Ammunition)",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "ocqv1e",
+    "name": "Bolts (20)",
+    "category": "Ammunition",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/quiver.svg",
+    "description": "Weight: 1 1/2 lb. Ammunition for crossbows. Stored in a Crossbow Bolt Case. (Ammunition)",
+    "rarity": "common",
+    "weight": 1.5
+  },
+  {
+    "id": "koPnzI",
+    "name": "Firearm Bullets (10)",
+    "category": "Ammunition",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/bullets.svg",
+    "description": "Weight: 2 lb. Ammunition for firearms. Stored in a Pouch. (Ammunition)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "KDqAOd",
+    "name": "Sling Bullets (20)",
+    "category": "Ammunition",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/bullets.svg",
+    "description": "Weight: 1 1/2 lb. Ammunition for slings. Stored in a Pouch. (Ammunition)",
+    "rarity": "common",
+    "weight": 1.5
+  },
+  {
+    "id": "DcNrkw",
+    "name": "Needles (50)",
+    "category": "Ammunition",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/sewing-needle.svg",
+    "description": "Weight: 1 lb. Ammunition for blowguns. Stored in a Pouch. (Ammunition)",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "k6LuBg",
+    "name": "Antitoxin",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/standing-potion.svg",
+    "description": "As a Bonus Action, you can drink a vial of Antitoxin to gain Advantage on saving throws to avoid or end the Poisoned condition for 1 hour.",
+    "rarity": "common"
+  },
+  {
+    "id": "MXVFpe",
+    "name": "Crystal (Arcane Focus)",
+    "category": "Spellcasting Focus",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/crystal-shine.svg",
+    "description": "Weight: 1 lb. A bejeweled or carved crystal used to channel arcane magic. A Sorcerer, Warlock, or Wizard can use it as a Spellcasting Focus. (Arcane Focus)",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "7PSozB",
+    "name": "Orb (Arcane Focus)",
+    "category": "Spellcasting Focus",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/crystal-ball.svg",
+    "description": "Weight: 3 lb. A bejeweled or carved orb used to channel arcane magic. A Sorcerer, Warlock, or Wizard can use it as a Spellcasting Focus. (Arcane Focus)",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "XIKpEM",
+    "name": "Rod (Arcane Focus)",
+    "category": "Spellcasting Focus",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/crystal-wand.svg",
+    "description": "Weight: 2 lb. A bejeweled or carved rod used to channel arcane magic. A Sorcerer, Warlock, or Wizard can use it as a Spellcasting Focus. (Arcane Focus)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "OaksSf",
+    "name": "Staff (Arcane Focus)",
+    "category": "Spellcasting Focus",
+    "icon": "https://5e.tools/img/items/XPHB/Quarterstaff.webp",
+    "description": "Weight: 4 lb. A bejeweled or carved staff used to channel arcane magic. Also functions as a Quarterstaff. A Sorcerer, Warlock, or Wizard can use it as a Spellcasting Focus. (Arcane Focus)",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "Ay3RUt",
+    "name": "Wand (Arcane Focus)",
+    "category": "Spellcasting Focus",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/crystal-wand.svg",
+    "description": "Weight: 1 lb. A bejeweled or carved wand used to channel arcane magic. A Sorcerer, Warlock, or Wizard can use it as a Spellcasting Focus. (Arcane Focus)",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "88Aog5",
+    "name": "Backpack",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/backpack.svg",
+    "description": "Weight: 5 lb. Holds up to 30 pounds within 1 cubic foot. Can also serve as a saddlebag.",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "khk5n7",
+    "name": "Ball Bearings",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/bullets.svg",
+    "description": "Weight: 2 lb. As a Utilize action, spill to cover a 10-ft-square area within 10 ft. A creature entering for the first time on a turn must succeed on a DC 10 Dex save or fall Prone. Takes 10 minutes to recover.",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "dumxas",
+    "name": "Barrel",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/barrel.svg",
+    "description": "Weight: 70 lb. Holds up to 40 gallons of liquid or up to 4 cubic feet of dry goods.",
+    "rarity": "common",
+    "weight": 70
+  },
+  {
+    "id": "TiFKHe",
+    "name": "Basket",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/basket.svg",
+    "description": "Weight: 2 lb. Holds up to 40 pounds within 2 cubic feet.",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "VoB1c8",
+    "name": "Bedroll",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/blanket.svg",
+    "description": "Weight: 7 lb. Sleeps one Small or Medium creature. While in a Bedroll, you automatically succeed on saving throws against extreme cold.",
+    "rarity": "common",
+    "weight": 7
+  },
+  {
+    "id": "vr2E8u",
+    "name": "Bell",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/ringing-bell.svg",
+    "description": "When rung as a Utilize action, produces a sound that can be heard up to 60 feet away.",
+    "rarity": "common"
+  },
+  {
+    "id": "pIrCnh",
+    "name": "Blanket",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/blanket.svg",
+    "description": "Weight: 3 lb. While wrapped in a blanket, you have Advantage on saving throws against extreme cold.",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "dHW7bC",
+    "name": "Block and Tackle",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/rope-coil.svg",
+    "description": "Weight: 5 lb. Allows you to hoist up to four times the weight you can normally lift.",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "N94op7",
+    "name": "Book",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/book-cover.svg",
+    "description": "Weight: 5 lb. Contains fiction or nonfiction. Consulting an accurate nonfiction Book grants a +5 bonus to Int (Arcana, History, Nature, or Religion) checks about its topic.",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "x94a41",
+    "name": "Glass Bottle",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/square-bottle.svg",
+    "description": "Weight: 2 lb. Holds up to 1 1/2 pints.",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "i2v52A",
+    "name": "Bucket",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/empty-wood-bucket-handle.svg",
+    "description": "Weight: 2 lb. Holds up to half a cubic foot of contents.",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "sTOVai",
+    "name": "Burglar's Pack",
+    "category": "Adventuring Gear - Packs",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/knapsack.svg",
+    "description": "Weight: 42 lb. Contains: Backpack, Ball Bearings, Bell, 10 Candles, Crowbar, Hooded Lantern, 7 flasks of Oil, 5 days of Rations, Rope, Tinderbox, and Waterskin.",
+    "rarity": "common",
+    "weight": 47.5
+  },
+  {
+    "id": "456WWo",
+    "name": "Caltrops",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/caltrops.svg",
+    "description": "Weight: 2 lb. As a Utilize action, spread to cover a 5-ft-square area within 5 ft. A creature entering for the first time on a turn must succeed on a DC 15 Dex save or take 1 Piercing damage and have Speed reduced to 0. Takes 10 minutes to recover.",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "N1o4wV",
+    "name": "Candle",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/candle-flame.svg",
+    "description": "For 1 hour, a lit Candle sheds Bright Light in a 5-foot radius and Dim Light for an additional 5 feet.",
+    "rarity": "common"
+  },
+  {
+    "id": "bvMAjg",
+    "name": "Crossbow Bolt Case",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/quiver.svg",
+    "description": "Weight: 1 lb. Holds up to 20 Bolts.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "iUamza",
+    "name": "Map or Scroll Case",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/tied-scroll.svg",
+    "description": "Weight: 1 lb. Holds up to 10 sheets of paper or 5 sheets of parchment.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "DP9Bkt",
+    "name": "Chain",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/crossed-chains.svg",
+    "description": "Weight: 10 lb. As a Utilize action, wrap around a Grappled/Incapacitated/Restrained creature within 5 ft (DC 13 Str Athletics). Bound creature is Restrained. Escape: DC 18 Dex (Acrobatics). Burst: DC 20 Str (Athletics).",
+    "rarity": "common",
+    "weight": 10
+  },
+  {
+    "id": "keDLrh",
+    "name": "Chest",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/chest.svg",
+    "description": "Weight: 25 lb. Holds up to 12 cubic feet of contents.",
+    "rarity": "common",
+    "weight": 25
+  },
+  {
+    "id": "9U4EKp",
+    "name": "Climber's Kit",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/carabiner.svg",
+    "description": "Weight: 12 lb. Includes boot tips, gloves, pitons, and a harness. As a Utilize action, anchor yourself; you can't fall more than 25 ft from the anchor point.",
+    "rarity": "common",
+    "weight": 12
+  },
+  {
+    "id": "qJnZdQ",
+    "name": "Fine Clothes",
+    "category": "Clothing",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/hanger.svg",
+    "description": "Weight: 6 lb. Made of expensive fabrics and adorned with expertly crafted details. Some events and locations admit only people wearing these clothes.",
+    "rarity": "common",
+    "weight": 6
+  },
+  {
+    "id": "UacnYU",
+    "name": "Traveler's Clothes",
+    "category": "Clothing",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/hanger.svg",
+    "description": "Weight: 4 lb. Resilient garments designed for travel in various environments.",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "GJZcLi",
+    "name": "Component Pouch",
+    "category": "Spellcasting Focus",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/shiny-purse.svg",
+    "description": "Weight: 2 lb. A watertight pouch filled with compartments that hold all the free Material components of your spells.",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "640QNr",
+    "name": "Costume",
+    "category": "Clothing",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/double-face-mask.svg",
+    "description": "Weight: 4 lb. While wearing a Costume, you have Advantage on any ability check you make to impersonate the person or type of person it represents.",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "prkQlI",
+    "name": "Crowbar",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/crowbar.svg",
+    "description": "Weight: 5 lb. Using a Crowbar gives you Advantage on Strength checks where its leverage can be applied.",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "9A7Xr2",
+    "name": "Diplomat's Pack",
+    "category": "Adventuring Gear - Packs",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/briefcase.svg",
+    "description": "Weight: 39 lb. Contains: Chest, Fine Clothes, Ink, 5 Ink Pens, Lamp, 2 Map or Scroll Cases, 4 flasks of Oil, 5 sheets of Paper, 5 sheets of Parchment, Perfume, and Tinderbox.",
+    "rarity": "common",
+    "weight": 39
+  },
+  {
+    "id": "YQsO4c",
+    "name": "Sprig of Mistletoe (Druidic Focus)",
+    "category": "Spellcasting Focus",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/flower-twirl.svg",
+    "description": "Carved, tied with ribbon, or painted to channel primal magic. A Druid or Ranger can use it as a Spellcasting Focus. (Druidic Focus)",
+    "rarity": "common"
+  },
+  {
+    "id": "zYWoK4",
+    "name": "Wooden Staff (Druidic Focus)",
+    "category": "Spellcasting Focus",
+    "icon": "https://5e.tools/img/items/XPHB/Quarterstaff.webp",
+    "description": "Weight: 4 lb. Carved, tied with ribbon, or painted to channel primal magic. Also functions as a Quarterstaff. A Druid or Ranger can use it as a Spellcasting Focus. (Druidic Focus)",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "LeAFmf",
+    "name": "Yew Wand (Druidic Focus)",
+    "category": "Spellcasting Focus",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/crystal-wand.svg",
+    "description": "Weight: 1 lb. Carved, tied with ribbon, or painted to channel primal magic. A Druid or Ranger can use it as a Spellcasting Focus. (Druidic Focus)",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "RnJTU1",
+    "name": "Dungeoneer's Pack",
+    "category": "Adventuring Gear - Packs",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/backpack.svg",
+    "description": "Weight: 55 lb. Contains: Backpack, Caltrops, Crowbar, 2 flasks of Oil, 10 days of Rations, Rope, Tinderbox, 10 Torches, and Waterskin.",
+    "rarity": "common",
+    "weight": 55
+  },
+  {
+    "id": "yG7y4f",
+    "name": "Entertainer's Pack",
+    "category": "Adventuring Gear - Packs",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/backpack.svg",
+    "description": "Weight: 58 1/2 lb. Contains: Backpack, Bedroll, Bell, Bullseye Lantern, 3 Costumes, Mirror, 8 flasks of Oil, 9 days of Rations, Tinderbox, and Waterskin.",
+    "rarity": "common",
+    "weight": 58.5
+  },
+  {
+    "id": "V0bFfp",
+    "name": "Explorer's Pack",
+    "category": "Adventuring Gear - Packs",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/backpack.svg",
+    "description": "Weight: 55 lb. Contains: Backpack, Bedroll, 2 flasks of Oil, 10 days of Rations, Rope, Tinderbox, 10 Torches, and Waterskin.",
+    "rarity": "common",
+    "weight": 55
+  },
+  {
+    "id": "NMBFbK",
+    "name": "Flask",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/water-flask.svg",
+    "description": "Weight: 1 lb. Holds up to 1 pint.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "8U3f6q",
+    "name": "Grappling Hook",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/grapple.svg",
+    "description": "Weight: 4 lb. As a Utilize action, throw at a railing, ledge, or catch within 50 ft (DC 13 Dex Acrobatics to catch). If tied to a Rope, you can then climb it.",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "WXobRV",
+    "name": "Healer's Kit",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/health-capsule.svg",
+    "description": "Weight: 3 lb. Has ten uses. As a Utilize action, expend one use to stabilize an Unconscious creature at 0 HP without needing a Wisdom (Medicine) check.",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "s1ineO",
+    "name": "Amulet (Holy Symbol)",
+    "category": "Spellcasting Focus",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/tribal-pendant.svg",
+    "description": "Weight: 1 lb. Worn or held. Bejeweled or painted to channel divine magic. A Cleric or Paladin can use it as a Spellcasting Focus. (Holy Symbol)",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "YqfXh2",
+    "name": "Emblem (Holy Symbol)",
+    "category": "Spellcasting Focus",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/wax-seal.svg",
+    "description": "Borne on fabric or a Shield. Bejeweled or painted to channel divine magic. A Cleric or Paladin can use it as a Spellcasting Focus. (Holy Symbol)",
+    "rarity": "common"
+  },
+  {
+    "id": "vSUS76",
+    "name": "Reliquary (Holy Symbol)",
+    "category": "Spellcasting Focus",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/covered-jar.svg",
+    "description": "Weight: 2 lb. Held. Bejeweled or painted to channel divine magic. A Cleric or Paladin can use it as a Spellcasting Focus. (Holy Symbol)",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "uuUslw",
+    "name": "Holy Water",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/holy-water.svg",
+    "description": "Weight: 1 lb. As an Attack action, throw at a creature within 20 ft. Target must succeed on a Dex save (DC 8 + Dex mod + Prof) or take 2d8 Radiant damage if it is a Fiend or an Undead.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "Bbi5h6",
+    "name": "Hunting Trap",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/skoll/box-trap.svg",
+    "description": "Weight: 25 lb. As a Utilize action, set the trap. A creature stepping on it must succeed on a DC 13 Dex save or take 1d4 Piercing damage and have Speed reduced to 0. Escape: DC 13 Str (Athletics) action.",
+    "rarity": "common",
+    "weight": 25
+  },
+  {
+    "id": "3zfb0R",
+    "name": "Ink",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/ink-swirl.svg",
+    "description": "Comes in a 1-ounce bottle, which provides enough ink to write about 500 pages.",
+    "rarity": "common"
+  },
+  {
+    "id": "ulPFXS",
+    "name": "Ink Pen",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/fountain-pen.svg",
+    "description": "Using Ink, an Ink Pen is used to write or draw.",
+    "rarity": "common"
+  },
+  {
+    "id": "Wu6tfE",
+    "name": "Jug",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/jug.svg",
+    "description": "Weight: 4 lb. Holds up to 1 gallon.",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "kiZ6bf",
+    "name": "Ladder",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/ladder.svg",
+    "description": "Weight: 25 lb. 10 feet tall. You must climb to move up or down it.",
+    "rarity": "common",
+    "weight": 25
+  },
+  {
+    "id": "8JzzZI",
+    "name": "Lamp",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://5e.tools/img/items/XPHB/Lamp.webp",
+    "description": "Weight: 1 lb. Burns Oil as fuel to cast Bright Light in a 15-foot radius and Dim Light for an additional 30 feet.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "uGM7h0",
+    "name": "Bullseye Lantern",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/lantern-flame.svg",
+    "description": "Weight: 2 lb. Burns Oil as fuel to cast Bright Light in a 60-foot Cone and Dim Light for an additional 60 feet.",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "UH6rSS",
+    "name": "Hooded Lantern",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/lantern.svg",
+    "description": "Weight: 2 lb. Burns Oil as fuel to cast Bright Light in a 30-foot radius and Dim Light for an additional 30 feet. As a Bonus Action, lower the hood to reduce to Dim Light in a 5-foot radius, or raise it again.",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "BMfQEi",
+    "name": "Lock",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/plain-padlock.svg",
+    "description": "Weight: 1 lb. Comes with a key. Without the key, a creature can use Thieves' Tools to pick it with a DC 15 Dex (Sleight of Hand) check.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "jYVzEb",
+    "name": "Magnifying Glass",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/magnifying-glass.svg",
+    "description": "Grants Advantage on any ability check made to appraise or inspect a highly detailed item. Can light a fire with sunlight (takes about 5 minutes).",
+    "rarity": "common"
+  },
+  {
+    "id": "JOBDWB",
+    "name": "Manacles",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/manacles.svg",
+    "description": "Weight: 6 lb. As a Utilize action, bind a Grappled/Incapacitated/Restrained Small or Medium creature within 5 ft (DC 13 Dex Sleight of Hand). Bound creature has Disadvantage on attacks and is Restrained if fixed in place. Escape: DC 20 Dex. Burst: DC 25 Str.",
+    "rarity": "common",
+    "weight": 6
+  },
+  {
+    "id": "f9fRMs",
+    "name": "Map",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/treasure-map.svg",
+    "description": "Consulting an accurate Map grants a +5 bonus to Wisdom (Survival) checks to find your way in the place it represents.",
+    "rarity": "common"
+  },
+  {
+    "id": "5zrDro",
+    "name": "Mirror",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/shinto-shrine-mirror.svg",
+    "description": "Weight: 1/2 lb. A handheld steel Mirror useful for personal cosmetics, peeking around corners, and reflecting light as a signal.",
+    "rarity": "common",
+    "weight": 0.5
+  },
+  {
+    "id": "vo1SpB",
+    "name": "Net",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://5e.tools/img/items/XPHB/Net.webp",
+    "description": "Weight: 3 lb. As an Attack action, throw at a creature within 15 ft. Target must succeed on a Dex save (DC 8 + Dex mod + Prof) or be Restrained. Escape: DC 10 Str (Athletics) action. Destroying the Net (AC 10; 5 HP) also frees the target.",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "qou7pA",
+    "name": "Oil",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/oil-can.svg",
+    "description": "Weight: 1 lb. Douse a creature within 20 ft (Dex save or take extra 5 Fire damage if ignited within 1 min), pour on ground to cover 5-ft square (5 Fire damage), or use as fuel for Lamps/Lanterns (burns 6 hours).",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "5fh42K",
+    "name": "Paper",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/folded-paper.svg",
+    "description": "One sheet of Paper can hold about 250 handwritten words.",
+    "rarity": "common"
+  },
+  {
+    "id": "oWPPtG",
+    "name": "Parchment",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/papers.svg",
+    "description": "One sheet of Parchment can hold about 250 handwritten words.",
+    "rarity": "common"
+  },
+  {
+    "id": "ZZArdj",
+    "name": "Perfume",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/delicate-perfume.svg",
+    "description": "Comes in a 4-ounce vial. For 1 hour after applying, you have Advantage on Charisma (Persuasion) checks to influence an Indifferent Humanoid within 5 feet.",
+    "rarity": "common"
+  },
+  {
+    "id": "HFigG0",
+    "name": "Basic Poison",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/poison-bottle.svg",
+    "description": "As a Bonus Action, coat one weapon or up to three pieces of ammunition. A creature taking Piercing or Slashing damage from the poisoned weapon takes an extra 1d4 Poison damage. Lasts 1 minute or until damage is dealt.",
+    "rarity": "common"
+  },
+  {
+    "id": "wfS6xu",
+    "name": "Pole",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/bo.svg",
+    "description": "Weight: 7 lb. 10 feet long. Touch something up to 10 ft away. Use to vault for Advantage on High/Long Jump Str (Athletics) checks.",
+    "rarity": "common",
+    "weight": 7
+  },
+  {
+    "id": "oGt6Jt",
+    "name": "Iron Pot",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/cauldron.svg",
+    "description": "Weight: 10 lb. Holds up to 1 gallon.",
+    "rarity": "common",
+    "weight": 10
+  },
+  {
+    "id": "El3zDo",
+    "name": "Potion of Climbing",
+    "category": "Consumable",
+    "icon": "https://5e.tools/img/items/XDMG/Potion%20of%20Climbing.webp",
+    "description": "When you drink this potion, you gain a Climb Speed equal to your Speed for 1 hour. During this time, you have Advantage on Strength (Athletics) checks to climb.",
+    "rarity": "common",
+    "weight": 0.5
+  },
+  {
+    "id": "zAMKW2",
+    "name": "Potion of Comprehension",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/magic-potion.svg",
+    "description": "When you drink this potion, you gain the effect of the Comprehend Languages spell for 1 hour.",
+    "rarity": "common",
+    "weight": 0.5
+  },
+  {
+    "id": "DFZ8a3",
+    "name": "Potion of Healing",
+    "category": "Consumable",
+    "icon": "https://5e.tools/img/items/XDMG/Potion%20of%20Healing.webp",
+    "description": "Weight: 1/2 lb. Magic item. As a Bonus Action, drink it or administer to a creature within 5 ft. The creature regains 2d4 + 2 Hit Points.",
+    "rarity": "common",
+    "weight": 0.5
+  },
+  {
+    "id": "7hFr4T",
+    "name": "Pouch",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/shiny-purse.svg",
+    "description": "Weight: 1 lb. Holds up to 6 pounds within one-fifth of a cubic foot.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "meaPLR",
+    "name": "Priest's Pack",
+    "category": "Adventuring Gear - Packs",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/backpack.svg",
+    "description": "Weight: 29 lb. Contains: Backpack, Blanket, Holy Water, Lamp, 7 days of Rations, Robe, and Tinderbox.",
+    "rarity": "common",
+    "weight": 29
+  },
+  {
+    "id": "Fr7gGW",
+    "name": "Quiver",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/quiver.svg",
+    "description": "Weight: 1 lb. Holds up to 20 Arrows.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "2HNfe0",
+    "name": "Portable Ram",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/ram.svg",
+    "description": "Weight: 35 lb. Use to break down doors with a +4 bonus to the Strength check. One other character can help, giving you Advantage.",
+    "rarity": "common",
+    "weight": 35
+  },
+  {
+    "id": "wUEqYS",
+    "name": "Rations",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/steak.svg",
+    "description": "Weight: 2 lb. Travel-ready food including jerky, dried fruit, hardtack, and nuts. One day's worth.",
+    "rarity": "common",
+    "weight": 2
+  },
+  {
+    "id": "gAqNaJ",
+    "name": "Robe",
+    "category": "Clothing",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/robe.svg",
+    "description": "Weight: 4 lb. Has vocational or ceremonial significance. Some events and locations admit only people wearing a Robe bearing certain colors or symbols.",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "IJlhpJ",
+    "name": "Rope",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/rope-coil.svg",
+    "description": "Weight: 5 lb. 50 feet long. Tie a knot as a Utilize action (DC 10 Dex Sleight of Hand). Burst: DC 20 Str (Athletics). Can bind an unwilling Grappled/Incapacitated/Restrained creature; Restrained if legs bound. Escape: DC 15 Dex (Acrobatics).",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "l0mSo9",
+    "name": "Sack",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/swap-bag.svg",
+    "description": "Weight: 1/2 lb. Holds up to 30 pounds within 1 cubic foot.",
+    "rarity": "common",
+    "weight": 0.5
+  },
+  {
+    "id": "2ZXnic",
+    "name": "Scholar's Pack",
+    "category": "Adventuring Gear - Packs",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/backpack.svg",
+    "description": "Weight: 22 lb. Contains: Backpack, Book, Ink, Ink Pen, Lamp, 10 flasks of Oil, 10 sheets of Parchment, and Tinderbox.",
+    "rarity": "common",
+    "weight": 22
+  },
+  {
+    "id": "xRyrWP",
+    "name": "Shovel",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/dig-hole.svg",
+    "description": "Weight: 5 lb. Working for 1 hour, you can dig a hole that is 5 feet on each side in soil or similar material.",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "ePqqjj",
+    "name": "Signal Whistle",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/whistle.svg",
+    "description": "When blown as a Utilize action, produces a sound that can be heard up to 600 feet away.",
+    "rarity": "common"
+  },
+  {
+    "id": "DrQWTH",
+    "name": "Spell Scroll (Cantrip)",
+    "category": "Adventuring Gear - Spell Scrolls",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/scroll-unfurled.svg",
+    "description": "Bears the words of a cantrip. Any creature that can read may cast the spell using its normal casting time, without providing Material components. Spell save DC 13, attack bonus +5. Scroll disintegrates after casting.",
+    "rarity": "common"
+  },
+  {
+    "id": "vv0t21",
+    "name": "Spell Scroll (Level 1)",
+    "category": "Adventuring Gear - Spell Scrolls",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/tied-scroll.svg",
+    "description": "Bears the words of a level 1 spell. Any creature that can read may cast the spell using its normal casting time, without providing Material components. Spell save DC 13, attack bonus +5. Scroll disintegrates after casting.",
+    "rarity": "common"
+  },
+  {
+    "id": "cDvbgo",
+    "name": "Spell Scroll (Level 2)",
+    "category": "Adventuring Gear - Spell Scrolls",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/tied-scroll.svg",
+    "description": "Bears the words of a level 2 spell. Any creature that can read may cast the spell using its normal casting time, without providing Material components. Spell save DC 13, attack bonus +5. Scroll disintegrates after casting.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "2FeE3g",
+    "name": "Iron Spikes (10)",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/nails.svg",
+    "description": "Weight: 5 lb. As a Utilize action, hammer a spike into wood, earth, or similar material to jam a door shut or tie a Rope or Chain to it.",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "tXojtm",
+    "name": "Spyglass",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/spyglass.svg",
+    "description": "Weight: 1 lb. Objects viewed through a Spyglass are magnified to twice their size.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "gT6SZ6",
+    "name": "String",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/sewing-string.svg",
+    "description": "10 feet long. You can tie a knot in it as a Utilize action.",
+    "rarity": "common"
+  },
+  {
+    "id": "guTHEn",
+    "name": "Tent",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/camping-tent.svg",
+    "description": "Weight: 20 lb. Sleeps up to two Small or Medium creatures.",
+    "rarity": "common",
+    "weight": 20
+  },
+  {
+    "id": "9YMDDq",
+    "name": "Tinderbox",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/matchbox.svg",
+    "description": "Weight: 1 lb. Contains flint, fire steel, and tinder. Lighting a Candle, Lamp, Lantern, or Torch takes a Bonus Action. Lighting any other fire takes 1 minute.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "5YHRCL",
+    "name": "Torch",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/torch.svg",
+    "description": "Weight: 1 lb. Burns for 1 hour, casting Bright Light in a 20-foot radius and Dim Light for an additional 20 feet. Can be used as a Simple Melee weapon dealing 1 Fire damage on a hit.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "rFwR3L",
+    "name": "Vial",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/caro-asercion/round-potion.svg",
+    "description": "Holds up to 4 ounces.",
+    "rarity": "common"
+  },
+  {
+    "id": "DGLhRh",
+    "name": "Waterskin",
+    "category": "Adventuring Gear - Containers & Storage",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/waterskin.svg",
+    "description": "Weight: 5 lb. (full). Holds up to 4 pints. If you don't drink sufficient water, you risk dehydration.",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "FDl5FX",
+    "name": "Exotic Saddle",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/saddle.svg",
+    "description": "Weight: 40 lb. Required for riding an aquatic or a flying mount. Comes with a bit, a bridle, reins, and any other equipment needed to use the saddle.",
+    "rarity": "common",
+    "weight": 40
+  },
+  {
+    "id": "TGLPEG",
+    "name": "Military Saddle",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/saddle.svg",
+    "description": "Weight: 30 lb. Gives Advantage on any ability check you make to remain mounted. Comes with a bit, a bridle, reins, and any other equipment needed to use the saddle.",
+    "rarity": "common",
+    "weight": 30
+  },
+  {
+    "id": "mZ2GiV",
+    "name": "Riding Saddle",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/saddle.svg",
+    "description": "Weight: 25 lb. Comes with a bit, a bridle, reins, and any other equipment needed to use the saddle.",
+    "rarity": "common",
+    "weight": 25
+  },
+  {
+    "id": "ogmMvJ",
+    "name": "Canoe",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/canoe.svg",
+    "description": "Holds up to six Medium creatures. Maximum speed of 2 mph. Otherwise identical to a rowboat.",
+    "rarity": "common",
+    "weight": 100
+  },
+  {
+    "id": "n19xp3",
+    "name": "Insect Repellent (Incense)",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/incense.svg",
+    "description": "A block of incense. When lit, burns for 8 hours and repels normal insects within a 20-foot radius centered on it. Does not protect against giant insects or swarms.",
+    "rarity": "common"
+  },
+  {
+    "id": "YtX3Mx",
+    "name": "Insect Repellent (Salve)",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/fragrance.svg",
+    "description": "A gourd or vial containing 20 applications of odorless, waterproof grease. One application protects against normal insects for 24 hours. Does not protect against giant insects or swarms.",
+    "rarity": "common"
+  },
+  {
+    "id": "a2yrHz",
+    "name": "Rain Catcher",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/drink-me.svg",
+    "description": "Weight: 5 lb. A 5-foot-square leather tarp on a wooden frame with legs. Catches 2 gallons of drinking water per inch of rainfall and holds up to 8 gallons. Folds up for easy transport.",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "ccnuoq",
+    "name": "Tej (Mug)",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/beer-stein.svg",
+    "description": "An amber-colored, fermented drink made from honey. More common and popular in Chult than beer or ale.",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "U8M6BZ",
+    "name": "Tej (1-gallon Cask)",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/beer-stein.svg",
+    "description": "A 1-gallon cask of tej, an amber-colored fermented drink made from honey. More common and popular in Chult than beer or ale.",
+    "rarity": "common",
+    "weight": 5
+  },
+  {
+    "id": "yeNOL7",
+    "name": "Yklwa",
+    "category": "Weapon",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/stone-spear.svg",
+    "description": "1d8 Piercing. Properties: Thrown (Range 10/30). Mastery: Sap. Weight: 3 lb. Traditional weapon of Chultan warriors. A 3-foot wooden shaft with a steel or stone blade up to 18 inches long. Not well balanced for throwing. (Simple Melee Weapon)",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "jj0XNZ",
+    "name": "+1 Ammunition (per piece)",
+    "category": "Weapon",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/quiver.svg",
+    "description": "You have a +1 bonus to attack and damage rolls made with this piece of magic ammunition. Once it hits a target, the ammunition is no longer magical.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "pApSO0",
+    "name": "+1 Shield, Wooden",
+    "category": "Armor",
+    "icon": "https://5e.tools/img/items/XPHB/Shield.webp",
+    "description": "AC +3 (base +2, plus +1 magical bonus). A wooden shield imbued with magic. While holding this shield, you have a +1 bonus to AC in addition to the shield's normal bonus to AC.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "kzV1Dj",
+    "name": "+1 Dagger",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Dagger.webp",
+    "description": "1d4+1 Piercing. Properties: Finesse, Light, Thrown (Range 20/60). You have a +1 bonus to attack and damage rolls made with this magic weapon.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "P096PX",
+    "name": "+1 Yklwa",
+    "category": "Weapon",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/stone-spear.svg",
+    "description": "1d8+1 Piercing. Properties: Thrown (Range 10/30). Mastery: Sap. You have a +1 bonus to attack and damage rolls made with this magic weapon. Traditional weapon of Chultan warriors. (Simple Melee Weapon)",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "6sYwsx",
+    "name": "Flying Monkey",
+    "category": "Animal",
+    "icon": "https://5e.tools/img/bestiary/ToA/Flying%20Monkey.webp",
+    "description": "A domesticated flying monkey, slightly more clever and curious than a common monkey, with feathered wings spanning about 5 feet. Can be taught to obey simple commands.",
+    "rarity": "common"
+  },
+  {
+    "id": "qi72Oq",
+    "name": "Flying Snake",
+    "category": "Animal",
+    "icon": "https://5e.tools/img/bestiary/XMM/Flying%20Snake.webp",
+    "description": "A trained flying snake, a brightly colored serpent with wing-like fins that allow it to glide through the air.",
+    "rarity": "common"
+  },
+  {
+    "id": "nk3Bm9",
+    "name": "Potion of Greater Healing",
+    "category": "Consumable",
+    "icon": "https://5e.tools/img/items/XDMG/Potion%20of%20Healing.webp",
+    "description": "You regain 4d4 + 4 Hit Points when you drink this potion. The potion's red liquid glimmers when agitated.",
+    "rarity": "uncommon",
+    "weight": 0.5
+  },
+  {
+    "id": "53oUT0",
+    "name": "Potion of Animal Friendship",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/magic-potion.svg",
+    "description": "When you drink this potion, you can cast the level 3 version of the Animal Friendship spell (save DC 13).",
+    "rarity": "uncommon",
+    "weight": 0.5
+  },
+  {
+    "id": "8VbKDu",
+    "name": "Potion of Fire Breath",
+    "category": "Consumable",
+    "icon": "https://5e.tools/img/items/XDMG/Potion%20of%20Fire%20Breath.webp",
+    "description": "After drinking this potion, you can take a Bonus Action to exhale fire at a target within 30 feet. The target makes a DC 13 Dex save, taking 4d6 Fire damage on a failure or half on a success. The effect ends after 3 uses or 1 hour.",
+    "rarity": "uncommon",
+    "weight": 0.5
+  },
+  {
+    "id": "yF0whI",
+    "name": "Potion of Growth",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/magic-potion.svg",
+    "description": "When you drink this potion, you gain the \"enlarge\" effect of the Enlarge/Reduce spell for 10 minutes (no Concentration required).",
+    "rarity": "uncommon",
+    "weight": 0.5
+  },
+  {
+    "id": "j5uO7t",
+    "name": "Potion of Hill Giant Strength",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/magic-potion.svg",
+    "description": "When you drink this potion, your Strength score changes to 21 for 1 hour. The potion has no effect if your Strength is already equal to or greater than 21.",
+    "rarity": "uncommon",
+    "weight": 0.5
+  },
+  {
+    "id": "NTvRgr",
+    "name": "Potion of Pugilism",
+    "category": "Consumable",
+    "icon": "https://5e.tools/img/items/XDMG/Potion%20of%20Pugilism.webp",
+    "description": "After you drink this potion, each Unarmed Strike you make deals an extra 1d6 Force damage on a hit. This effect lasts 10 minutes.",
+    "rarity": "uncommon",
+    "weight": 0.5
+  },
+  {
+    "id": "EoAlpo",
+    "name": "Potion of Resistance",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/magic-potion.svg",
+    "description": "When you drink this potion, you have Resistance to one type of damage for 1 hour. The type is determined when the potion is created (Acid, Cold, Fire, Force, Lightning, Necrotic, Poison, Psychic, Radiant, or Thunder).",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "8Vgz0k",
+    "name": "Potion of Water Breathing",
+    "category": "Consumable",
+    "icon": "https://5e.tools/img/items/XDMG/Potion%20of%20Water%20Breathing.webp",
+    "description": "You can breathe underwater for 24 hours after drinking this potion.",
+    "rarity": "uncommon",
+    "weight": 0.5
+  },
+  {
+    "id": "NvOR6O",
+    "name": "Oil of Slipperiness",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/oil-can.svg",
+    "description": "One vial covers one Medium or smaller creature plus its equipment (one additional vial per size above Medium). Applying takes 10 minutes. The affected creature gains the effect of the Freedom of Movement spell for 8 hours.",
+    "rarity": "uncommon",
+    "weight": 0.5
+  },
+  {
+    "id": "XXr28K",
+    "name": "+1 Wraps of Unarmed Power",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "While wearing these wraps, you have a +1 bonus to attack rolls and damage rolls made with your Unarmed Strikes. Those strikes deal your choice of Force damage or their normal damage type.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "7qwzn5",
+    "name": "Alchemy Jug",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Alchemy%20Jug.webp",
+    "description": "This ceramic jug appears to be able to hold a gallon of liquid and weighs 12 pounds whether full or empty. The jug sloshes when it is shaken, even if the jug is empty.",
+    "rarity": "uncommon",
+    "weight": 12
+  },
+  {
+    "id": "DwINP8",
+    "name": "Amulet of Proof against Detection and Location",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Amulet%20of%20Proof%20against%20Detection%20and%20Location.webp",
+    "description": "Requires attunement. While wearing this amulet, you can't be targeted by Divination spells or perceived through magical scrying sensors unless you allow it.",
+    "rarity": "uncommon",
+    "weight": 1
+  },
+  {
+    "id": "ssL0jC",
+    "name": "Bag of Holding",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Bag%20of%20Holding.webp",
+    "description": "This bag has an interior space considerably larger than its outside dimensions\u2014roughly 2 feet square and 4 feet deep on the inside. The bag can hold up to 500 pounds, not exceeding a volume of 64 cubic feet. The bag weighs 5 pounds, regardless of its contents. Retrieving an item from the bag requires a Utilize action.",
+    "rarity": "uncommon",
+    "weight": 15
+  },
+  {
+    "id": "XXfJGK",
+    "name": "Bag of Tricks, Gray",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This bag made from gray cloth appears empty. Reaching inside the bag, however, reveals the presence of a small, fuzzy object.",
+    "rarity": "uncommon",
+    "weight": 0.5
+  },
+  {
+    "id": "9DuNOn",
+    "name": "Bag of Tricks, Rust",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This bag made from rust cloth appears empty. Reaching inside the bag, however, reveals the presence of a small, fuzzy object.",
+    "rarity": "uncommon",
+    "weight": 0.5
+  },
+  {
+    "id": "F0bJW0",
+    "name": "Bag of Tricks, Tan",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This bag made from tan cloth appears empty. Reaching inside the bag, however, reveals the presence of a small, fuzzy object.",
+    "rarity": "uncommon",
+    "weight": 0.5
+  },
+  {
+    "id": "mlSNZB",
+    "name": "Bead of Nourishment",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This flavorless, gelatinous bead dissolves on your tongue and provides as much nourishment as 1 day of Rations.",
+    "rarity": "common"
+  },
+  {
+    "id": "5PFjvW",
+    "name": "Bead of Refreshment",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This flavorless, gelatinous bead dissolves in liquid, transforming up to a pint of the liquid into fresh, cold drinking water. The bead has no effect on magical liquids or harmful substances such as poison.",
+    "rarity": "common"
+  },
+  {
+    "id": "ONu3cs",
+    "name": "Boots of Elvenkind",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Boots%20of%20Elvenkind.webp",
+    "description": "While you wear these boots, your steps make no sound, regardless of the surface you are moving across. You also have Advantage on Dexterity (Stealth) checks.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "KgxP3i",
+    "name": "Boots of False Tracks",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "While wearing these boots, you can have them leave tracks like those of any kind of Humanoid of your size.",
+    "rarity": "common"
+  },
+  {
+    "id": "D0fOg6",
+    "name": "Boots of Striding and Springing",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Boots%20of%20Striding%20and%20Springing.webp",
+    "description": "Requires attunement. While you wear these boots, your Speed becomes 30 feet unless your Speed is higher, and your Speed isn't reduced by you carrying weight in excess of your carrying capacity or wearing Heavy Armor.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "VYbGpY",
+    "name": "Bracers of Archery",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Bracers%20of%20Archery.webp",
+    "description": "Requires attunement. While wearing these bracers, you have proficiency with the Longbow and Shortbow, and you gain a +2 bonus to damage rolls made with such weapons.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "59vi3Z",
+    "name": "Brooch of Shielding",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Brooch%20of%20Shielding.webp",
+    "description": "Requires attunement. While wearing this brooch, you have Resistance to Force damage, and you have Immunity to damage from the Magic Missile spell.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "5VfR6s",
+    "name": "Broom of Flying",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Broom%20of%20Flying.webp",
+    "description": "Requires attunement. This wooden broom functions like a mundane broom until you stand astride it and take a Magic action to make it hover beneath you, at which time it can be ridden in the air. It has a Fly Speed of 50 feet. It can carry up to 400 pounds, but its Fly Speed becomes 30 feet while carrying over 200 pounds. The broom stops hovering when you land or when you're no longer riding it.",
+    "rarity": "uncommon",
+    "weight": 3
+  },
+  {
+    "id": "8PBS8z",
+    "name": "Candle of the Deep",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "The flame of this candle isn't extinguished when immersed in water. It gives off light and heat like a normal candle.",
+    "rarity": "common"
+  },
+  {
+    "id": "dhlhmH",
+    "name": "Cap of Water Breathing",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "While wearing this cap underwater, you can take a Magic action to create a bubble of air around your head. This bubble allows you to breathe normally underwater. This bubble stays with you until the cap is removed or you are no longer underwater.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "c7iThV",
+    "name": "Circlet of Blasting",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Circlet%20of%20Blasting.webp",
+    "description": "While wearing this circlet, you can cast Scorching Ray with it (5 to hit). The circlet can't cast this spell again until the next dawn.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "9w5UHQ",
+    "name": "Cloak of Billowing",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Cloak%20of%20Billowing.webp",
+    "description": "While wearing this cloak, you can take a Bonus Action to make it billow dramatically for 1 minute.",
+    "rarity": "common"
+  },
+  {
+    "id": "vJGC2h",
+    "name": "Cloak of Elvenkind",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Cloak%20of%20Elvenkind.webp",
+    "description": "Requires attunement. While you wear this cloak, Wisdom (Perception) checks made to perceive you have Disadvantage, and you have Advantage on Dexterity (Stealth) checks.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "CEM6Rz",
+    "name": "Cloak of Many Fashions",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Cloak%20of%20Many%20Fashions.webp",
+    "description": "While wearing this cloak, you can take a Bonus Action to change the style, color, and apparent quality of the garment. The cloak's weight doesn't change. Regardless of its appearance, the cloak can't be anything but a cloak. Although it can duplicate the appearance of other magic cloaks, it doesn't gain their magical properties.",
+    "rarity": "common"
+  },
+  {
+    "id": "Brp5X3",
+    "name": "Cloak of Protection",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Cloak%20of%20Protection.webp",
+    "description": "Requires attunement. You gain a +1 bonus to Armor Class and saving throws while you wear this cloak.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "rGqsJS",
+    "name": "Cloak of the Manta Ray",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Cloak%20of%20the%20Manta%20Ray.webp",
+    "description": "Requires attunement. While wearing this cloak, you can breathe underwater, and you have a Swim Speed of 60 feet.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "H19WRN",
+    "name": "Clockwork Amulet",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This copper amulet contains tiny interlocking gears and is powered by magic from Mechanus, a plane of clockwork predictability. Faint ticking and whirring noises emanate from within.",
+    "rarity": "common"
+  },
+  {
+    "id": "TtY6p2",
+    "name": "Clothes of Mending",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This elegant outfit magically mends itself to counteract daily wear and tear. Pieces of the outfit that are destroyed can't be repaired in this way.",
+    "rarity": "common"
+  },
+  {
+    "id": "hvN7V0",
+    "name": "Dark Shard Amulet",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Dark%20Shard%20Amulet.webp",
+    "description": "Requires attunement by by a warlock. This amulet is fashioned from a shard of resilient material originating from an otherworldly realm. While you are wearing it, you gain the following benefits.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "VjAlpU",
+    "name": "Decanter of Endless Water",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Decanter%20of%20Endless%20Water.webp",
+    "description": "This stoppered flask sloshes when shaken, as if it contains water. The decanter weighs 2 pounds.",
+    "rarity": "uncommon",
+    "weight": 2
+  },
+  {
+    "id": "1XTlZE",
+    "name": "Deck of Illusions",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This box contains a set of cards. A full deck has 34 cards: 32 depicting specific creatures and two with a mirrored surface. A deck found as treasure is usually missing 1d20 - 1 cards.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "ABRsRO",
+    "name": "Dread Helm",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Dread%20Helm.webp",
+    "description": "While you're wearing this fearsome steel helm, your eyes glow red and the rest of your face is hidden in shadow.",
+    "rarity": "common"
+  },
+  {
+    "id": "qIlVbo",
+    "name": "Driftglobe",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Driftglobe.webp",
+    "description": "This small sphere of thick glass weighs 1 pound. If you are within 60 feet of it, you can command it to emanate light equivalent to that of the Light or Daylight spell (your choice). Once used, the Daylight effect can't be used again until the next dawn.",
+    "rarity": "uncommon",
+    "weight": 1
+  },
+  {
+    "id": "JYS2Rq",
+    "name": "Dust of Disappearance",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Dust%20of%20Disappearance.webp",
+    "description": "This powder resembles fine sand. There is enough of it for one use. When you take a Utilize action to throw the dust into the air, you and each creature and object within a 10-foot Emanation [Area of Effect] originating from you have the Invisible condition for 2d4 minutes. The duration is the same for all subjects, and the dust is consumed when its magic takes effect. Immediately after an affected creature makes an attack roll, deals damage, or casts a spell, the Invisible condition ends for that creature.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "h3hxrL",
+    "name": "Dust of Dryness",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This small packet contains 1d6 + 4 pinches of dust. As a Utilize action, you can sprinkle a pinch of the dust over water, turning up to a 15-foot Cube [Area of Effect] of water into one marble-sized pellet, which floats or rests near where the dust was sprinkled. The pellet's weight is negligible. A creature can take a Utilize action to smash the pellet against a hard surface, causing the pellet to shatter and release the water the dust absorbed. Doing so destroys the pellet and ends its magic.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "ivcORO",
+    "name": "Ear Horn of Hearing",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "While held up to your ear, this horn suppresses the effects of the Deafened condition on you.",
+    "rarity": "common"
+  },
+  {
+    "id": "yrr1a6",
+    "name": "Elemental Gem, Blue Sapphire",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Elemental%20Gem%20(Blue%20Sapphire).webp",
+    "description": "This gem contains a mote of elemental energy. When you take a Utilize action to break the gem, an Air Elemental is summoned, and the gem ceases to be magical. The elemental appears in an unoccupied space as close to the broken gem as possible, understands your languages, obeys your commands, and takes its turn immediately after you on your Initiative count. The elemental disappears after 1 hour, when it dies, or when you dismiss it as a Bonus Action.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "grFTfY",
+    "name": "Elemental Gem, Emerald",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Elemental%20Gem%20(Emerald).webp",
+    "description": "This gem contains a mote of elemental energy. When you take a Utilize action to break the gem, a Water Elemental is summoned, and the gem ceases to be magical. The elemental appears in an unoccupied space as close to the broken gem as possible, understands your languages, obeys your commands, and takes its turn immediately after you on your Initiative count. The elemental disappears after 1 hour, when it dies, or when you dismiss it as a Bonus Action.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "eONRD4",
+    "name": "Elemental Gem, Red Corundum",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Elemental%20Gem%20(Red%20Corundum).webp",
+    "description": "This gem contains a mote of elemental energy. When you take a Utilize action to break the gem, a Fire Elemental is summoned, and the gem ceases to be magical. The elemental appears in an unoccupied space as close to the broken gem as possible, understands your languages, obeys your commands, and takes its turn immediately after you on your Initiative count. The elemental disappears after 1 hour, when it dies, or when you dismiss it as a Bonus Action.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "RpMOPg",
+    "name": "Elemental Gem, Yellow Diamond",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Elemental%20Gem%20(Yellow%20Diamond).webp",
+    "description": "This gem contains a mote of elemental energy. When you take a Utilize action to break the gem, an Earth Elemental is summoned, and the gem ceases to be magical. The elemental appears in an unoccupied space as close to the broken gem as possible, understands your languages, obeys your commands, and takes its turn immediately after you on your Initiative count. The elemental disappears after 1 hour, when it dies, or when you dismiss it as a Bonus Action.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "V7DNbR",
+    "name": "Enduring Spellbook",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This spellbook, along with anything written on its pages, can't be damaged by fire or water. In addition, the spellbook doesn't deteriorate with age.",
+    "rarity": "common"
+  },
+  {
+    "id": "Kzqtmc",
+    "name": "Ersatz Eye",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This magical eye replaces a real one that was lost or removed. While the Ersatz Eye is embedded in your eye socket, you can see through the tiny orb as though it were your natural eye. You can insert or remove the Ersatz Eye as a Magic action, and it can't be removed against your will while you are alive.",
+    "rarity": "common"
+  },
+  {
+    "id": "gDlXSu",
+    "name": "Eversmoking Bottle",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Eversmoking%20Bottle.webp",
+    "description": "As a Magic action, you can open or close this bottle.",
+    "rarity": "uncommon",
+    "weight": 1
+  },
+  {
+    "id": "3KVOp3",
+    "name": "Eyes of Charming",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Eyes%20of%20Charming.webp",
+    "description": "Requires attunement. These crystal lenses fit over the eyes. They have 3 charges. While wearing them, you can expend 1 or more charges to cast Charm Person (save 13). For 1 charge, you cast the level 1 version of the spell. You increase the spell's level by one for each additional charge you expend. The lenses regain all expended charges daily at dawn.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "7fZjT2",
+    "name": "Eyes of Minute Seeing",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "These crystal lenses fit over the eyes. While wearing them, your vision improves significantly out to a range of 1 foot, granting you Darkvision within that range and Advantage on Intelligence (Investigation) checks made to examine something within that range.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "KymKQZ",
+    "name": "Eyes of the Eagle",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Eyes%20of%20the%20Eagle.webp",
+    "description": "These crystal lenses fit over the eyes. While wearing them, you have Advantage on Wisdom (Perception) checks that rely on sight. In conditions of clear visibility, you can make out details of even extremely distant creatures and objects as small as 2 feet across.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "81vmN2",
+    "name": "Figurine of Wondrous Power, Silver Raven",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "A Figurine of Wondrous Power is a statuette small enough to fit in a pocket. If you take a Magic action to throw the figurine to a point on the ground within 60 feet of yourself, the figurine becomes a living creature specified in the figurine's description below. If the space where the creature would appear is occupied by other creatures or objects, or if there isn't enough space for the creature, the figurine doesn't become a creature.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "nCzVog",
+    "name": "Gauntlets of Ogre Power",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Gauntlets%20of%20Ogre%20Power.webp",
+    "description": "Requires attunement. Your Strength score is 19 while you wear these gauntlets. They have no effect on you if your Strength is 19 or higher without them.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "8Kc3q5",
+    "name": "Gem of Brightness",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Gem%20of%20Brightness.webp",
+    "description": "This prism has 50 charges. While you are holding it, you can take a Magic action and use one of three command words to cause one of the following effects:",
+    "rarity": "uncommon",
+    "weight": 1
+  },
+  {
+    "id": "1g72Rv",
+    "name": "Gloves of Missile Snaring",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Gloves%20of%20Missile%20Snaring.webp",
+    "description": "Requires attunement. If you're hit by an attack roll made with a Ranged or Thrown weapon while wearing these gloves, you can take a Reaction to reduce the damage by 1d10 plus your Dexterity modifier if you have a free hand. If you reduce the damage to 0, you can catch the ammunition or weapon if it is small enough for you to hold in that hand.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "J2BSMo",
+    "name": "Gloves of Swimming and Climbing",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "Requires attunement. While wearing these gloves, climbing and swimming don't cost you extra movement, and you gain a +5 bonus to Strength (Athletics) checks made to climb or swim.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "RvYCBz",
+    "name": "Gloves of Thievery",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Gloves%20of%20Thievery.webp",
+    "description": "These gloves are imperceptible while worn. While wearing them, you gain a +5 bonus to Dexterity (Sleight of Hand) checks.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "ZcBQ4z",
+    "name": "Goggles of Night",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Goggles%20of%20Night.webp",
+    "description": "While wearing these dark lenses, you have Darkvision out to 60 feet. If you already have Darkvision, wearing the goggles increases its range by 60 feet.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "XBXTaM",
+    "name": "Hat of Disguise",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Hat%20of%20Disguise.webp",
+    "description": "Requires attunement. While wearing this hat, you can cast the Disguise Self spell. The spell ends if the hat is removed.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "55lN6Z",
+    "name": "Hat of Vermin",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Hat%20of%20Vermin.webp",
+    "description": "This hat has 3 charges. While holding the hat, you can take a Magic action to expend 1 charge and summon your choice of a Bat, a Frog, or a Rat. The summoned creature magically appears in the hat and tries to get away from you as quickly as possible. The creature is Indifferent [Attitude] toward you and other creatures, and it isn't under your control. It behaves as an ordinary creature of its kind and disappears after 1 hour or when it drops to 0 Hit Points. The hat regains all expended charges daily at dawn.",
+    "rarity": "common"
+  },
+  {
+    "id": "c1rpV2",
+    "name": "Hat of Wizardry",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Hat%20of%20Wizardry.webp",
+    "description": "Requires attunement by by a wizard. This cone-shaped hat is adorned with moons and stars. While you are wearing it, you gain the following benefits.",
+    "rarity": "common"
+  },
+  {
+    "id": "LDhw5C",
+    "name": "Headband of Intellect",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Headband%20of%20Intellect.webp",
+    "description": "Requires attunement. Your Intelligence score is 19 while you wear this headband. It has no effect on you if your Intelligence is 19 or higher without it.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "B5krHw",
+    "name": "Helm of Comprehending Languages",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Helm%20of%20Comprehending%20Languages.webp",
+    "description": "While wearing this helm, you can cast Comprehend Languages from it.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "1QB8Vc",
+    "name": "Helm of Telepathy",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Helm%20of%20Telepathy.webp",
+    "description": "Requires attunement. While wearing this helm, you have telepathy with a range of 30 feet, and you can cast Detect Thoughts or Suggestion (save 13) from the helm. Once either spell is cast from the helm, that spell can't be cast from it again until the next dawn.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "ud4eAS",
+    "name": "Horn of Silent Alarm",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This horn has 4 charges and regains 1d4 expended charges daily at dawn. As a Magic action, you can blow the horn while expending 1 charge. One creature of your choice hears the horn's blare, provided that creature is within 600 feet of the horn. No other creature hears the horn.",
+    "rarity": "common"
+  },
+  {
+    "id": "p28P1V",
+    "name": "Instrument of Illusions",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Instrument%20of%20Illusions.webp",
+    "description": "While you are playing this musical instrument, you can take a Magic action to create harmless, illusory visual effects within a 5-foot Emanation [Area of Effect] originating from the instrument. If you are a Bard, the size of the Emanation [Area of Effect] increases to 15 feet. Sample visual effects include luminous musical notes, a spectral dancer, butterflies, and gently falling snow. The magical effects have neither substance nor sound, and they are obviously illusory. The effects end when you stop playing.",
+    "rarity": "common"
+  },
+  {
+    "id": "9AQqke",
+    "name": "Instrument of Scribing",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This musical instrument has 3 charges and regains all expended charges daily at dawn. While you are playing it, you can take a Magic action to expend 1 charge and write a magical message on a nonmagical object or surface that you can see within 30 feet of yourself. The message can be up to six words long and is written in a language you know. If you are a Bard, you can scribe an additional seven words and make the message glow faintly, allowing it to be seen in nonmagical Darkness. Casting the Dispel Magic spell on the message erases it. Otherwise, the message fades away after 24 hours.",
+    "rarity": "common"
+  },
+  {
+    "id": "W0vf61",
+    "name": "Instrument of the Bards, Doss Lute",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Doss%20Lute.webp",
+    "description": "Requires attunement by by a bard. An Instrument of the Bards is superior to an ordinary instrument in every way. Seven types of these instruments exist, each named after a bard college. A creature that attempts to play the instrument without being attuned to it must succeed on a 15 Wisdom saving throw or take 2d4 Psychic damage.",
+    "rarity": "uncommon",
+    "weight": 2
+  },
+  {
+    "id": "JscPcz",
+    "name": "Instrument of the Bards, Fochlucan Bandore",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Fochlucan%20Bandore.webp",
+    "description": "Requires attunement by by a bard. An Instrument of the Bards is superior to an ordinary instrument in every way. Seven types of these instruments exist, each named after a bard college. A creature that attempts to play the instrument without being attuned to it must succeed on a 15 Wisdom saving throw or take 2d4 Psychic damage.",
+    "rarity": "uncommon",
+    "weight": 2
+  },
+  {
+    "id": "uufpLf",
+    "name": "Instrument of the Bards, Mac-Fuirmidh Cittern",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Mac-Fuirmidh%20Cittern.webp",
+    "description": "Requires attunement by by a bard. An Instrument of the Bards is superior to an ordinary instrument in every way. Seven types of these instruments exist, each named after a bard college. A creature that attempts to play the instrument without being attuned to it must succeed on a 15 Wisdom saving throw or take 2d4 Psychic damage.",
+    "rarity": "uncommon",
+    "weight": 2
+  },
+  {
+    "id": "7wzhFo",
+    "name": "Lantern of Revealing",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Lantern%20of%20Revealing.webp",
+    "description": "While lit, this hooded lantern burns for 6 hours on 1 pint of oil, shedding Bright Light in a 30-foot radius and Dim Light for an additional 30 feet. Invisible creatures and objects are visible as long as they are in the lantern's Bright Light. You can take a Utilize action to lower the hood, reducing the lantern's light to Dim Light in a 5-foot radius.",
+    "rarity": "uncommon",
+    "weight": 2
+  },
+  {
+    "id": "dHEKp9",
+    "name": "Lock of Trickery",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This lock appears to be an ordinary Lock (of the type described in chapter 6 of the Player's Handbook) and comes with a single key. The tumblers in this lock magically adjust to thwart burglars. Dexterity checks made to pick the lock have Disadvantage.",
+    "rarity": "common"
+  },
+  {
+    "id": "7CubvI",
+    "name": "Medallion of Thoughts",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Medallion%20of%20Thoughts.webp",
+    "description": "Requires attunement. The medallion has 5 charges. While wearing it, you can expend 1 charge to cast Detect Thoughts (save 13) from it. The medallion regains 1d4 expended charges daily at dawn.",
+    "rarity": "uncommon",
+    "weight": 1
+  },
+  {
+    "id": "RgVsIm",
+    "name": "Mystery Key",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "A question mark is worked into the head of this key. The key has a 5 chance of unlocking any lock into which it's inserted. Once it unlocks something, the key disappears.",
+    "rarity": "common"
+  },
+  {
+    "id": "veaQPJ",
+    "name": "Nature's Mantle",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Natures%20Mantle.webp",
+    "description": "Requires attunement by by a druid or ranger. This cloak shifts color and texture to blend with the terrain surrounding you. While wearing the cloak, you can use it as a Spellcasting Focus for your Druid and Ranger spells.",
+    "rarity": "uncommon",
+    "weight": 2
+  },
+  {
+    "id": "kLx9xT",
+    "name": "Necklace of Adaptation",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Necklace%20of%20Adaptation.webp",
+    "description": "Requires attunement. While wearing this necklace, you can breathe normally in any environment, and you have Advantage on saving throws made to avoid or end the Poisoned condition.",
+    "rarity": "uncommon",
+    "weight": 1
+  },
+  {
+    "id": "YpnzUz",
+    "name": "Orb of Direction",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Orb%20of%20Direction.webp",
+    "description": "This orb can be used as an Arcane Focus.",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "Qq7K9I",
+    "name": "Orb of Time",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This orb can be used as an Arcane Focus.",
+    "rarity": "common",
+    "weight": 3
+  },
+  {
+    "id": "MdPnQd",
+    "name": "Pearl of Power",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "Requires attunement by by a spellcaster. While this pearl is on your person, you can take a Magic action to regain one expended spell slot of level 3 or lower. Once you use the pearl, it can't be used again until the next dawn.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "pAux6N",
+    "name": "Perfume of Bewitching",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This tiny vial contains magic perfume, enough for one use. You can take a Magic action to apply the perfume to yourself, and its effect lasts 1 hour. For the duration, you have Advantage on all Charisma (Deception and Persuasion) checks made to influence a creature within 5 feet of yourself.",
+    "rarity": "common"
+  },
+  {
+    "id": "zRTHbI",
+    "name": "Periapt of Health",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Periapt%20of%20Health.webp",
+    "description": "Requires attunement. While wearing this pendant, you can take a Magic action to regain 2d4 + 2 Hit Points. Once used, this property can't be used again until the next dawn.",
+    "rarity": "uncommon",
+    "weight": 1
+  },
+  {
+    "id": "QSCyOa",
+    "name": "Periapt of Wound Closure",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Periapt%20of%20Wound%20Closure.webp",
+    "description": "Requires attunement. While wearing this pendant, you gain the following benefits.",
+    "rarity": "uncommon",
+    "weight": 1
+  },
+  {
+    "id": "tPoSBV",
+    "name": "Pipe of Smoke Monsters",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Pipe%20of%20Smoke%20Monsters.webp",
+    "description": "While smoking this pipe, you can take a Magic action to exhale a puff of smoke that takes the form of a creature, such as a dragon, a flumph, or a slaad. The form must be small enough to fit in a 1-foot cube and loses its shape after a few seconds, becoming an ordinary puff of smoke.",
+    "rarity": "common"
+  },
+  {
+    "id": "NKaNOb",
+    "name": "Pipes of Haunting",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Pipes%20of%20Haunting.webp",
+    "description": "These pipes have 3 charges and regain 1d3 expended charges daily at dawn. You can take a Magic action to play them and expend 1 charge to create an eerie, spellbinding tune. Each creature of your choice within 30 feet of you must succeed on a 15 Wisdom saving throw or have the Frightened condition for 1 minute. A creature that fails the save repeats it at the end of each of its turns, ending the effect on itself on a success. A creature that succeeds on its save is immune to the effect of these pipes for 24 hours.",
+    "rarity": "uncommon",
+    "weight": 2
+  },
+  {
+    "id": "DoSiPD",
+    "name": "Pipes of the Sewers",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Pipes%20of%20the%20Sewers.webp",
+    "description": "Requires attunement. While these pipes are on your person, ordinary rat and giant rat are Indifferent [Attitude] toward you and won't attack you unless you threaten or harm them.",
+    "rarity": "uncommon",
+    "weight": 2
+  },
+  {
+    "id": "yyUvgD",
+    "name": "Pole of Angling",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This item functions as a Pole. While holding it, you can take a Magic action to cause it to transform into a fishing pole with a hook, a line, and a reel, or have the fishing pole revert to a Pole.",
+    "rarity": "common"
+  },
+  {
+    "id": "y6vVcz",
+    "name": "Pole of Collapsing",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Pole%20of%20Collapsing.webp",
+    "description": "This item functions as a Pole. While holding it, you can take a Magic action to collapse it into a 1-foot-long rod for ease of storage (the pole's weight doesn't change) or cause the 1-foot-long rod to revert to a Pole. The rod elongates only as far as the surrounding space allows.",
+    "rarity": "common"
+  },
+  {
+    "id": "pVkag4",
+    "name": "Pot of Awakening",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "If you plant an ordinary shrub in this 10-pound clay pot and let it grow for 30 days, the shrub magically transforms into an Awakened Shrub at the end of that time. When the shrub awakens, its roots break the pot, destroying it.",
+    "rarity": "common"
+  },
+  {
+    "id": "jHLNVs",
+    "name": "Prosthetic Limb",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Prosthetic%20Limb.webp",
+    "description": "This magic item replaces a lost limb\u2014a hand, an arm, a foot, a leg, or a similar body part. While the prosthetic is attached, it functions identically to the part it replaces. You can detach or reattach it as a Magic action, and it can't be removed against your will while you are alive.",
+    "rarity": "common"
+  },
+  {
+    "id": "UIz84v",
+    "name": "Quiver of Ehlonna",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Quiver%20of%20Ehlonna.webp",
+    "description": "Each of the quiver's three compartments connects to an extradimensional space that allows the quiver to hold numerous items while never weighing more than 2 pounds. The shortest compartment can hold up to 60 Arrow, Bolt, or similar objects. The midsize compartment holds up to 18 Javelin or similar objects. The longest compartment holds up to 6 long objects, such as bows, Quarterstaff, or Spear.",
+    "rarity": "uncommon",
+    "weight": 2
+  },
+  {
+    "id": "s7tDem",
+    "name": "Robe of Useful Items",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Robe%20of%20Useful%20Items.webp",
+    "description": "This robe has cloth patches of various shapes and colors covering it. While wearing the robe, you can take a Magic action to detach one of the patches, causing it to become the object or creature it represents. Once the last patch is removed, the robe becomes an ordinary garment.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "SenUmh",
+    "name": "Rope of Climbing",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This 60-foot length of rope can hold up to 3,000 pounds. While holding one end of the rope, you can take a Magic action to command the other end of the rope to animate and move toward a destination you choose, up to the rope's length away from you. That end moves 10 feet on your turn when you first command it and 10 feet at the start of each of your subsequent turns until reaching its destination or until you tell it to stop. You can also tell the rope to fasten itself securely to an object or to unfasten itself, to knot or unknot itself, or to coil itself for carrying.",
+    "rarity": "uncommon",
+    "weight": 3
+  },
+  {
+    "id": "QEFood",
+    "name": "Rope of Mending",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This 50-foot coil of rope can repair itself when cut into any number of smaller pieces. As a Magic action, you can cause all pieces of the rope that are in contact with each other and not otherwise in use to knit back together. A Rope of Mending is forever shortened if a section of it is lost or destroyed.",
+    "rarity": "common"
+  },
+  {
+    "id": "4AtUJs",
+    "name": "Ruby of the War Mage",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "Requires attunement by by a spellcaster. Etched with eldritch runes, this 1-inch-diameter ruby allows you to use a Simple or Martial weapon as a Spellcasting Focus for your spells. For this property to work, you must attach the ruby to the weapon by pressing the ruby against it for at least 10 minutes. Thereafter, the ruby can't be removed unless you detach it as a Magic action, the weapon is destroyed, or your Attunement to the ruby ends.",
+    "rarity": "common"
+  },
+  {
+    "id": "20sCVg",
+    "name": "Saddle of the Cavalier",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "While in this saddle on a mount, you can't be dismounted against your will if you're conscious, and attack rolls against the mount have disadvantage.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "pyIyfF",
+    "name": "Sending Stones",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Sending%20Stones.webp",
+    "description": "Sending Stones come in pairs, with each stone carved to match the other so the pairing is easily recognized. While you touch one stone, you can cast Sending from it. The target is the bearer of the other stone. If no creature bears the other stone, you know that fact as soon as you use the stone, and you don't cast the spell.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "nXvAnY",
+    "name": "Slippers of Spider Climbing",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Slippers%20of%20Spider%20Climbing.webp",
+    "description": "Requires attunement. While you wear these light shoes, you can move up, down, and across vertical surfaces and along ceilings, while leaving your hands free. You have a Climb Speed equal to your Speed. However, the slippers don't allow you to move this way on a slippery surface, such as one covered by ice or oil.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "4WuxTs",
+    "name": "Stone of Good Luck",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Stone%20of%20Good%20Luck%20(Luckstone).webp",
+    "description": "Requires attunement. While this polished agate is on your person, you gain a +1 bonus to ability checks and saving throws.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "0ZL1aG",
+    "name": "Talking Doll",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Talking%20Doll.webp",
+    "description": "Requires attunement. While this doll is within 5 feet of you, you can spend a Short Rest telling it to say up to six phrases, none of which can be more than six words long, and set a condition under which the doll speaks each phrase. You can also replace old phrases with new ones. Whatever the condition, it must occur within 5 feet of the doll to make it speak. For example, whenever someone picks up the doll, it might say, \"I want a piece of candy.\" The doll's phrases are lost when your Attunement to the doll ends.",
+    "rarity": "common"
+  },
+  {
+    "id": "GDEUZ9",
+    "name": "Tankard of Sobriety",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This tankard has a stern face sculpted into one side. You can drink ale, wine, or any other nonmagical alcoholic beverage poured into it without becoming inebriated. The tankard has no effect on magical liquids or harmful substances such as poison.",
+    "rarity": "common"
+  },
+  {
+    "id": "qmvisE",
+    "name": "Veteran's Cane",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "As a Bonus Action, you can transform this walking cane into an ordinary Longsword or change the Longsword back into a walking cane. In either case, you must be holding the item.",
+    "rarity": "common"
+  },
+  {
+    "id": "a1P8rz",
+    "name": "Wind Fan",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Wind%20Fan.webp",
+    "description": "While holding this fan, you can cast Gust of Wind (save 13) from it. Each subsequent time the fan is used before the next dawn, it has a cumulative 20 chance of not working; if the fan fails to work, it tears into useless, nonmagical tatters.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "0dpl2E",
+    "name": "Winged Boots",
+    "category": "Wondrous Item",
+    "icon": "https://5e.tools/img/items/XDMG/Winged%20Boots.webp",
+    "description": "Requires attunement. These boots have 4 charges and regain 1d4 expended charges daily at dawn. While wearing the boots, you can take a Magic action to expend 1 charge, gaining a Fly Speed of 30 feet for 1 hour. If you are flying when the duration expires, you descend at a rate of 30 feet per round until you land.",
+    "rarity": "uncommon"
   }
 ]
