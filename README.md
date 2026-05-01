@@ -21,6 +21,22 @@ npm test         # vitest run
 npm run build    # tsc + vite build → dist/
 ```
 
+### Testing in OBR locally (without deploying)
+
+The extension can be loaded into OBR straight off the vite dev server:
+
+1. Make sure the catalog repo is reachable. The default catalog URL in
+   `src/constants.ts` points at the deployed
+   `https://abottchen.github.io/obr-inv-catalog/items.json`, so once the
+   catalog repo is pushed and Pages is enabled, iteration on the extension
+   itself is the only thing that needs to be local.
+2. `npm run dev` (vite serves on `http://localhost:5173`).
+3. In OBR, Settings → Extensions → Add Custom Extension, paste
+   `http://localhost:5173/manifest.dev.json`. That manifest points the
+   icon and popover URLs at localhost; edits to source hot-reload.
+4. The production `manifest.json` (pointing at Pages) stays unchanged for
+   real deploys.
+
 Catalog repo: <https://github.com/abottchen/obr-inv-catalog> (Pages-hosted JSON).
 
 ## Deploy
