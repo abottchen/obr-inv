@@ -74,16 +74,28 @@ export const LIST_CSS = `
 }
 .gold-cell {
   flex: 1 1 0; min-width: 0;
-  display: flex; align-items: center; gap: 2px;
+  display: flex; align-items: center; gap: 4px;
   background: var(--bg-1); border: 1px solid var(--border);
-  border-radius: 4px; padding: 0 3px;
+  border-radius: 4px; padding: 0 6px;
 }
+.gold-cell[data-ccy="pp"] { border-left: 2px solid var(--ccy-pp); }
+.gold-cell[data-ccy="gp"] { border-left: 2px solid var(--ccy-gp); }
+.gold-cell[data-ccy="sp"] { border-left: 2px solid var(--ccy-sp); }
+.gold-cell[data-ccy="cp"] { border-left: 2px solid var(--ccy-cp); }
 .gold-cell:focus-within { border-color: var(--accent); }
+.gold-cell:focus-within[data-ccy="pp"] { border-left-color: var(--ccy-pp); }
+.gold-cell:focus-within[data-ccy="gp"] { border-left-color: var(--ccy-gp); }
+.gold-cell:focus-within[data-ccy="sp"] { border-left-color: var(--ccy-sp); }
+.gold-cell:focus-within[data-ccy="cp"] { border-left-color: var(--ccy-cp); }
 .gold-cell label {
-  color: var(--accent-soft); text-transform: uppercase;
-  font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
   flex-shrink: 0;
 }
+.gold-cell[data-ccy="pp"] label { color: var(--ccy-pp); }
+.gold-cell[data-ccy="gp"] label { color: var(--ccy-gp); }
+.gold-cell[data-ccy="sp"] label { color: var(--ccy-sp); }
+.gold-cell[data-ccy="cp"] label { color: var(--ccy-cp); }
 .gold-cell input {
   flex: 1 1 0; width: 0; min-width: 0;
   background: transparent; color: var(--text);

@@ -63,6 +63,7 @@ export function mountShell(
   for (const f of ["pp", "gp", "sp", "cp"] as const) {
     const cell = document.createElement("div");
     cell.className = "gold-cell";
+    cell.dataset.ccy = f;
     cell.title = tip;
     const lbl = document.createElement("label");
     lbl.textContent = f;

@@ -1,4 +1,4 @@
-import { THEME, RARITY_COLORS } from "./constants";
+import { THEME, RARITY_COLORS, CURRENCY_COLORS } from "./constants";
 
 const BASE_CSS = `
 :root {
@@ -11,6 +11,10 @@ const BASE_CSS = `
   --rarity-rare: ${RARITY_COLORS.rare};
   --rarity-very-rare: ${RARITY_COLORS["very rare"]};
   --rarity-legendary: ${RARITY_COLORS.legendary};
+  --ccy-pp: ${CURRENCY_COLORS.pp};
+  --ccy-gp: ${CURRENCY_COLORS.gp};
+  --ccy-sp: ${CURRENCY_COLORS.sp};
+  --ccy-cp: ${CURRENCY_COLORS.cp};
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }

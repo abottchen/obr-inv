@@ -26,6 +26,13 @@ export const RARITY_COLORS: Record<string, string> = {
   legendary: "#ff9800",
 };
 
+export const CURRENCY_COLORS: Record<"pp" | "gp" | "sp" | "cp", string> = {
+  pp: "#d0d0d8",
+  gp: "#ffd700",
+  sp: "#c0c0c0",
+  cp: "#b87333",
+};
+
 export const THEME = {
   bg0: "#15171f",
   bg1: "#1c2030",
