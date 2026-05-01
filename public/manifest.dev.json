@@ -1,0 +1,15 @@
+{
+  "name": "Inventory (dev)",
+  "description": "Local-dev variant pointing at the vite dev server. Use the regular manifest.json for the production deploy.",
+  "version": "0.1.0-dev",
+  "manifest_version": 1,
+  "author": "abottchen",
+  "icon": "http://localhost:5173/icon.svg",
+  "action": {
+    "title": "Inventory (dev)",
+    "icon": "http://localhost:5173/icon.svg",
+    "popover": "http://localhost:5173/index.html",
+    "height": 640,
+    "width": 460
+  }
+}
