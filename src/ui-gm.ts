@@ -57,6 +57,7 @@ export function mountGmView(opts: GmViewOpts): () => void {
   let records: Record<string, PlayerInventoryRecord> = {};
   let activePid = opts.selfId;
   let shellRefs: { rerender: (r: PlayerInventoryRecord, cat: CatalogItem[]) => void; destroy: () => void } | null = null;
+  let mountedShellPid: string | null = null;
 
   const renderTabs = () => {
     tabsEl.innerHTML = "";
@@ -98,31 +99,44 @@ export function mountGmView(opts: GmViewOpts): () => void {
   const renderShell = () => {
     const rec = records[activePid];
     if (!rec) return;
+    // Same tab still active → just update content. This preserves the
+    // shell's transient UI state (lock toggle, search text, collapsed
+    // categories) across metadata changes. Different tab → full remount.
+    if (shellRefs && mountedShellPid === activePid) {
+      shellRefs.rerender(rec, opts.catalog);
+      return;
+    }
     if (shellRefs) shellRefs.destroy();
+    mountedShellPid = activePid;
     shellRefs = mountShell(shellRoot, rec, opts.catalog, {
       onIncrement: async (id) => {
-        try { await writeRecord(activePid, incrementItem(rec, id)); }
-        catch (e) { gmHandleErr(e); shellRefs?.rerender(rec, opts.catalog); }
+        const r = records[activePid]; if (!r) return;
+        try { await writeRecord(activePid, incrementItem(r, id)); }
+        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, opts.catalog); }
       },
       onDecrement: async (id) => {
-        try { await writeRecord(activePid, decrementItem(rec, id)); }
-        catch (e) { gmHandleErr(e); shellRefs?.rerender(rec, opts.catalog); }
+        const r = records[activePid]; if (!r) return;
+        try { await writeRecord(activePid, decrementItem(r, id)); }
+        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, opts.catalog); }
       },
       onRemove: async (id) => {
-        try { await writeRecord(activePid, removeItem(rec, id)); }
-        catch (e) { gmHandleErr(e); shellRefs?.rerender(rec, opts.catalog); }
+        const r = records[activePid]; if (!r) return;
+        try { await writeRecord(activePid, removeItem(r, id)); }
+        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, opts.catalog); }
       },
       onCurrencyChange: async (f, v) => {
-        const u = { ...rec, currency: { ...rec.currency, [f]: v } };
+        const r = records[activePid]; if (!r) return;
+        const u = { ...r, currency: { ...r.currency, [f]: v } };
         try { await writeRecord(activePid, u); }
-        catch (e) { gmHandleErr(e); shellRefs?.rerender(rec, opts.catalog); }
+        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, opts.catalog); }
       },
       onAddClick: () => {
         openAddDialog({
           catalog: opts.catalog,
           onAdd: async (id, qty) => {
+            const r = records[activePid]; if (!r) return;
             try {
-              await writeRecord(activePid, addItem(rec, id, qty));
+              await writeRecord(activePid, addItem(r, id, qty));
               closeAddDialog();
             } catch (e) { gmHandleErr(e); }
           },
@@ -130,10 +144,11 @@ export function mountGmView(opts: GmViewOpts): () => void {
       },
       onDescription: (id, anchor) => showDescription(anchor, byId.get(id) ?? null, id),
       onTransfer: async (id, anchor) => {
+        const r = records[activePid]; if (!r) return;
         const all = await listInventoryRecords();
         const targets = buildTargets(activePid, all, opts.selfId);
         const ci = byId.get(id);
-        const entry = rec.items.find(([eid]) => eid === id);
+        const entry = r.items.find(([eid]) => eid === id);
         if (!entry || entry[1] <= 0) return;
         showTransfer({
           anchor, itemId: id,

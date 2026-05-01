@@ -70,7 +70,28 @@ export function openAddDialog(opts: AddDialogOpts): void {
     const qty = document.createElement("input");
     qty.className = "transfer-qty add-qty";
     qty.type = "number"; qty.min = "1"; qty.value = "1";
+    qty.onfocus = () => qty.select();
     row.appendChild(qty);
+
+    const stepper = document.createElement("div");
+    stepper.className = "qty-stepper";
+    const up = document.createElement("button");
+    up.type = "button"; up.className = "qty-step";
+    up.textContent = "▲"; up.title = "Increase qty";
+    up.onclick = () => {
+      const n = Math.max(1, parseInt(qty.value, 10) || 1);
+      qty.value = String(n + 1);
+    };
+    const down = document.createElement("button");
+    down.type = "button"; down.className = "qty-step";
+    down.textContent = "▼"; down.title = "Decrease qty";
+    down.onclick = () => {
+      const n = Math.max(1, parseInt(qty.value, 10) || 1);
+      qty.value = String(Math.max(1, n - 1));
+    };
+    stepper.appendChild(up);
+    stepper.appendChild(down);
+    row.appendChild(stepper);
 
     const plus = document.createElement("button");
     plus.className = "btn-plus"; plus.textContent = "+";

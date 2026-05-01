@@ -89,7 +89,28 @@ export const DIALOG_CSS = `
   background: var(--bg-1); color: var(--text);
   border: 1px solid var(--border); border-radius: 4px;
   padding: 3px 6px; width: 60px; outline: none;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
+.transfer-qty::-webkit-outer-spin-button,
+.transfer-qty::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.transfer-qty { -moz-appearance: textfield; appearance: textfield; }
+.qty-stepper {
+  display: flex; flex-direction: column; gap: 1px;
+  flex-shrink: 0;
+}
+.qty-step {
+  width: 14px; height: 11px; padding: 0;
+  background: var(--bg-2); color: var(--accent-soft);
+  border: 1px solid var(--border); border-radius: 2px;
+  font-size: 8px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.qty-step:hover {
+  background: var(--accent); color: #fff;
+  border-color: var(--accent-soft);
+}
+.qty-step:active { transform: translateY(1px); }
 
 .dialog-overlay {
   position: fixed; inset: 0; z-index: 40;
