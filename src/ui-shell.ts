@@ -59,37 +59,43 @@ export function mountShell(
   const gold = document.createElement("div");
   gold.className = "gold-strip";
   const ccyInputs: Record<string, HTMLInputElement> = {} as any;
+  const tip = "Type a number to set, +N to add, -N to subtract";
   for (const f of ["pp", "gp", "sp", "cp"] as const) {
     const cell = document.createElement("div");
     cell.className = "gold-cell";
+    cell.title = tip;
     const lbl = document.createElement("label");
     lbl.textContent = f;
     cell.appendChild(lbl);
     const inp = document.createElement("input");
-    inp.type = "number"; inp.min = "0"; inp.value = "0";
-    const commit = (v: number) => {
-      const clamped = Math.max(0, Math.floor(v));
+    inp.type = "text";
+    inp.inputMode = "numeric";
+    inp.value = "0";
+    inp.title = tip;
+    const currentValue = () => currentRecord.currency[f] ?? 0;
+    const commit = () => {
+      const parsed = parseCurrencyInput(inp.value, currentValue());
+      if (parsed === null) {
+        inp.value = String(currentValue());
+        return;
+      }
+      const clamped = Math.max(0, Math.floor(parsed));
       inp.value = String(clamped);
       void handlers.onCurrencyChange(f, clamped);
     };
-    inp.onchange = () => commit(parseInt(inp.value, 10) || 0);
+    inp.onchange = commit;
+    inp.onfocus = () => inp.select();
+    inp.onkeydown = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        commit();
+        inp.blur();
+      } else if (e.key === "Escape") {
+        inp.value = String(currentValue());
+        inp.blur();
+      }
+    };
     cell.appendChild(inp);
-    const stepper = document.createElement("div");
-    stepper.className = "ccy-stepper";
-    const stepFor = (e: MouseEvent): number =>
-      e.ctrlKey || e.metaKey ? 100 : e.shiftKey ? 10 : 1;
-    const tooltip = `click ±1, shift+click ±10, ctrl+click ±100`;
-    const up = document.createElement("button");
-    up.type = "button"; up.className = "ccy-step ccy-up";
-    up.textContent = "▲"; up.title = `Increase ${f} (${tooltip})`;
-    up.onclick = (e) => commit((parseInt(inp.value, 10) || 0) + stepFor(e));
-    const down = document.createElement("button");
-    down.type = "button"; down.className = "ccy-step ccy-down";
-    down.textContent = "▼"; down.title = `Decrease ${f} (${tooltip})`;
-    down.onclick = (e) => commit((parseInt(inp.value, 10) || 0) - stepFor(e));
-    stepper.appendChild(up);
-    stepper.appendChild(down);
-    cell.appendChild(stepper);
     gold.appendChild(cell);
     ccyInputs[f] = inp;
   }
@@ -178,4 +184,21 @@ function formatWeight(w: number): string {
   if (w === 0) return "0";
   if (Number.isInteger(w)) return String(w);
   return w.toFixed(1);
+}
+
+/**
+ * Parse a currency input value:
+ * - "123"   → set to 123
+ * - "+45"   → current + 45
+ * - "-20"   → current - 20  (caller clamps at 0)
+ * - "" or junk → null (caller reverts)
+ */
+export function parseCurrencyInput(raw: string, current: number): number | null {
+  const t = raw.trim();
+  const m = /^([+-]?)(\d+)$/.exec(t);
+  if (!m) return null;
+  const n = parseInt(m[2], 10);
+  if (m[1] === "+") return current + n;
+  if (m[1] === "-") return current - n;
+  return n;
 }
