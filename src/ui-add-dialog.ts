@@ -1,6 +1,7 @@
 import { showDescription } from "./ui-description";
-import { escapeHtml, isSafeIconUrl } from "./escape";
+import { escapeHtml } from "./escape";
 import type { CatalogItem } from "./types";
+import { appendIconImage } from "./ui-icon";
 
 export interface AddDialogOpts {
   catalog: CatalogItem[];
@@ -68,9 +69,7 @@ export function openAddDialog(opts: AddDialogOpts): void {
 
     const icon = document.createElement("div");
     icon.className = "inv-icon";
-    if (item.icon && isSafeIconUrl(item.icon)) {
-      icon.style.backgroundImage = `url("${item.icon}")`;
-    }
+    if (item.icon) appendIconImage(icon, item.icon);
     row.appendChild(icon);
 
     const name = document.createElement("div");

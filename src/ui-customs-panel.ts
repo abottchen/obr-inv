@@ -7,7 +7,7 @@ import {
 } from "./metadata";
 import { openCustomsDialog } from "./ui-customs-dialog";
 import { resolvedCatalog } from "./catalog";
-import { isSafeIconUrl } from "./escape";
+import { appendIconImage } from "./ui-icon";
 import type {
   CatalogItem, CustomItem, CustomItemsRecord, PlayerInventoryRecord,
 } from "./types";
@@ -98,10 +98,8 @@ export function openCustomsPanel(opts: CustomsPanelOpts): void {
 
     const icon = document.createElement("div");
     icon.className = "inv-icon";
-    if (c.icon && isSafeIconUrl(c.icon)) {
-      icon.style.backgroundImage = `url("${c.icon}")`;
-    }
-    else icon.textContent = "❓";
+    const appended = c.icon ? appendIconImage(icon, c.icon) : null;
+    if (!appended) icon.textContent = "❓";
     row.appendChild(icon);
 
     const main = document.createElement("div");

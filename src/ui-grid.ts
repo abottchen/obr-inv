@@ -1,5 +1,6 @@
-import { escapeHtml, isSafeIconUrl } from "./escape";
+import { escapeHtml } from "./escape";
 import type { CatalogItem, InventoryEntry, Rarity } from "./types";
+import { appendIconImage } from "./ui-icon";
 import { groupByCategory } from "./ui-items-data";
 import type { PulseTracker } from "./ui-feedback";
 
@@ -103,11 +104,8 @@ function renderCell(
 
   const image = document.createElement("div");
   image.className = "cell-image";
-  if (item?.icon && isSafeIconUrl(item.icon)) {
-    image.style.backgroundImage = `url("${item.icon}")`;
-  } else {
-    image.textContent = "❓";
-  }
+  const appended = item?.icon ? appendIconImage(image, item.icon) : null;
+  if (!appended) image.textContent = "❓";
   cell.appendChild(image);
 
   if (count > 1) {

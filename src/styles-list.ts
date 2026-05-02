@@ -63,7 +63,8 @@ export const LIST_CSS = `
 .inv-icon {
   width: 26px; height: 26px; flex-shrink: 0;
   background: var(--bg-2); border-radius: 4px;
-  background-size: cover; background-position: center;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
 }
 .inv-name { flex: 1; }
 .inv-name mark { background: rgba(124,77,255,0.25); color: inherit; padding: 0 1px; }
@@ -177,11 +178,17 @@ export const LIST_CSS = `
 .cell-image {
   position: absolute; inset: 2px;
   background-color: var(--bg-2);
-  background-size: cover;
-  background-position: center;
   border-radius: 4px;
+  overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   font-size: 22px; color: var(--text-dim);
+}
+.icon-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  transform-origin: center;
 }
 .cell-count {
   position: absolute; right: 3px; bottom: 3px;
