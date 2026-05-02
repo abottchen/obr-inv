@@ -1,8 +1,8 @@
-import { renderList, type ListState, type RowHandlers } from "./ui-list";
+import { renderList, type ListState } from "./ui-list";
 import { renderGrid, type GridState } from "./ui-grid";
 import { totalWeight } from "./inventory";
 import { createPulseTracker, type PulseTracker } from "./ui-feedback";
-import { mountIconSprite, icon, setIcon } from "./ui-icons";
+import { mountIconSprite, icon } from "./ui-icons";
 import type { CatalogItem, PlayerInventoryRecord } from "./types";
 
 const VIEW_MODE_KEY = "obr-inv:viewMode";
@@ -27,21 +27,13 @@ function writeViewMode(mode: ViewMode): void {
 }
 
 export interface DescriptionCtx {
-  unlocked: boolean;
   count: number;
   onIncrement: () => void;
   onDecrement: () => void;
   onRemove: () => void;
-  /** Provided only when the shell is currently locked. Calling this
-   *  flips the shell into unlocked mode, rerenders, and re-opens the
-   *  same item's popover with edit controls — so a user who realises
-   *  mid-popover that they can't edit doesn't have to backtrack
-   *  (close → click lock pill → re-right-click). Mostly relevant in
-   *  grid view, where cells don't surface lock state visually. */
-  onUnlock?: () => void;
 }
 
-export interface ShellHandlers extends Omit<RowHandlers, "onIncrement" | "onDecrement" | "onRemove" | "onDescription"> {
+export interface ShellHandlers {
   onIncrement: (id: string) => Promise<void>;
   onDecrement: (id: string) => Promise<void>;
   onRemove: (id: string) => Promise<void>;
@@ -75,13 +67,6 @@ export function mountShell(
 
   const wrap = document.createElement("div");
   wrap.className = "shell";
-
-  // Top accent rail. CSS shows it only when the shell is unlocked, so the
-  // gilt glow becomes the unmistakable signal that edit mode is on — even
-  // for a player who scrolled past the lock pill.
-  const lockRail = document.createElement("div");
-  lockRail.className = "lock-rail";
-  wrap.appendChild(lockRail);
 
   const header = document.createElement("div");
   header.className = "shell-header";
@@ -147,17 +132,6 @@ export function mountShell(
   viewGridBtn.appendChild(icon("i-grid"));
   viewSeg.appendChild(viewGridBtn);
   controls.appendChild(viewSeg);
-
-  const lockBtn = document.createElement("button");
-  lockBtn.className = "lock-toggle";
-  lockBtn.title = "Click to unlock editing";
-  const lockIcon = icon("i-lock", "lock-icon");
-  const lockLabel = document.createElement("span");
-  lockLabel.className = "lock-label";
-  lockLabel.textContent = "Locked";
-  lockBtn.appendChild(lockIcon);
-  lockBtn.appendChild(lockLabel);
-  controls.appendChild(lockBtn);
 
   header.appendChild(controls);
   wrap.appendChild(header);
@@ -331,7 +305,6 @@ export function mountShell(
 
   root.appendChild(wrap);
 
-  let unlocked = false;
   let viewMode: ViewMode = readViewMode();
   const collapsed = new Set<string>();
   const ghosts = new Set<string>();
@@ -342,23 +315,6 @@ export function mountShell(
   let prevRecord: PlayerInventoryRecord | null = null;
   let currentRecord = initialRecord;
   let currentCatalog = catalog;
-
-  // The wrapped description handler is rebuilt on every rerender so it can
-  // close over fresh `working` state. We park the latest version here so
-  // the unlock-from-popover callback can re-fire it after rerendering with
-  // unlocked=true — without that hoist, the only reference to the wrapper
-  // is trapped inside the rerender closure.
-  let latestOnDescription: (id: string, anchor: { x: number; y: number }) => void = () => {};
-
-  const updateLockUI = () => {
-    setIcon(lockIcon, unlocked ? "i-unlock" : "i-lock");
-    lockLabel.textContent = unlocked ? "Unlocked" : "Locked";
-    lockBtn.classList.toggle("unlocked", unlocked);
-    lockBtn.title = unlocked ? "Click to lock editing" : "Click to unlock editing";
-    // The wrap data-attr drives both the gilt accent rail and any other
-    // unlocked-mode treatments (row-action visibility, etc.).
-    wrap.dataset.unlocked = unlocked ? "true" : "false";
-  };
 
   // Segmented control: each button reflects its own mode. The active class
   // moves to whichever button matches the current viewMode.
@@ -411,33 +367,18 @@ export function mountShell(
       const entry = working.items.find(([eid]) => eid === id);
       const count = entry?.[1] ?? 0;
       handlers.onDescription(id, anchor, {
-        unlocked,
         count,
         onIncrement: () => { ghosts.add(id); void handlers.onIncrement(id); },
         onDecrement: () => { ghosts.add(id); void handlers.onDecrement(id); },
         onRemove:    () => { ghosts.delete(id); void handlers.onRemove(id); },
-        // Locked-popover escape hatch. Only attached when locked; the
-        // popover renders an "Unlock to edit" button and routes here.
-        // We flip unlock state, rerender (which assigns a new
-        // wrappedOnDescription to latestOnDescription), then re-fire the
-        // description for the same item + anchor — showDescription's
-        // close-then-mount swaps the popover in place with edit controls.
-        onUnlock: unlocked ? undefined : () => {
-          unlocked = true;
-          updateLockUI();
-          rerender(currentRecord, currentCatalog);
-          latestOnDescription(id, anchor);
-        },
       });
     };
-    latestOnDescription = wrappedOnDescription;
 
     if (viewMode === "grid") {
       const gridState: GridState = {
         items: working.items,
         catalog: cat,
         search: search.value,
-        unlocked,
         collapsed,
         ghosts,
         tracker,
@@ -449,27 +390,12 @@ export function mountShell(
         items: working.items,
         catalog: cat,
         search: search.value,
-        unlocked,
         collapsed,
         ghosts,
         tracker,
         phantomRemoves,
       };
-      renderList(body, listState, {
-        onIncrement: (id) => {
-          ghosts.add(id);
-          void handlers.onIncrement(id);
-        },
-        onDecrement: (id) => {
-          ghosts.add(id);
-          void handlers.onDecrement(id);
-        },
-        onRemove: (id) => {
-          ghosts.delete(id);
-          void handlers.onRemove(id);
-        },
-        onDescription: wrappedOnDescription,
-      });
+      renderList(body, listState, { onDescription: wrappedOnDescription });
     }
   };
 
@@ -494,11 +420,6 @@ export function mountShell(
     const group = headerEl.closest<HTMLElement>(".cat-group");
     if (group) group.dataset.collapsed = willCollapse ? "true" : "false";
   });
-  lockBtn.onclick = () => {
-    unlocked = !unlocked;
-    updateLockUI();
-    rerender(currentRecord, currentCatalog);
-  };
   // Segmented control: each button selects its mode. Clicking the already-
   // active button is a no-op.
   const setView = (mode: ViewMode) => {
@@ -524,7 +445,6 @@ export function mountShell(
     });
   };
 
-  updateLockUI();
   updateViewToggleUI();
   rerender(initialRecord, catalog);
 

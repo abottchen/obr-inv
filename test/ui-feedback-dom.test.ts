@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
-import { mountShell, type ShellHandlers } from "../src/ui-shell";
+import { mountShell, type ShellHandlers, type DescriptionCtx } from "../src/ui-shell";
 import type { CatalogItem, PlayerInventoryRecord } from "../src/types";
 
 const catalog: CatalogItem[] = [
@@ -30,6 +30,31 @@ function makeHandlers(): ShellHandlers {
     onAddClick: noop,
     onDescription: noop,
   };
+}
+
+/**
+ * Edits now route through the description popover, which is built by
+ * the shell at right-click / left-click time. Tests that need to invoke
+ * a decrement/remove on a row simulate a click on the row to capture
+ * the ctx, then call ctx.onDecrement() / ctx.onRemove() directly.
+ */
+function captureCtx(
+  root: HTMLElement, baseHandlers: ShellHandlers,
+): { handlers: ShellHandlers; openFor: (id: string) => DescriptionCtx } {
+  const captured = new Map<string, DescriptionCtx>();
+  const handlers: ShellHandlers = {
+    ...baseHandlers,
+    onDescription: (id, _anchor, ctx) => { captured.set(id, ctx); },
+  };
+  const openFor = (id: string): DescriptionCtx => {
+    const row = root.querySelector<HTMLElement>(`.inv-row[data-item-id="${id}"]`);
+    if (!row) throw new Error(`no row for ${id}`);
+    row.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: 1, clientY: 1 }));
+    const ctx = captured.get(id);
+    if (!ctx) throw new Error(`onDescription not called for ${id}`);
+    return ctx;
+  };
+  return { handlers, openFor };
 }
 
 function rowFor(root: HTMLElement, id: string): HTMLElement | null {
@@ -82,13 +107,13 @@ describe("ui-feedback DOM integration", () => {
   it("keeps the row visible (as ghost) when decrement leaves count at 0", () => {
     const root = document.createElement("div");
     document.body.appendChild(root);
-    const refs = mountShell(root, rec([["h1", 1]]), catalog, makeHandlers());
+    const { handlers, openFor } = captureCtx(root, makeHandlers());
+    const refs = mountShell(root, rec([["h1", 1]]), catalog, handlers);
 
-    // Unlock so the inline handlers (which add to the ghost set) wire up.
-    (root.querySelector(".lock-toggle") as HTMLButtonElement).click();
-
-    // Simulate the click on −, which adds h1 to ghosts via the wrapper.
-    (root.querySelector('[data-action="dec"]') as HTMLButtonElement).click();
+    // Open the popover for h1 (left-click on row), capture its ctx, then
+    // invoke onDecrement — the shell wraps that callback to add h1 to
+    // its ghost set, which is the behaviour under test.
+    openFor("h1").onDecrement();
 
     // Metadata round-trip: writeRecord runs pruneZeros, so the returned
     // record has h1 stripped entirely. The shell must re-inject it from
@@ -101,18 +126,18 @@ describe("ui-feedback DOM integration", () => {
     expect(row?.querySelector(".inv-count")?.textContent).toContain("×0");
   });
 
-  it("removes the ghost row when the user clicks the trashcan", () => {
+  it("removes the ghost row when the user invokes the popover trashcan", () => {
     const root = document.createElement("div");
     document.body.appendChild(root);
-    const refs = mountShell(root, rec([["h1", 1]]), catalog, makeHandlers());
+    const { handlers, openFor } = captureCtx(root, makeHandlers());
+    const refs = mountShell(root, rec([["h1", 1]]), catalog, handlers);
 
-    (root.querySelector(".lock-toggle") as HTMLButtonElement).click();
-    (root.querySelector('[data-action="dec"]') as HTMLButtonElement).click();
+    openFor("h1").onDecrement();
     refs.rerender(rec([]), catalog); // ghost still visible
 
     expect(rowFor(root, "h1")).not.toBeNull();
 
-    (root.querySelector('[data-action="remove"]') as HTMLButtonElement).click();
+    openFor("h1").onRemove();
     refs.rerender(rec([]), catalog); // first render: phantom-remove + leave anim
 
     let row = rowFor(root, "h1");

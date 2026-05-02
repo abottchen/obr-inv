@@ -115,8 +115,8 @@ describe("ui-shell view toggle", () => {
     expect(layer!.style.display).toBe("none");
   });
 
-  it("threads unlocked, count, and edit handlers into onDescription ctx", async () => {
-    let captured: { id: string; ctx: { unlocked: boolean; count: number; onIncrement: () => void; onDecrement: () => void; onRemove: () => void } } | null = null;
+  it("threads count and edit handlers into onDescription ctx", async () => {
+    let captured: { id: string; ctx: { count: number; onIncrement: () => void; onDecrement: () => void; onRemove: () => void } } | null = null;
     let incCalls = 0;
     const handlers: ShellHandlers = {
       onIncrement: async () => { incCalls++; },
@@ -130,19 +130,18 @@ describe("ui-shell view toggle", () => {
     document.body.appendChild(root);
     mountShell(root, record, catalog, handlers);
 
-    // Locked first
+    // Right-click opens the popover and captures the ctx.
     const row = root.querySelector<HTMLElement>('.inv-row[data-item-id="h1"]')!;
     row.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 1, clientY: 1 }));
     expect(captured).not.toBeNull();
-    expect(captured!.ctx.unlocked).toBe(false);
     expect(captured!.ctx.count).toBe(3);
 
-    // Unlock
-    root.querySelector<HTMLButtonElement>(".lock-toggle")!.click();
+    // Left-click also opens the popover (same code path).
     captured = null;
     const row2 = root.querySelector<HTMLElement>('.inv-row[data-item-id="h1"]')!;
-    row2.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 1, clientY: 1 }));
-    expect(captured!.ctx.unlocked).toBe(true);
+    row2.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, clientX: 1, clientY: 1 }));
+    expect(captured).not.toBeNull();
+    expect(captured!.ctx.count).toBe(3);
 
     // Edit handlers in ctx invoke the underlying shell handlers
     captured!.ctx.onIncrement();
