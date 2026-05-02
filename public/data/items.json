@@ -2669,5 +2669,14 @@
     "description": "Weight: 3 lb. A common hammer suitable for driving pitons, nails, or stakes.",
     "rarity": "common",
     "weight": 3
+  },
+  {
+    "id": "om0Dtw",
+    "name": "Piton",
+    "category": "Adventuring Gear - Camping & Travel",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/spike.svg",
+    "description": "Weight: 1/4 lb. A metal spike that can be hammered into a surface as an anchor point, typically for securing rope while climbing.",
+    "rarity": "common",
+    "weight": 0.25
   }
 ]
