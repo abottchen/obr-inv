@@ -30,8 +30,9 @@ export const DIALOG_CSS = `
   width: 36px; height: 36px;
   background-color: var(--bg-1);
   border: 1px solid var(--border); border-radius: 4px;
-  background-size: cover; background-position: center;
   flex-shrink: 0;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
 }
 .description-popover .desc-title {
   flex: 1; min-width: 0;

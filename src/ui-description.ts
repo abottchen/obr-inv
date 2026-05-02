@@ -1,6 +1,6 @@
 import { clampToFrame } from "./frame";
-import { isSafeIconUrl } from "./escape";
 import type { CatalogItem } from "./types";
+import { appendIconImage } from "./ui-icon";
 
 let active: HTMLElement | null = null;
 let outsideHandler: ((e: MouseEvent) => void) | null = null;
@@ -34,11 +34,10 @@ export function showDescription(
   const header = document.createElement("div");
   header.className = "desc-header";
 
-  if (item?.icon && isSafeIconUrl(item.icon)) {
+  if (item?.icon) {
     const ic = document.createElement("div");
     ic.className = "desc-icon";
-    ic.style.backgroundImage = `url("${item.icon}")`;
-    header.appendChild(ic);
+    if (appendIconImage(ic, item.icon)) header.appendChild(ic);
   }
 
   const title = document.createElement("div");
