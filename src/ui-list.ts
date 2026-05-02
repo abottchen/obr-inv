@@ -134,6 +134,7 @@ function renderRow(
 
   const name = document.createElement("div");
   name.className = "inv-name";
+  if (item?.rarity) name.dataset.rarity = item.rarity;
   name.innerHTML = item ? highlight(item.name, search) : escapeHtml(`[${id}] (missing from catalog)`);
   row.appendChild(name);
 

@@ -152,10 +152,8 @@ export const DIALOG_CSS = `
   background: linear-gradient(90deg, rgba(156,39,176,0.10), var(--bg-1) 60%); }
 .add-row[data-rarity="legendary"] { border-left-color: var(--rarity-legendary);
   background: linear-gradient(90deg, rgba(255,152,0,0.10), var(--bg-1) 60%); }
-.add-row .item-name[data-rarity="uncommon"] { color: var(--rarity-uncommon); }
-.add-row .item-name[data-rarity="rare"] { color: var(--rarity-rare); }
-.add-row .item-name[data-rarity="very rare"] { color: var(--rarity-very-rare); }
-.add-row .item-name[data-rarity="legendary"] { color: var(--rarity-legendary); }
+/* Rarity color/glow on .item-name now comes from the .inv-name rules in
+ * styles-list.ts — the add-dialog row's name carries both classes. */
 .add-qty { width: 56px; }
 .btn-plus {
   background: var(--accent); color: #fff;
