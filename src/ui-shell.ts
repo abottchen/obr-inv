@@ -204,7 +204,6 @@ export function mountShell(
         void handlers.onRemove(id);
       },
       onDescription: handlers.onDescription,
-      onTransfer: handlers.onTransfer,
     });
   };
 

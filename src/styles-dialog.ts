@@ -77,6 +77,19 @@ export const DIALOG_CSS = `
   overflow-y: auto;
 }
 
+.description-popover .desc-actions {
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-1);
+  display: flex; justify-content: flex-end; gap: 6px;
+}
+.description-popover .desc-transfer {
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 6px;
+  padding: 6px 12px; font-size: 12px; cursor: pointer;
+}
+.description-popover .desc-transfer:hover { filter: brightness(1.1); }
+
 .transfer-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
 .transfer-list button {
   display: flex; align-items: center; gap: 6px;

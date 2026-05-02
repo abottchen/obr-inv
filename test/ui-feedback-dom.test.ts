@@ -29,7 +29,6 @@ function makeHandlers(): ShellHandlers {
     onCurrencyChange: async () => {},
     onAddClick: noop,
     onDescription: noop,
-    onTransfer: noop,
   };
 }
 

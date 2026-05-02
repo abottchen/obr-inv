@@ -25,6 +25,25 @@ describe("ui-description popover", () => {
     expect(document.querySelector(".description-popover")).toBeNull();
   });
 
+  it("renders no Transfer button when no callback is provided", () => {
+    showDescription({ x: 10, y: 10 }, item);
+    expect(document.querySelector(".desc-transfer")).toBeNull();
+  });
+
+  it("renders a Transfer button when onTransfer is provided", () => {
+    let invoked = false;
+    showDescription({ x: 10, y: 10 }, item, undefined, {
+      onTransfer: () => { invoked = true; },
+    });
+    const btn = document.querySelector(".desc-transfer") as HTMLButtonElement;
+    expect(btn).not.toBeNull();
+
+    btn.click();
+    // Popover dismisses before invoking the callback.
+    expect(document.querySelector(".description-popover")).toBeNull();
+    expect(invoked).toBe(true);
+  });
+
   it("preventDefault is called so the OS context menu doesn't appear", () => {
     showDescription({ x: 10, y: 10 }, item);
     const pop = document.querySelector(".description-popover") as HTMLElement;

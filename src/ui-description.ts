@@ -6,8 +6,16 @@ let active: HTMLElement | null = null;
 let outsideHandler: ((e: MouseEvent) => void) | null = null;
 let escHandler: ((e: KeyboardEvent) => void) | null = null;
 
+export interface DescriptionOpts {
+  /** When provided, the popover renders a "Transfer…" button that
+   *  closes the popover and invokes this callback. Omit for read-only
+   *  contexts (e.g. browsing the catalog in the add-to-inventory dialog). */
+  onTransfer?: () => void;
+}
+
 export function showDescription(
-  anchor: { x: number; y: number }, item: CatalogItem | null, fallbackId?: string,
+  anchor: { x: number; y: number }, item: CatalogItem | null,
+  fallbackId?: string, opts?: DescriptionOpts,
 ): void {
   closeDescription();
   const pop = document.createElement("div");
@@ -54,6 +62,22 @@ export function showDescription(
   desc.className = "desc";
   desc.textContent = item?.description ?? "Item missing from catalog.";
   pop.appendChild(desc);
+
+  if (opts?.onTransfer) {
+    const actions = document.createElement("div");
+    actions.className = "desc-actions";
+    const transferBtn = document.createElement("button");
+    transferBtn.type = "button";
+    transferBtn.className = "desc-transfer";
+    transferBtn.textContent = "Transfer…";
+    transferBtn.onclick = () => {
+      const cb = opts.onTransfer;
+      closeDescription();
+      cb?.();
+    };
+    actions.appendChild(transferBtn);
+    pop.appendChild(actions);
+  }
 
   // Right-click anywhere inside the popover dismisses it. (Right-clicking
   // outside is already handled by the mousedown-outside listener below.)

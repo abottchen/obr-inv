@@ -7,7 +7,6 @@ export interface RowHandlers {
   onDecrement: (id: string) => void;
   onRemove: (id: string) => void;
   onDescription: (id: string, anchor: { x: number; y: number }) => void;
-  onTransfer: (id: string, anchor: { x: number; y: number }) => void;
 }
 
 export interface ListState {
@@ -172,16 +171,17 @@ function renderRow(
     row.appendChild(rm);
   }
 
-  // Right-click and shift+right-click open description / transfer.
-  // Bound to the whole row so the entire visual element is hit-testable;
-  // exempt the ± / × buttons so right-clicking those does nothing surprising.
+  // Right-click anywhere on the row opens the description popover, which
+  // contains a Transfer button when applicable. Shift+right-click was the
+  // previous transfer shortcut but Firefox forces its native menu when
+  // Shift is held, bypassing preventDefault.
+  // Exempt the ± / × buttons so right-clicking those does nothing surprising.
   row.addEventListener("contextmenu", (ev) => {
     const t = ev.target as HTMLElement;
     if (t.closest(".btn-step, .btn-x")) return;
     ev.preventDefault();
     const me = ev as MouseEvent;
-    if (me.shiftKey) h.onTransfer(id, { x: me.clientX, y: me.clientY });
-    else h.onDescription(id, { x: me.clientX, y: me.clientY });
+    h.onDescription(id, { x: me.clientX, y: me.clientY });
   });
 
   return row;

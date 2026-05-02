@@ -137,6 +137,33 @@ export function mountGmView(opts: GmViewOpts): () => void {
     });
   };
 
+  const openTransferFor = async (
+    id: string, anchor: { x: number; y: number },
+  ) => {
+    const r = records[activePid];
+    if (!r) return;
+    const all = await listInventoryRecords();
+    const targets = buildTargets(activePid, all, opts.selfId);
+    const ci = byId.get(id);
+    const entry = r.items.find(([eid]) => eid === id);
+    showTransfer({
+      anchor,
+      itemId: id,
+      itemName: ci?.name ?? id,
+      itemIcon: ci?.icon,
+      maxQty: entry?.[1] ?? 0,
+      targets,
+      onConfirm: async (toPlayerId, qty) => {
+        try {
+          await transferItem({
+            fromPlayerId: activePid, toPlayerId,
+            itemId: id, itemName: ci?.name ?? id, qty,
+          });
+        } catch (e) { gmHandleErr(e); }
+      },
+    });
+  };
+
   const renderShell = () => {
     const rec = records[activePid];
     if (!rec) return;
@@ -190,26 +217,9 @@ export function mountGmView(opts: GmViewOpts): () => void {
         });
       },
       onCreateCustomClick: () => openCreateItem(),
-      onDescription: (id, anchor) => showDescription(anchor, byId.get(id) ?? null, id),
-      onTransfer: async (id, anchor) => {
-        const r = records[activePid]; if (!r) return;
-        const all = await listInventoryRecords();
-        const targets = buildTargets(activePid, all, opts.selfId);
-        const ci = byId.get(id);
-        const entry = r.items.find(([eid]) => eid === id);
-        if (!entry || entry[1] <= 0) return;
-        showTransfer({
-          anchor, itemId: id,
-          itemName: ci?.name ?? id, itemIcon: ci?.icon,
-          maxQty: entry[1], targets,
-          onConfirm: async (toPlayerId, qty) => {
-            try {
-              await transferItem({
-                fromPlayerId: activePid, toPlayerId,
-                itemId: id, itemName: ci?.name ?? id, qty,
-              });
-            } catch (e) { gmHandleErr(e); }
-          },
+      onDescription: (id, anchor) => {
+        showDescription(anchor, byId.get(id) ?? null, id, {
+          onTransfer: () => { void openTransferFor(id, anchor); },
         });
       },
     });
