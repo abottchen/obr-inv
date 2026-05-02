@@ -217,9 +217,15 @@ export function mountGmView(opts: GmViewOpts): () => void {
         });
       },
       onCreateCustomClick: () => openCreateItem(),
-      onDescription: (id, anchor) => {
+      onDescription: (id, anchor, ctx) => {
         showDescription(anchor, byId.get(id) ?? null, id, {
           onTransfer: () => { void openTransferFor(id, anchor); },
+          editControls: ctx.unlocked ? {
+            count: ctx.count,
+            onIncrement: ctx.onIncrement,
+            onDecrement: ctx.onDecrement,
+            onRemove:    ctx.onRemove,
+          } : undefined,
         });
       },
     });

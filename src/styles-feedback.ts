@@ -149,4 +149,42 @@ export const FEEDBACK_CSS = `
   20%  { color: var(--warn); }
   100% { color: inherit; }
 }
+
+/* ─── Grid-cell pulse variants ──────────────────────────────────────── */
+.inv-cell[data-pulse="inc"], .inv-cell[data-pulse="add"] {
+  animation: feedback-glow 700ms ease-out;
+}
+.inv-cell[data-pulse="dec"] {
+  animation: feedback-glow-neg 700ms ease-out;
+}
+.inv-cell[data-pulse="received"] {
+  animation: feedback-glow-louder 1500ms ease-out;
+}
+.inv-cell[data-pulse="add"] {
+  animation:
+    feedback-glow 700ms ease-out,
+    feedback-cell-enter 350ms ease-out;
+}
+@keyframes feedback-cell-enter {
+  0%   { opacity: 0; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.inv-cell[data-pulse="remove"] {
+  animation: feedback-cell-leave 400ms ease-in forwards;
+  overflow: hidden;
+}
+@keyframes feedback-cell-leave {
+  0%   {
+    opacity: 1; transform: scale(1);
+    box-shadow: 0 0 0 2px var(--warn), 0 0 14px rgba(252,211,77,0.3);
+  }
+  25%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.85); box-shadow: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inv-cell[data-pulse] { animation-duration: 0ms !important; }
+  .inv-cell[data-pulse="received"] {
+    animation: feedback-glow-louder 800ms ease-out !important;
+  }
+}
 `;

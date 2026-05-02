@@ -6,11 +6,12 @@ Per-player inventory tracker for Owlbear Rodeo.
 
 - Each player sees their own inventory; the GM sees all of them via tabs.
 - Collapsible categories with animated expand/collapse, name-only search.
-- Item names tinted by rarity (uncommon/rare flat color; very-rare/legendary add a soft glow); rows carry a colored left-stripe for the same signal at a glance.
-- Right-click any row → description popover (rarity-titled, with icon, weight, description). When the row is from your own inventory, the popover also exposes a **Transfer…** button. Right-click the popover (or click outside / press Esc) to dismiss.
-- Visual feedback on every state change — count pulse + scale, floating "+1" / "−1", row glow on inc/dec/add. Removes pulse amber and collapse out. Items received via transfer get a louder pulse with a name flash and auto-scroll the row into view; the row's category auto-expands if it was collapsed. Honors `prefers-reduced-motion`.
+- Two view modes — toggle in the header (▦ / ☰) between the dense **list** and a Baldur's Gate-style **grid**: square cells with overlaid count badges, alphabetized within each category, hover for a rarity-colored tooltip. The choice persists per browser.
+- Item names tinted by rarity (uncommon/rare flat color; very-rare/legendary add a soft glow); list rows carry a colored left-stripe and grid cells a colored border for the same signal at a glance.
+- Right-click any row or grid cell → description popover (rarity-titled, with icon, weight, description). When the item is from your own inventory and the lock is open, the popover surfaces inline `−` / `×N` / `+` / `🗑` controls (with the same `+1` / `−1` float as the list view) plus a **Transfer…** button. Right-click the popover (or click outside / press Esc) to dismiss.
+- Visual feedback on every state change — count pulse + scale, floating "+1" / "−1", row/cell glow on inc/dec/add. Removes pulse amber and collapse out. Items received via transfer get a louder pulse with a name flash and auto-scroll the row/cell into view; the row's category auto-expands if it was collapsed. Honors `prefers-reduced-motion`.
 - Transfer announcements broadcast to everyone in the room: the recipient sees `Alice gave you 3× Healing Potion`; observers see `Alice just transferred 3× Healing Potion to Bob`.
-- Single global lock toggle gates the +/−/🗑 buttons; currency is always editable and accepts `+45` / `-20` deltas.
+- Single global lock toggle gates editing — in list view it shows ±/🗑 inline on each row; in grid view the same controls live in the right-click popover. Currency is always editable and accepts `+45` / `-20` deltas.
 - Decrementing to 0 keeps the row visible (a "ghost" you can re-stock with +); the trashcan button is the explicit way to drop a row entirely.
 - Add-to-inventory dialog opens with all categories collapsed (the catalog is 305+ items); typing in the search auto-expands matching groups, and clearing the search restores the prior state.
 - Color-coded denominations on the gold strip (pp/gp/sp/cp).

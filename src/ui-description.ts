@@ -11,6 +11,15 @@ export interface DescriptionOpts {
    *  closes the popover and invokes this callback. Omit for read-only
    *  contexts (e.g. browsing the catalog in the add-to-inventory dialog). */
   onTransfer?: () => void;
+  /** When provided, the popover renders − / count / + and 🗑 edit
+   *  controls. Caller decides when to provide this (typically only
+   *  when the inventory is unlocked). */
+  editControls?: {
+    count: number;
+    onIncrement: () => void;
+    onDecrement: () => void;
+    onRemove: () => void;
+  };
 }
 
 export function showDescription(
@@ -63,19 +72,89 @@ export function showDescription(
   desc.textContent = item?.description ?? "Item missing from catalog.";
   pop.appendChild(desc);
 
-  if (opts?.onTransfer) {
+  if (opts?.editControls || opts?.onTransfer) {
     const actions = document.createElement("div");
     actions.className = "desc-actions";
-    const transferBtn = document.createElement("button");
-    transferBtn.type = "button";
-    transferBtn.className = "desc-transfer";
-    transferBtn.textContent = "Transfer…";
-    transferBtn.onclick = () => {
-      const cb = opts.onTransfer;
-      closeDescription();
-      cb?.();
-    };
-    actions.appendChild(transferBtn);
+
+    if (opts.editControls) {
+      const ec = opts.editControls;
+      // Local optimistic count: the underlying handler is async, the metadata
+      // round-trip won't propagate back to the popover (it's detached from
+      // the shell rerender cycle). Tracking locally makes the count cell
+      // reflect the user's clicks immediately and pulse where they're looking.
+      let localCount = ec.count;
+
+      const dec = document.createElement("button");
+      dec.type = "button"; dec.className = "btn-step";
+      dec.dataset.action = "dec";
+      dec.textContent = "−"; dec.title = "Decrease";
+      actions.appendChild(dec);
+
+      const cntWrap = document.createElement("span");
+      cntWrap.className = "desc-count-wrap";
+      const cnt = document.createElement("span");
+      cnt.className = "desc-count";
+      cnt.textContent = `×${localCount}`;
+      cntWrap.appendChild(cnt);
+      const delta = document.createElement("span");
+      delta.className = "desc-delta";
+      cntWrap.appendChild(delta);
+      actions.appendChild(cntWrap);
+
+      const inc = document.createElement("button");
+      inc.type = "button"; inc.className = "btn-step";
+      inc.dataset.action = "inc";
+      inc.textContent = "+"; inc.title = "Increase";
+      actions.appendChild(inc);
+
+      const rm = document.createElement("button");
+      rm.type = "button"; rm.className = "btn-x";
+      rm.dataset.action = "remove";
+      rm.textContent = "🗑"; rm.title = "Delete this item";
+      rm.onclick = () => {
+        const cb = ec.onRemove;
+        closeDescription();
+        cb();
+      };
+      actions.appendChild(rm);
+
+      const pulse = (kind: "inc" | "dec", deltaText: string) => {
+        // Restamp via reflow so rapid clicks re-trigger the CSS animation.
+        delete cnt.dataset.pulse;
+        delete delta.dataset.pulse;
+        void cnt.offsetWidth;
+        cnt.dataset.pulse = kind;
+        delta.textContent = deltaText;
+        delta.dataset.pulse = kind;
+      };
+      inc.onclick = () => {
+        localCount += 1;
+        cnt.textContent = `×${localCount}`;
+        pulse("inc", "+1");
+        ec.onIncrement();
+      };
+      dec.onclick = () => {
+        if (localCount <= 0) return;
+        localCount -= 1;
+        cnt.textContent = `×${localCount}`;
+        pulse("dec", "−1");
+        ec.onDecrement();
+      };
+    }
+
+    if (opts.onTransfer) {
+      const transferBtn = document.createElement("button");
+      transferBtn.type = "button";
+      transferBtn.className = "desc-transfer";
+      transferBtn.textContent = "Transfer…";
+      transferBtn.onclick = () => {
+        const cb = opts.onTransfer;
+        closeDescription();
+        cb?.();
+      };
+      actions.appendChild(transferBtn);
+    }
+
     pop.appendChild(actions);
   }
 

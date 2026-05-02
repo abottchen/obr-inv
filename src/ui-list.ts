@@ -1,5 +1,6 @@
 import { escapeHtml, isSafeIconUrl } from "./escape";
 import type { CatalogItem, InventoryEntry, Rarity } from "./types";
+import { groupByCategory } from "./ui-items-data";
 import type { PulseTracker, PulseEntry } from "./ui-feedback";
 
 export interface RowHandlers {
@@ -24,28 +25,16 @@ export function renderList(
   container: HTMLElement, state: ListState, handlers: RowHandlers,
 ): void {
   container.innerHTML = "";
-  const byId = new Map(state.catalog.map((c) => [c.id, c]));
   const search = state.search.trim().toLowerCase();
+  const sortedCats = groupByCategory({
+    items: state.items,
+    catalog: state.catalog,
+    search: state.search,
+    ghosts: state.ghosts,
+    phantomRemoves: state.phantomRemoves,
+  });
 
-  // Real items + synthetic [id, 0] entries for phantom removes (one render).
-  const working: InventoryEntry[] = [...state.items];
-  const realIds = new Set(state.items.map((e) => e[0]));
-  for (const id of state.phantomRemoves) {
-    if (!realIds.has(id)) working.push([id, 0]);
-  }
-
-  const byCat = new Map<string, Array<{ entry: InventoryEntry; item: CatalogItem | null }>>();
-  for (const entry of working) {
-    const item = byId.get(entry[0]) ?? null;
-    const isPhantom = state.phantomRemoves.has(entry[0]);
-    if (entry[1] === 0 && !state.ghosts.has(entry[0]) && !isPhantom) continue;
-    if (search && !rowMatches(entry, item, search)) continue;
-    const cat = item?.category ?? "Unknown";
-    if (!byCat.has(cat)) byCat.set(cat, []);
-    byCat.get(cat)!.push({ entry, item });
-  }
-
-  if (byCat.size === 0) {
+  if (sortedCats.length === 0) {
     const empty = document.createElement("div");
     empty.className = "empty-state";
     empty.textContent = search ? `No items match "${state.search}"` : "Inventory is empty";
@@ -59,9 +48,6 @@ export function renderList(
 
   const receivedRows: HTMLElement[] = [];
 
-  const sortedCats = [...byCat.entries()].sort(
-    ([a], [b]) => a.localeCompare(b),
-  );
   for (const [cat, entries] of sortedCats) {
     const collapsed = state.collapsed.has(cat);
 
@@ -98,13 +84,6 @@ export function renderList(
       behavior: reducedMotion ? "auto" : "smooth",
     });
   }
-}
-
-function rowMatches(
-  entry: InventoryEntry, item: CatalogItem | null, search: string,
-): boolean {
-  const name = item?.name ?? entry[0];
-  return name.toLowerCase().includes(search);
 }
 
 function formatDelta(delta: number): string {
