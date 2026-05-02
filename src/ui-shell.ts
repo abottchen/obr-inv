@@ -32,6 +32,13 @@ export interface DescriptionCtx {
   onIncrement: () => void;
   onDecrement: () => void;
   onRemove: () => void;
+  /** Provided only when the shell is currently locked. Calling this
+   *  flips the shell into unlocked mode, rerenders, and re-opens the
+   *  same item's popover with edit controls — so a user who realises
+   *  mid-popover that they can't edit doesn't have to backtrack
+   *  (close → click lock pill → re-right-click). Mostly relevant in
+   *  grid view, where cells don't surface lock state visually. */
+  onUnlock?: () => void;
 }
 
 export interface ShellHandlers extends Omit<RowHandlers, "onIncrement" | "onDecrement" | "onRemove" | "onDescription"> {
@@ -182,18 +189,44 @@ export function mountShell(
     const wrapRect = wrap.getBoundingClientRect();
     const tipW = tooltipLayer.offsetWidth || 0;
     const tipH = tooltipLayer.offsetHeight || 24;
-    const above = rect.top - tipH - 6 > 4;
     const margin = 4;
-    const desiredLeft = rect.left + rect.width / 2 - tipW / 2;
+    const gap = 8;
+
+    // Side-positioning. The previous above/below algorithm covered the
+    // category line on top-row hovers and the icon above for other rows.
+    // Right-of-cell is the default; for cells near the right edge the
+    // tooltip flips to the left of the cell. Only when neither side fits
+    // (very narrow popover) do we fall back to above/below.
     const minLeft = wrapRect.left + margin;
     const maxLeft = wrapRect.right - margin - tipW;
-    const clampedLeft = maxLeft < minLeft
-      ? minLeft
-      : Math.min(Math.max(desiredLeft, minLeft), maxLeft);
-    tooltipLayer.style.left = `${clampedLeft}px`;
-    tooltipLayer.style.top = above
-      ? `${rect.top - tipH - 6}px`
-      : `${rect.bottom + 6}px`;
+    const rightLeft = rect.right + gap;
+    const leftLeft  = rect.left - gap - tipW;
+    let placed = false;
+    if (rightLeft <= maxLeft) {
+      tooltipLayer.style.left = `${rightLeft}px`;
+      placed = true;
+    } else if (leftLeft >= minLeft) {
+      tooltipLayer.style.left = `${leftLeft}px`;
+      placed = true;
+    }
+    if (placed) {
+      // Vertical centre on the cell, clamped inside the popover.
+      const minTop = wrapRect.top + margin;
+      const maxTop = wrapRect.bottom - margin - tipH;
+      const desiredTop = rect.top + rect.height / 2 - tipH / 2;
+      tooltipLayer.style.top = `${Math.min(Math.max(desiredTop, minTop), maxTop)}px`;
+    } else {
+      // Pop-out fallback for very narrow widths.
+      const desiredLeft = rect.left + rect.width / 2 - tipW / 2;
+      const clampedLeft = maxLeft < minLeft
+        ? minLeft
+        : Math.min(Math.max(desiredLeft, minLeft), maxLeft);
+      tooltipLayer.style.left = `${clampedLeft}px`;
+      const above = rect.top - tipH - gap > margin;
+      tooltipLayer.style.top = above
+        ? `${rect.top - tipH - gap}px`
+        : `${rect.bottom + gap}px`;
+    }
   });
   body.addEventListener("mouseout", (e) => {
     const cell = (e.target as HTMLElement).closest<HTMLElement>(".inv-cell");
@@ -310,6 +343,13 @@ export function mountShell(
   let currentRecord = initialRecord;
   let currentCatalog = catalog;
 
+  // The wrapped description handler is rebuilt on every rerender so it can
+  // close over fresh `working` state. We park the latest version here so
+  // the unlock-from-popover callback can re-fire it after rerendering with
+  // unlocked=true — without that hoist, the only reference to the wrapper
+  // is trapped inside the rerender closure.
+  let latestOnDescription: (id: string, anchor: { x: number; y: number }) => void = () => {};
+
   const updateLockUI = () => {
     setIcon(lockIcon, unlocked ? "i-unlock" : "i-lock");
     lockLabel.textContent = unlocked ? "Unlocked" : "Locked";
@@ -376,8 +416,21 @@ export function mountShell(
         onIncrement: () => { ghosts.add(id); void handlers.onIncrement(id); },
         onDecrement: () => { ghosts.add(id); void handlers.onDecrement(id); },
         onRemove:    () => { ghosts.delete(id); void handlers.onRemove(id); },
+        // Locked-popover escape hatch. Only attached when locked; the
+        // popover renders an "Unlock to edit" button and routes here.
+        // We flip unlock state, rerender (which assigns a new
+        // wrappedOnDescription to latestOnDescription), then re-fire the
+        // description for the same item + anchor — showDescription's
+        // close-then-mount swaps the popover in place with edit controls.
+        onUnlock: unlocked ? undefined : () => {
+          unlocked = true;
+          updateLockUI();
+          rerender(currentRecord, currentCatalog);
+          latestOnDescription(id, anchor);
+        },
       });
     };
+    latestOnDescription = wrappedOnDescription;
 
     if (viewMode === "grid") {
       const gridState: GridState = {

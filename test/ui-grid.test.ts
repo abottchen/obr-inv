@@ -160,10 +160,13 @@ describe("renderGrid", () => {
     expect(root.querySelector(".empty-state")?.textContent).toBe('No items match "xyzzy"');
   });
 
-  it("renders the empty-state element when inventory is empty", () => {
+  it("renders the evocative empty-pack state when inventory is empty", () => {
     const root = document.createElement("div");
     renderGrid(root, baseState({ items: [] }), noopHandlers());
-    expect(root.querySelector(".empty-state")?.textContent).toBe("Inventory is empty");
+    const empty = root.querySelector(".empty-state");
+    expect(empty).not.toBeNull();
+    expect(empty?.classList.contains("empty-pack")).toBe(true);
+    expect(empty?.querySelector(".empty-title")?.textContent).toBe("Your pack is empty");
   });
 
   it("stamps data-pulse from the tracker onto cells", () => {

@@ -35,7 +35,24 @@ export function renderGrid(
   if (sortedCats.length === 0) {
     const empty = document.createElement("div");
     empty.className = "empty-state";
-    empty.textContent = search ? `No items match "${state.search}"` : "Inventory is empty";
+    if (search) {
+      empty.textContent = `No items match "${state.search}"`;
+    } else {
+      // Same evocative empty state shape as the list view; a single
+      // markup variant keeps both views consistent when a player flips
+      // between them on an empty inventory.
+      empty.classList.add("empty-pack");
+      empty.innerHTML = `
+        <svg class="empty-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 7h14l-2 12c0 1-1 2-2 2H9c-1 0-2-1-2-2L5 7Z"/>
+          <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+          <path d="M10 13h4"/>
+        </svg>
+        <h3 class="empty-title">Your pack is empty</h3>
+        <p class="empty-sub">Quests reward those prepared for them. Stock up on potions, scrolls, and arms before you set out.</p>
+      `;
+    }
     container.appendChild(empty);
     return;
   }

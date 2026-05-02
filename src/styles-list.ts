@@ -194,7 +194,11 @@ export const LIST_CSS = `
 
 .cat-header {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  /* Two grid children in markup: titlewrap (chev + name + decorative
+   * rule) takes the elastic 1fr column; the count badge sits in the
+   * trailing auto column. The earlier auto/1fr/auto template assumed a
+   * three-child shape and let the badge stretch the whole row. */
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 10px;
   padding: 4px 0 6px;
@@ -473,7 +477,43 @@ export const LIST_CSS = `
   text-align: right;
 }
 
-.empty-state { padding: 28px 8px; text-align: center; color: var(--text-dim); font-style: italic; }
+.empty-state {
+  padding: 36px 24px;
+  text-align: center;
+  color: var(--text-dim);
+  font-style: italic;
+}
+/* Evocative first-time empty state — distinct from a search-no-match
+ * which stays a one-liner. The glyph picks up the gilt accent so the
+ * visual weight nudges the player toward the Add button below. */
+.empty-state.empty-pack {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 56px 32px;
+  font-style: normal;
+}
+.empty-glyph {
+  width: 64px; height: 64px;
+  color: color-mix(in srgb, var(--accent) 60%, var(--text-dim));
+  opacity: 0.7;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--accent-soft) 28%, transparent));
+}
+.empty-title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "wght" 500, "WONK" 1;
+  font-size: 20px;
+  margin: 0 0 8px;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.empty-sub {
+  font-style: italic;
+  color: var(--text-dim);
+  max-width: 280px;
+  line-height: 1.5;
+  margin: 0;
+  font-size: 12.5px;
+}
 
 /* ─── Grid view ─────────────────────────────────────────────────────── */
 .grid-cells {

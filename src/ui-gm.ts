@@ -17,6 +17,8 @@ import { transferItem } from "./transfer";
 import { buildExport, downloadExport } from "./export";
 import { resolvedCatalog } from "./catalog";
 import { escapeHtml } from "./escape";
+import { totalWeight } from "./inventory";
+import { mountIconSprite, icon as svgIcon } from "./ui-icons";
 import {
   BROADCAST_CHANNEL, STORAGE_CAP_BYTES,
   METER_YELLOW_RATIO, METER_RED_RATIO,
@@ -43,71 +45,136 @@ export function mountGmView(opts: GmViewOpts): () => void {
   let merged = resolvedCatalog(opts.catalog, customs);
   let byId = new Map(merged.map((c) => [c.id, c]));
 
+  mountIconSprite();
+
+  // GM layout: a 200px vertical player rail on the left, the active player's
+  // shell on the right. The rail hosts head + list + footer (meter + actions),
+  // and replaces the legacy top tab strip. Storage meter and Customs/Export
+  // buttons live in the rail footer instead of separate strips above the
+  // shell, freeing vertical real estate for inventory content.
   const wrap = document.createElement("div");
-  wrap.style.display = "flex";
-  wrap.style.flexDirection = "column";
-  wrap.style.height = "100%";
+  wrap.className = "gm-wrap";
 
-  const tabsEl = document.createElement("div");
-  tabsEl.className = "tabs";
-  wrap.appendChild(tabsEl);
+  const rail = document.createElement("aside");
+  rail.className = "player-rail";
 
+  const railHead = document.createElement("div");
+  railHead.className = "rail-head";
+  const railTitle = document.createElement("p");
+  railTitle.className = "rail-title font-display";
+  railTitle.textContent = "Party Records";
+  const railSub = document.createElement("p");
+  railSub.className = "rail-sub";
+  railHead.appendChild(railTitle);
+  railHead.appendChild(railSub);
+  rail.appendChild(railHead);
+
+  const railList = document.createElement("div");
+  railList.className = "rail-list";
+  rail.appendChild(railList);
+
+  const railFoot = document.createElement("div");
+  railFoot.className = "rail-foot";
+  // Meter — Vault label, byte usage, and a thin gilt fill bar that switches
+  // colour through warn/bad as the cap fills.
   const meterEl = document.createElement("div");
-  meterEl.className = "meter-strip";
-  meterEl.innerHTML = `<div class="meter-bar"><div class="meter-fill"></div></div><div class="meter-text"></div>`;
-  wrap.appendChild(meterEl);
+  meterEl.className = "rail-meter";
+  meterEl.innerHTML = `
+    <div class="meter-row"><span>Vault</span><span class="meter-text"></span></div>
+    <div class="meter-bar"><div class="meter-fill"></div></div>
+  `;
+  railFoot.appendChild(meterEl);
+
+  const railActions = document.createElement("div");
+  railActions.className = "rail-actions";
+  const customsBtn = document.createElement("button");
+  customsBtn.className = "rail-action";
+  customsBtn.title = "Manage custom items";
+  customsBtn.appendChild(svgIcon("i-star"));
+  customsBtn.appendChild(document.createTextNode("Customs"));
+  const dlBtn = document.createElement("button");
+  dlBtn.className = "rail-action";
+  dlBtn.title = "Download backup JSON";
+  dlBtn.appendChild(svgIcon("i-download"));
+  dlBtn.appendChild(document.createTextNode("Export"));
+  railActions.appendChild(customsBtn);
+  railActions.appendChild(dlBtn);
+  railFoot.appendChild(railActions);
+  rail.appendChild(railFoot);
+
+  wrap.appendChild(rail);
 
   const shellRoot = document.createElement("div");
-  shellRoot.style.flex = "1";
-  shellRoot.style.minHeight = "0";
+  shellRoot.className = "gm-shell-host";
   wrap.appendChild(shellRoot);
 
   opts.root.innerHTML = "";
   opts.root.appendChild(wrap);
+
 
   let records: Record<string, PlayerInventoryRecord> = {};
   let activePid = opts.selfId;
   let shellRefs: { rerender: (r: PlayerInventoryRecord, cat: CatalogItem[]) => void; destroy: () => void } | null = null;
   let mountedShellPid: string | null = null;
 
+  // Render the player rail: one .rail-item per inventory record, plus
+  // a subtle subtitle reporting fellowship size. Sorting puts the GM
+  // last (matches the original tab strip's intent), other players A→Z.
   const renderTabs = () => {
-    tabsEl.innerHTML = "";
+    railList.innerHTML = "";
     const ids = Object.keys(records).sort((a, b) => {
       if (a === opts.selfId) return 1;
       if (b === opts.selfId) return -1;
       return records[a].name.localeCompare(records[b].name);
     });
+    railSub.textContent = `${ids.length} in fellowship`;
     for (const pid of ids) {
-      const t = document.createElement("button");
-      t.className = "tab" + (pid === activePid ? " active" : "");
-      t.style.borderLeftColor = records[pid].color;
-      t.textContent = records[pid].name + (pid === opts.selfId ? " (GM)" : "");
-      t.onclick = () => { activePid = pid; renderAll(); };
-      tabsEl.appendChild(t);
-    }
-    const customsBtn = document.createElement("button");
-    customsBtn.className = "tab-customs";
-    customsBtn.textContent = "✱";
-    customsBtn.title = "Manage custom items";
-    customsBtn.onclick = () => {
-      openCustomsPanel({
-        catalog: opts.catalog,
-        initialCustoms: customs,
-        records,
-        onError: gmHandleErr,
-      });
-    };
-    tabsEl.appendChild(customsBtn);
+      const r = records[pid];
+      const itemCount = r.items.reduce((acc, [, n]) => acc + (n > 0 ? 1 : 0), 0);
+      const w = totalWeight(r.items, opts.catalog);
+      const isSelf = pid === opts.selfId;
+      const initial = (r.name?.[0] ?? "?").toUpperCase();
 
-    const dl = document.createElement("button");
-    dl.className = "tab-download";
-    dl.textContent = "⤓";
-    dl.title = "Download backup JSON";
-    dl.onclick = async () => {
-      const exp = await buildExport(opts.catalog, opts.catalogUrl);
-      downloadExport(exp);
-    };
-    tabsEl.appendChild(dl);
+      const t = document.createElement("button");
+      t.className = "rail-item" + (pid === activePid ? " active" : "");
+      t.title = isSelf ? `${r.name} (GM)` : r.name;
+
+      const pip = document.createElement("span");
+      pip.className = "rail-pip";
+      pip.style.color = r.color;
+      pip.textContent = initial;
+      t.appendChild(pip);
+
+      const who = document.createElement("span");
+      who.className = "rail-who";
+      const name = document.createElement("span");
+      name.className = "rail-name";
+      name.textContent = isSelf ? `${r.name} (GM)` : r.name;
+      const stats = document.createElement("span");
+      stats.className = "rail-stats font-mono";
+      stats.textContent = `${itemCount} items · ${formatRailWeight(w)} lb`;
+      who.appendChild(name);
+      who.appendChild(stats);
+      t.appendChild(who);
+
+      t.onclick = () => { activePid = pid; renderAll(); };
+      railList.appendChild(t);
+    }
+  };
+
+  // Customs / Export buttons in the rail footer — bound once on mount,
+  // not per render, since they don't depend on records.
+  customsBtn.onclick = () => {
+    openCustomsPanel({
+      catalog: opts.catalog,
+      initialCustoms: customs,
+      records,
+      onError: gmHandleErr,
+    });
+  };
+  dlBtn.onclick = async () => {
+    const exp = await buildExport(opts.catalog, opts.catalogUrl);
+    downloadExport(exp);
   };
 
   const renderMeter = async () => {
@@ -226,6 +293,7 @@ export function mountGmView(opts: GmViewOpts): () => void {
             onDecrement: ctx.onDecrement,
             onRemove:    ctx.onRemove,
           } : undefined,
+          onUnlock: ctx.onUnlock,
         });
       },
     });
@@ -302,6 +370,13 @@ export function mountGmView(opts: GmViewOpts): () => void {
   return () => {
     unsubMeta(); unsubCustoms(); unsubBroadcast(); shellRefs?.destroy();
   };
+}
+
+/** Tighter weight format for the rail's per-player stats line. */
+function formatRailWeight(w: number): string {
+  if (w === 0) return "0";
+  if (Number.isInteger(w)) return String(w);
+  return w.toFixed(1);
 }
 
 function showOverCapModal(args: {
