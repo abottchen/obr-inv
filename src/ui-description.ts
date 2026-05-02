@@ -1,6 +1,7 @@
 import { clampToFrame } from "./frame";
 import type { CatalogItem } from "./types";
 import { appendIconImage } from "./ui-icon";
+import { icon as svgIcon } from "./ui-icons";
 
 let active: HTMLElement | null = null;
 let outsideHandler: ((e: MouseEvent) => void) | null = null;
@@ -40,29 +41,54 @@ export function showDescription(
     if (appendIconImage(ic, item.icon)) header.appendChild(ic);
   }
 
+  // Title block: small tagline above (category · rarity) gives a sense of
+  // place, then the name in display font with rarity tint inherited from
+  // .desc-title[data-rarity="..."] selectors.
+  const titleBlock = document.createElement("div");
+  titleBlock.className = "desc-titleblock";
+  if (item && (item.category || item.rarity)) {
+    const tagline = document.createElement("div");
+    tagline.className = "desc-tagline";
+    const parts: string[] = [];
+    if (item.category) parts.push(item.category);
+    if (item.rarity)   parts.push(item.rarity);
+    tagline.textContent = parts.join(" · ");
+    titleBlock.appendChild(tagline);
+  }
   const title = document.createElement("div");
   title.className = "desc-title";
   title.textContent = item?.name ?? `[${fallbackId ?? "?"}] (missing from catalog)`;
   if (item?.rarity) title.dataset.rarity = item.rarity;
-  header.appendChild(title);
+  titleBlock.appendChild(title);
+  header.appendChild(titleBlock);
 
   const close = document.createElement("button");
   close.type = "button";
   close.className = "popover-close";
-  close.textContent = "✕";
+  close.appendChild(svgIcon("i-x"));
   close.title = "Close";
   close.onclick = closeDescription;
   header.appendChild(close);
 
   pop.appendChild(header);
 
-  if (item && (item.rarity || typeof item.weight === "number")) {
+  // Three-up meta strip — weight / rarity / category as labelled cells.
+  // Each cell only renders if its value exists, so a custom item with
+  // no weight gets a two-cell strip instead of an empty slot.
+  if (item && (typeof item.weight === "number" || item.rarity || item.category)) {
     const meta = document.createElement("div");
-    meta.className = "meta";
-    const parts: string[] = [];
-    if (item.rarity) parts.push(item.rarity);
-    if (typeof item.weight === "number") parts.push(`${item.weight} lb`);
-    meta.textContent = parts.join(" · ");
+    meta.className = "meta meta-strip";
+    const cell = (k: string, v: string) => {
+      const el = document.createElement("div");
+      el.className = "meta-cell";
+      const kl = document.createElement("span"); kl.className = "k"; kl.textContent = k;
+      const vl = document.createElement("span"); vl.className = "v"; vl.textContent = v;
+      el.appendChild(kl); el.appendChild(vl);
+      return el;
+    };
+    if (typeof item.weight === "number") meta.appendChild(cell("Weight", `${item.weight} lb`));
+    if (item.rarity)                     meta.appendChild(cell("Rarity", item.rarity));
+    if (item.category)                   meta.appendChild(cell("Type",   item.category));
     pop.appendChild(meta);
   }
 
@@ -109,7 +135,7 @@ export function showDescription(
       const rm = document.createElement("button");
       rm.type = "button"; rm.className = "btn-x";
       rm.dataset.action = "remove";
-      rm.textContent = "🗑"; rm.title = "Delete this item";
+      rm.appendChild(svgIcon("i-trash")); rm.title = "Delete this item";
       rm.onclick = () => {
         const cb = ec.onRemove;
         closeDescription();
