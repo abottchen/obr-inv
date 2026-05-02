@@ -19,6 +19,13 @@ export const LIST_CSS = `
   padding: 6px 10px; cursor: pointer;
 }
 .lock-toggle.unlocked { background: var(--accent); color: #fff; border-color: var(--accent-soft); }
+.shell-btn {
+  background: var(--bg-1); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 10px; cursor: pointer;
+  font-size: 13px; line-height: 1;
+}
+.shell-btn:hover { border-color: var(--accent-soft); }
 
 .shell-body { flex: 1; overflow-y: auto; padding: 4px 8px; }
 .cat-header {

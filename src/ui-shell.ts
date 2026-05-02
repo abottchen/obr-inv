@@ -39,6 +39,16 @@ export function mountShell(
   search.className = "shell-search";
   search.placeholder = "Search inventory...";
   header.appendChild(search);
+  const collapseAllBtn = document.createElement("button");
+  collapseAllBtn.className = "shell-btn";
+  collapseAllBtn.textContent = "⊟";
+  collapseAllBtn.title = "Collapse all categories";
+  header.appendChild(collapseAllBtn);
+  const expandAllBtn = document.createElement("button");
+  expandAllBtn.className = "shell-btn";
+  expandAllBtn.textContent = "⊞";
+  expandAllBtn.title = "Expand all categories";
+  header.appendChild(expandAllBtn);
   const lockBtn = document.createElement("button");
   lockBtn.className = "lock-toggle";
   lockBtn.textContent = "🔒";
@@ -232,6 +242,19 @@ export function mountShell(
     unlocked = !unlocked;
     updateLockUI();
     rerender(currentRecord, currentCatalog);
+  };
+  collapseAllBtn.onclick = () => {
+    body.querySelectorAll<HTMLElement>(".cat-group").forEach((group) => {
+      const cat = group.dataset.category;
+      if (cat) collapsed.add(cat);
+      group.dataset.collapsed = "true";
+    });
+  };
+  expandAllBtn.onclick = () => {
+    collapsed.clear();
+    body.querySelectorAll<HTMLElement>(".cat-group").forEach((group) => {
+      group.dataset.collapsed = "false";
+    });
   };
 
   updateLockUI();
