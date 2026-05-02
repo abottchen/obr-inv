@@ -1,0 +1,1784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Inventory — Redesign Mockup</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ================================================================
+     PALETTE — "LEATHER CODEX"
+     ================================================================ */
+  :root {
+    --leather-0: #14100b;   /* deep cover */
+    --leather-1: #1c150f;   /* shell ground */
+    --leather-2: #261c14;   /* panel face */
+    --leather-3: #322419;   /* raised / hover */
+    --leather-4: #3f2e21;   /* card edge */
+    --rule:      #4a3625;
+    --rule-soft: #2f2218;
+
+    --gilt:        #c8a44e;
+    --gilt-bright: #e8cf86;
+    --gilt-soft:   #8a6f37;
+    --gilt-glow:   rgba(232,207,134,0.32);
+    --ink:         #14100b;
+
+    --parchment:    #ece0c2;
+    --parchment-2:  #d8c79f;
+    --sepia:        #b09a76;
+    --sepia-dim:    #826d4d;
+    --shadow-deep:  0 18px 38px -12px rgba(0,0,0,0.85),
+                    0 2px 0 rgba(255,255,255,0.04) inset,
+                    0 -22px 60px -36px rgba(0,0,0,0.9) inset;
+
+    --rarity-common:    #968259;
+    --rarity-uncommon:  #6c8a3a;
+    --rarity-rare:      #4f86b8;
+    --rarity-very-rare: #9a6abb;
+    --rarity-legendary: #e0a23a;
+
+    --bad:   #c4564a;
+    --warn:  #d68a2a;
+    --ok:    #6c8a3a;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: "Manrope", system-ui, sans-serif;
+    color: var(--parchment);
+    background:
+      radial-gradient(circle at 18% 12%, #2a1f15 0%, transparent 50%),
+      radial-gradient(circle at 82% 88%, #1f1610 0%, transparent 60%),
+      #0a0805;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+    overflow-x: hidden;
+  }
+
+  /* Page chrome */
+  .page {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 32px;
+    padding: 32px 40px;
+    min-height: 100vh;
+    align-items: start;
+  }
+
+  .controls {
+    position: sticky; top: 32px;
+    color: var(--parchment-2);
+    font-size: 12px;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
+  .controls h1 {
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 144, "wght" 500, "SOFT" 30, "WONK" 1;
+    font-size: 28px;
+    line-height: 1.05;
+    margin: 0 0 4px;
+    color: var(--gilt-bright);
+    letter-spacing: -0.01em;
+  }
+  .controls h1 em {
+    font-style: italic;
+    color: var(--parchment);
+    font-variation-settings: "opsz" 144, "wght" 400, "SOFT" 60, "WONK" 1;
+  }
+  .controls p.lede {
+    margin: 0 0 22px;
+    color: var(--sepia);
+    font-size: 12.5px;
+    max-width: 200px;
+  }
+  .controls .group { margin-bottom: 18px; }
+  .controls .label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--gilt);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .controls .seg {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 3px;
+    background: rgba(20,15,10,0.6);
+    border: 1px solid var(--rule-soft);
+    border-radius: 8px;
+  }
+  .controls .seg button {
+    appearance: none;
+    background: transparent;
+    color: var(--sepia);
+    border: 0;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font: 500 11px "Manrope", sans-serif;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .controls .seg button:hover { color: var(--parchment); }
+  .controls .seg button.active {
+    background: linear-gradient(180deg, #4a371f, #2e1f12);
+    color: var(--gilt-bright);
+    box-shadow: 0 0 0 1px var(--gilt-soft) inset, 0 -2px 0 rgba(0,0,0,0.4) inset;
+  }
+
+  .controls .toggle {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px;
+    background: rgba(20,15,10,0.6);
+    border: 1px solid var(--rule-soft);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    width: fit-content;
+    font: 500 11px "Manrope", sans-serif;
+    color: var(--sepia);
+  }
+  .controls .toggle input { display: none; }
+  .controls .toggle .dot {
+    width: 28px; height: 16px;
+    border-radius: 999px;
+    background: #1c1410;
+    border: 1px solid var(--rule);
+    position: relative;
+  }
+  .controls .toggle .dot::after {
+    content: "";
+    position: absolute;
+    top: 1px; left: 1px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--sepia-dim);
+    transition: transform 160ms ease, background 160ms ease;
+  }
+  .controls .toggle input:checked + .dot::after {
+    transform: translateX(12px);
+    background: var(--gilt-bright);
+    box-shadow: 0 0 8px var(--gilt-glow);
+  }
+  .controls .toggle input:checked ~ .label-text { color: var(--parchment); }
+
+  .controls .footnote {
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--rule);
+    color: var(--sepia-dim);
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  /* Canvas area */
+  .canvas {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 8px 0 80px;
+  }
+  .stage {
+    position: relative;
+    width: 540px; height: 720px;
+    perspective: 2000px;
+  }
+  .stage-frame-label {
+    text-align: center;
+    margin-top: -12px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    color: var(--sepia-dim);
+  }
+
+  /* ================================================================
+     POPOVER FRAME — the iframe content
+     ================================================================ */
+  .popover {
+    position: absolute; inset: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background:
+      /* paper-grain */
+      radial-gradient(circle at 30% 20%, rgba(232,207,134,0.025) 0%, transparent 35%),
+      radial-gradient(circle at 70% 70%, rgba(196,90,44,0.018) 0%, transparent 40%),
+      /* leather grain */
+      repeating-linear-gradient(
+        135deg,
+        rgba(0,0,0,0) 0px,
+        rgba(0,0,0,0) 2px,
+        rgba(0,0,0,0.04) 2px,
+        rgba(0,0,0,0.04) 3px
+      ),
+      linear-gradient(180deg, var(--leather-1) 0%, var(--leather-0) 100%);
+    box-shadow: var(--shadow-deep);
+    color: var(--parchment);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--leather-3);
+  }
+
+  /* Top accent rail — visible only when unlocked, signals "edit mode is on" */
+  .lock-rail {
+    height: 3px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      var(--gilt-soft) 20%,
+      var(--gilt-bright) 50%,
+      var(--gilt-soft) 80%,
+      transparent 100%);
+    box-shadow: 0 0 14px var(--gilt-glow);
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+  .popover[data-unlocked="true"] .lock-rail { opacity: 1; }
+
+  /* ================================================================
+     HEADER
+     ================================================================ */
+  .header {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid var(--rule);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.025), transparent 60%),
+      transparent;
+  }
+
+  .brand {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .brand .mark {
+    width: 22px; height: 22px;
+    flex-shrink: 0;
+    color: var(--gilt-bright);
+    align-self: center;
+    filter: drop-shadow(0 0 6px var(--gilt-glow));
+  }
+  .brand .title {
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 144, "wght" 500, "SOFT" 30;
+    font-size: 22px;
+    color: var(--parchment);
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .brand .subtitle {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--sepia-dim);
+    margin-left: auto;
+    align-self: center;
+  }
+
+  .search {
+    position: relative;
+  }
+  .search svg {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    width: 14px; height: 14px;
+    color: var(--sepia-dim);
+    pointer-events: none;
+  }
+  .search input {
+    width: 100%;
+    background: rgba(0,0,0,0.32);
+    color: var(--parchment);
+    font: 500 13px/1 "Manrope", sans-serif;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 9px 12px 9px 34px;
+    outline: none;
+    transition: border-color 120ms, box-shadow 120ms;
+  }
+  .search input::placeholder { color: var(--sepia-dim); font-style: italic; }
+  .search input:focus {
+    border-color: var(--gilt);
+    box-shadow: 0 0 0 1px var(--gilt) inset, 0 0 12px var(--gilt-glow);
+  }
+
+  .icon-pair {
+    display: inline-flex;
+    background: rgba(0,0,0,0.32);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .icon-pair button {
+    appearance: none; background: transparent; border: 0;
+    color: var(--sepia);
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 100ms, color 100ms;
+  }
+  .icon-pair button:hover { background: var(--leather-3); color: var(--parchment); }
+  .icon-pair button + button { border-left: 1px solid var(--rule); }
+  .icon-pair svg { width: 13px; height: 13px; }
+
+  .view-seg {
+    display: inline-flex;
+    background: rgba(0,0,0,0.32);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 2px;
+    gap: 1px;
+  }
+  .view-seg button {
+    appearance: none; background: transparent; border: 0;
+    color: var(--sepia);
+    width: 28px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 100ms, color 100ms;
+  }
+  .view-seg button.active {
+    background: linear-gradient(180deg, #4a371f, #2e1f12);
+    color: var(--gilt-bright);
+    box-shadow: 0 0 0 1px var(--gilt-soft) inset;
+  }
+  .view-seg svg { width: 13px; height: 13px; }
+
+  .lock-pill {
+    appearance: none;
+    background: rgba(0,0,0,0.32);
+    color: var(--sepia);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 0 12px;
+    height: 30px;
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 600 11px "Manrope", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 120ms ease;
+  }
+  .lock-pill svg { width: 12px; height: 12px; }
+  .popover[data-unlocked="true"] .lock-pill {
+    background: linear-gradient(180deg, var(--gilt) 0%, #a17f2c 100%);
+    color: var(--ink);
+    border-color: var(--gilt-bright);
+    box-shadow: 0 0 0 1px var(--gilt-soft), 0 0 12px var(--gilt-glow);
+  }
+
+  /* ================================================================
+     BODY
+     ================================================================ */
+  .body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 14px 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--leather-4) transparent;
+  }
+  .body::-webkit-scrollbar { width: 8px; }
+  .body::-webkit-scrollbar-track { background: transparent; }
+  .body::-webkit-scrollbar-thumb {
+    background: var(--leather-4);
+    border-radius: 4px;
+    border: 2px solid var(--leather-1);
+  }
+
+  .cat {
+    margin-bottom: 18px;
+  }
+  .cat-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .cat-header .chev {
+    width: 9px; height: 9px;
+    border-right: 1.5px solid var(--gilt);
+    border-bottom: 1.5px solid var(--gilt);
+    transform: rotate(45deg) translate(-1px,-1px);
+    transition: transform 200ms ease;
+  }
+  .cat[data-collapsed="true"] .chev { transform: rotate(-45deg) translate(0,2px); }
+  .cat-header .titlewrap {
+    display: flex; align-items: baseline; gap: 8px;
+    overflow: hidden;
+  }
+  .cat-header .title {
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 60, "wght" 500;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    color: var(--parchment-2);
+    text-transform: none;
+  }
+  .cat-header .rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--rule) 0%, transparent 100%);
+    align-self: center;
+    transform: translateY(2px);
+  }
+  .cat-header .count {
+    font: 600 10px "JetBrains Mono", monospace;
+    color: var(--sepia-dim);
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border: 1px solid var(--rule);
+    border-radius: 99px;
+    background: rgba(0,0,0,0.25);
+  }
+
+  .cat-body {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 240ms ease, opacity 200ms ease;
+  }
+  .cat[data-collapsed="true"] .cat-body { grid-template-rows: 0fr; opacity: 0; }
+  .cat-body-inner { overflow: hidden; min-height: 0; }
+
+  /* ================================================================
+     LIST ROWS
+     ================================================================ */
+  .row {
+    display: grid;
+    grid-template-columns: 38px 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px 8px 10px;
+    margin-bottom: 4px;
+    background: linear-gradient(180deg, var(--leather-2) 0%, #20170f 100%);
+    border: 1px solid var(--leather-4);
+    border-left: 3px solid var(--rarity-common);
+    border-radius: 5px;
+    position: relative;
+    transition: transform 100ms ease, background 120ms ease, border-color 120ms ease;
+    cursor: default;
+  }
+  .row:hover {
+    background: linear-gradient(180deg, var(--leather-3) 0%, #26190f 100%);
+    border-color: var(--rule);
+  }
+  .row[data-rarity="uncommon"]  { border-left-color: var(--rarity-uncommon); }
+  .row[data-rarity="rare"]      { border-left-color: var(--rarity-rare); }
+  .row[data-rarity="very-rare"] { border-left-color: var(--rarity-very-rare); }
+  .row[data-rarity="legendary"] { border-left-color: var(--rarity-legendary); }
+
+  .row-icon {
+    width: 38px; height: 38px;
+    border-radius: 4px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.06) 0%, transparent 50%),
+      var(--leather-0);
+    border: 1px solid var(--leather-4);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--sepia);
+  }
+  .row-icon svg { width: 22px; height: 22px; }
+  .row[data-rarity="uncommon"]  .row-icon { color: var(--rarity-uncommon); }
+  .row[data-rarity="rare"]      .row-icon { color: var(--rarity-rare); }
+  .row[data-rarity="very-rare"] .row-icon { color: var(--rarity-very-rare); }
+  .row[data-rarity="legendary"] .row-icon { color: var(--rarity-legendary); }
+
+  .row-name {
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 36, "wght" 450;
+    font-size: 14.5px;
+    line-height: 1.2;
+    color: var(--parchment);
+    letter-spacing: -0.005em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .row[data-rarity="uncommon"]  .row-name { color: #c5d99a; }
+  .row[data-rarity="rare"]      .row-name { color: #a4c8e8; }
+  .row[data-rarity="very-rare"] .row-name {
+    color: #d2b3e8;
+    text-shadow: 0 0 8px rgba(154,106,187,0.45);
+  }
+  .row[data-rarity="legendary"] .row-name {
+    color: #f0c878;
+    text-shadow: 0 0 10px rgba(224,162,58,0.6);
+  }
+  .row-meta {
+    font: 400 11px "Manrope", sans-serif;
+    color: var(--sepia-dim);
+    letter-spacing: 0.01em;
+  }
+  .row-count {
+    font: 700 13px "JetBrains Mono", monospace;
+    color: var(--parchment-2);
+    text-align: right;
+    min-width: 36px;
+  }
+  .row-count[data-zero="true"] {
+    color: var(--sepia-dim);
+    opacity: 0.6;
+  }
+
+  .row-actions {
+    display: none;
+    align-items: center;
+    gap: 4px;
+  }
+  .popover[data-unlocked="true"] .row:hover .row-actions { display: inline-flex; }
+  .popover[data-unlocked="true"] .row .row-count { display: none; }
+  .popover[data-unlocked="true"] .row:not(:hover) .row-count { display: inline-block; }
+
+  .row-actions button {
+    appearance: none; background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--sepia);
+    width: 24px; height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font: 600 13px "Manrope", sans-serif;
+    transition: all 100ms;
+  }
+  .row-actions button:hover {
+    color: var(--gilt-bright);
+    border-color: var(--gilt-soft);
+    background: rgba(232,207,134,0.08);
+  }
+  .row-actions button.danger:hover {
+    color: var(--bad);
+    border-color: var(--bad);
+    background: rgba(196,86,74,0.12);
+  }
+
+  /* ================================================================
+     GRID
+     ================================================================ */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 8px;
+  }
+  .cell {
+    aspect-ratio: 1;
+    border-radius: 5px;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.05) 0%, transparent 50%),
+      linear-gradient(180deg, var(--leather-2) 0%, #1a120c 100%);
+    border: 1px solid var(--leather-4);
+    position: relative;
+    cursor: context-menu;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.03) inset,
+      0 -2px 6px rgba(0,0,0,0.4) inset;
+    transition: transform 120ms ease, border-color 120ms ease;
+  }
+  .cell:hover { transform: translateY(-1px); border-color: var(--rule); }
+  .cell[data-rarity="uncommon"]  { border-color: rgba(108,138,58,0.55); }
+  .cell[data-rarity="rare"]      { border-color: rgba(79,134,184,0.55); }
+  .cell[data-rarity="very-rare"] {
+    border-color: rgba(154,106,187,0.55);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.03) inset,
+      0 -2px 6px rgba(0,0,0,0.4) inset,
+      0 0 10px rgba(154,106,187,0.32);
+  }
+  .cell[data-rarity="legendary"] {
+    border-color: rgba(224,162,58,0.65);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.05) inset,
+      0 -2px 6px rgba(0,0,0,0.4) inset,
+      0 0 14px rgba(224,162,58,0.45);
+  }
+  .cell-icon {
+    position: absolute; inset: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--sepia);
+  }
+  .cell-icon svg { width: 80%; height: 80%; }
+  .cell[data-rarity="uncommon"]  .cell-icon { color: var(--rarity-uncommon); }
+  .cell[data-rarity="rare"]      .cell-icon { color: var(--rarity-rare); }
+  .cell[data-rarity="very-rare"] .cell-icon { color: var(--rarity-very-rare); }
+  .cell[data-rarity="legendary"] .cell-icon { color: var(--rarity-legendary); }
+  .cell-count {
+    position: absolute; bottom: 4px; right: 4px;
+    background: var(--leather-0);
+    border: 1px solid var(--leather-4);
+    color: var(--parchment);
+    font: 700 10px "JetBrains Mono", monospace;
+    padding: 1px 5px;
+    border-radius: 3px;
+    line-height: 1.4;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+
+  /* ================================================================
+     FOOTER + COIN POUCH
+     ================================================================ */
+  .footer {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px 6px;
+    border-top: 1px solid var(--rule);
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.25) 100%);
+  }
+  .weight {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    color: var(--sepia);
+    font: 500 12px "Manrope", sans-serif;
+  }
+  .weight .num {
+    font: 700 14px "JetBrains Mono", monospace;
+    color: var(--parchment-2);
+  }
+  .weight .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--sepia-dim);
+  }
+
+  .add {
+    appearance: none;
+    margin-left: auto;
+    background: linear-gradient(180deg, var(--gilt) 0%, #9c7a2a 100%);
+    color: var(--ink);
+    border: 1px solid var(--gilt-bright);
+    border-radius: 5px;
+    padding: 8px 16px;
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 36, "wght" 600;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.25) inset,
+      0 -2px 0 rgba(0,0,0,0.25) inset,
+      0 4px 12px rgba(0,0,0,0.4);
+    transition: transform 100ms;
+  }
+  .add:hover { filter: brightness(1.08); }
+  .add:active { transform: translateY(1px); }
+
+  .pouch {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 8px 14px 14px;
+  }
+  .coin {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid var(--leather-4);
+    border-radius: 6px;
+    padding: 4px 8px 4px 4px;
+  }
+  .coin .disc {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 12, "wght" 700;
+    font-size: 10px;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.25) inset,
+      0 -2px 2px rgba(0,0,0,0.4) inset,
+      0 1px 2px rgba(0,0,0,0.5);
+    position: relative;
+  }
+  .coin .disc::after {
+    content: "";
+    position: absolute; inset: 2px;
+    border-radius: 50%;
+    border: 1px dashed rgba(0,0,0,0.25);
+  }
+  .coin[data-ccy="pp"] .disc { background: linear-gradient(135deg, #f0f0f5 0%, #9aa0b0 100%); color: #2a2f3c; }
+  .coin[data-ccy="gp"] .disc { background: linear-gradient(135deg, #f5d774 0%, #b58020 100%); color: #3a2810; }
+  .coin[data-ccy="sp"] .disc { background: linear-gradient(135deg, #e6e6e6 0%, #8a8a8a 100%); color: #2a2a2a; }
+  .coin[data-ccy="cp"] .disc { background: linear-gradient(135deg, #d2895a 0%, #7a3e1f 100%); color: #2a160a; }
+  .coin input {
+    flex: 1; min-width: 0; width: 0;
+    background: transparent;
+    border: 0; outline: none;
+    font: 700 14px "JetBrains Mono", monospace;
+    color: var(--parchment);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    padding: 0;
+  }
+  .coin:focus-within {
+    border-color: var(--gilt-soft);
+    box-shadow: 0 0 0 1px var(--gilt-soft) inset;
+  }
+
+  /* ================================================================
+     EMPTY STATE
+     ================================================================ */
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 32px;
+    color: var(--sepia);
+  }
+  .empty .glyph {
+    width: 80px; height: 80px;
+    color: var(--gilt-soft);
+    opacity: 0.6;
+    margin-bottom: 18px;
+    filter: drop-shadow(0 0 12px var(--gilt-glow));
+  }
+  .empty h3 {
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 144, "wght" 500, "WONK" 1;
+    font-size: 22px;
+    margin: 0 0 8px;
+    color: var(--parchment-2);
+    letter-spacing: -0.01em;
+  }
+  .empty p {
+    font-style: italic;
+    color: var(--sepia);
+    max-width: 280px;
+    line-height: 1.5;
+    margin: 0 0 22px;
+    font-size: 13px;
+  }
+
+  /* ================================================================
+     ITEM CARD POPOVER (description) — overlays main popover
+     ================================================================ */
+  .card-overlay {
+    position: absolute; inset: 0;
+    background: rgba(10,7,4,0.55);
+    backdrop-filter: blur(2px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 30;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+  .card-overlay.visible { opacity: 1; pointer-events: auto; }
+
+  .item-card {
+    width: 320px;
+    background: linear-gradient(180deg, var(--leather-2) 0%, var(--leather-1) 100%);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 22px 60px -10px rgba(0,0,0,0.85);
+    transform: translateY(8px) scale(0.98);
+    transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .card-overlay.visible .item-card { transform: translateY(0) scale(1); }
+
+  .item-card .ribbon {
+    height: 4px;
+    background: var(--rarity-common);
+    box-shadow: 0 0 12px transparent;
+  }
+  .item-card[data-rarity="legendary"] .ribbon {
+    background: linear-gradient(90deg, #d68a2a, #f0c878, #d68a2a);
+    box-shadow: 0 0 16px rgba(224,162,58,0.6);
+  }
+  .item-card[data-rarity="very-rare"] .ribbon {
+    background: linear-gradient(90deg, #7e4f8e, #d2b3e8, #7e4f8e);
+    box-shadow: 0 0 12px rgba(154,106,187,0.45);
+  }
+  .item-card[data-rarity="rare"]     .ribbon { background: var(--rarity-rare); }
+  .item-card[data-rarity="uncommon"] .ribbon { background: var(--rarity-uncommon); }
+
+  .item-card-head {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 14px;
+    padding: 16px 18px 12px;
+  }
+  .item-card-icon {
+    width: 56px; height: 56px;
+    border-radius: 4px;
+    background: var(--leather-0);
+    border: 1px solid var(--leather-4);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--rarity-legendary);
+  }
+  .item-card-icon svg { width: 36px; height: 36px; }
+  .item-card-title {
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 144, "wght" 500, "SOFT" 30, "WONK" 1;
+    font-size: 22px;
+    line-height: 1.1;
+    color: #f0c878;
+    text-shadow: 0 0 14px rgba(224,162,58,0.45);
+    letter-spacing: -0.01em;
+    margin: 4px 0 4px;
+  }
+  .item-card-tagline {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--sepia);
+  }
+
+  .item-card-meta {
+    display: flex;
+    gap: 0;
+    padding: 0 18px;
+    border-top: 1px solid var(--rule-soft);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .item-card-meta .cell {
+    flex: 1;
+    aspect-ratio: auto;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 8px 0;
+    display: flex; flex-direction: column; gap: 2px;
+    align-items: flex-start;
+  }
+  .item-card-meta .cell + .cell { border-left: 1px solid var(--rule-soft); padding-left: 14px; }
+  .item-card-meta .k {
+    font: 600 9px "Manrope", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--sepia-dim);
+  }
+  .item-card-meta .v {
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 36, "wght" 500;
+    font-size: 14px;
+    color: var(--parchment);
+  }
+
+  .item-card-desc {
+    padding: 14px 18px;
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 14, "wght" 400;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--parchment-2);
+    max-height: 180px;
+    overflow-y: auto;
+  }
+  .item-card-desc p { margin: 0; }
+  .item-card-desc p + p { margin-top: 8px; }
+  .item-card-desc::first-letter {
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 144, "wght" 600, "WONK" 1;
+    font-size: 32px;
+    float: left;
+    line-height: 1;
+    margin-right: 6px;
+    color: var(--gilt-bright);
+  }
+
+  .item-card-actions {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 18px;
+    background: rgba(0,0,0,0.25);
+    border-top: 1px solid var(--rule-soft);
+  }
+  .item-card-actions .qty {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .item-card-actions .qty button {
+    width: 26px; height: 26px;
+    border-radius: 4px;
+    background: var(--leather-3);
+    border: 1px solid var(--rule);
+    color: var(--parchment);
+    cursor: pointer;
+    font: 700 14px "Manrope", sans-serif;
+  }
+  .item-card-actions .qty .n {
+    font: 700 14px "JetBrains Mono", monospace;
+    color: var(--parchment);
+    min-width: 24px; text-align: center;
+  }
+  .item-card-actions .transfer {
+    margin-left: auto;
+    background: linear-gradient(180deg, var(--gilt) 0%, #9c7a2a 100%);
+    color: var(--ink);
+    border: 1px solid var(--gilt-bright);
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 36, "wght" 600;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.2) inset,
+      0 -1px 0 rgba(0,0,0,0.2) inset;
+  }
+
+  /* ================================================================
+     GM VIEW — wider canvas with vertical player rail
+     ================================================================ */
+  .gm-stage {
+    position: relative;
+    width: 760px; height: 720px;
+    display: none;
+  }
+  .gm-popover {
+    position: absolute; inset: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background:
+      repeating-linear-gradient(135deg, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 3px),
+      linear-gradient(180deg, var(--leather-1) 0%, var(--leather-0) 100%);
+    box-shadow: var(--shadow-deep);
+    border: 1px solid var(--leather-3);
+    display: grid;
+    grid-template-columns: 220px 1fr;
+  }
+  .player-rail {
+    background: rgba(0,0,0,0.3);
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .rail-head {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .rail-head .crown {
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 144, "wght" 500, "WONK" 1;
+    font-size: 18px;
+    color: var(--parchment);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .rail-head .small {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--sepia-dim);
+    margin-top: 2px;
+  }
+  .rail-list { flex: 1; overflow-y: auto; padding: 8px 8px; }
+  .rail-item {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 5px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 100ms;
+  }
+  .rail-item:hover { background: rgba(255,255,255,0.04); }
+  .rail-item.active {
+    background: linear-gradient(180deg, rgba(232,207,134,0.10), rgba(232,207,134,0.02));
+    border-color: var(--gilt-soft);
+  }
+  .rail-item .pip {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 36, "wght" 600;
+    font-size: 13px;
+    color: var(--parchment);
+  }
+  .rail-item .who { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .rail-item .name {
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 36, "wght" 500;
+    font-size: 14px;
+    color: var(--parchment);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .rail-item .stats {
+    font: 500 10px "JetBrains Mono", monospace;
+    color: var(--sepia-dim);
+    letter-spacing: 0.02em;
+  }
+  .rail-foot {
+    padding: 10px 12px 12px;
+    border-top: 1px solid var(--rule);
+    background: rgba(0,0,0,0.25);
+  }
+  .meter {
+    margin-bottom: 8px;
+  }
+  .meter .row {
+    display: flex; align-items: center; justify-content: space-between;
+    font: 500 10px "Manrope", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--sepia-dim);
+    margin-bottom: 4px;
+    background: transparent; border: 0; padding: 0;
+  }
+  .meter .row .num { font-family: "JetBrains Mono", monospace; color: var(--parchment-2); letter-spacing: 0; }
+  .meter .bar {
+    height: 5px;
+    background: var(--leather-0);
+    border: 1px solid var(--leather-4);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .meter .fill {
+    height: 100%;
+    width: 38%;
+    background: linear-gradient(90deg, var(--gilt-soft), var(--gilt-bright));
+    box-shadow: 0 0 8px var(--gilt-glow);
+  }
+  .rail-foot .actions {
+    display: flex; gap: 6px;
+  }
+  .rail-foot .actions button {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--sepia);
+    border-radius: 4px;
+    padding: 5px 0;
+    font: 500 10px "Manrope", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  .rail-foot .actions button:hover { color: var(--gilt-bright); border-color: var(--gilt-soft); }
+  .rail-foot .actions svg { width: 12px; height: 12px; }
+
+  /* ================================================================
+     RESPONSIVE / SMALL SCREEN
+     ================================================================ */
+  @media (max-width: 900px) {
+    .page { grid-template-columns: 1fr; padding: 16px; }
+    .controls { position: static; }
+  }
+</style>
+
+<!-- ================================================================
+     SVG ICON SPRITE
+     ================================================================ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <defs>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+    </symbol>
+    <symbol id="i-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 4v6H3M15 20v-6h6M9 4l-6 6M15 20l6-6"/>
+    </symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9V3h6M21 15v6h-6M3 9l6-6M21 15l-6 6"/>
+    </symbol>
+    <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>
+    </symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+    </symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+    </symbol>
+    <symbol id="i-unlock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7-2.6"/>
+    </symbol>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 4v12M6 14l6 6 6-6M4 22h16"/>
+    </symbol>
+    <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7Z"/>
+    </symbol>
+
+    <!-- item icons (silhouette style) -->
+    <symbol id="it-sword" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M14.5 2.5 22 2v.5l-7.7 7.7 1.4 1.4 1.4-1.4 1 1-3.5 3.5-1-1 .8-.8L13 11.4l-7 7-2 .6-1.6 1.6-.7-.7L3.4 18l.6-2 7-7-1.5-1.5-.8.8-1-1L11.2 3.8l1 1-1.4 1.4 1.4 1.4Z"/>
+    </symbol>
+    <symbol id="it-bow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M5 3c5 3 12 9 14 18M5 3c0 5 0 12 0 18M5 21c5-3 12-9 14-18"/>
+      <path d="m11 11 7-2-2 7"/>
+    </symbol>
+    <symbol id="it-shield" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3Zm-1 7h2v3h3v2h-3v3h-2v-3H8v-2h3V9Z"/>
+    </symbol>
+    <symbol id="it-armor" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M9 2 4 4v5l2 1v9c0 1 1 2 2 2h8c1 0 2-1 2-2v-9l2-1V4l-5-2-2 2h-2L9 2Z"/>
+    </symbol>
+    <symbol id="it-potion" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M10 2h4v3l3 5c1.5 2.5 1.5 6-1 8-2 1.5-6 1.5-8 0-2.5-2-2.5-5.5-1-8l3-5V2Zm1 1v2h2V3h-2Zm-2 11h6c.5 0 1-.5 1-1l-1.5-3h-5L8 13c0 .5.5 1 1 1Z"/>
+    </symbol>
+    <symbol id="it-scroll" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M5 3h12c1 0 2 1 2 2v3h-3V5H8v14c0 1-1 2-2 2H5c-1 0-2-1-2-2V5c0-1 1-2 2-2Zm0 2v14h1V5H5Zm5 4h7v2h-7V9Zm0 4h7v2h-7v-2Z"/>
+    </symbol>
+    <symbol id="it-bag" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M9 4h6l1 3h2c1 0 2 1 2 2 0 4-2 12-8 12s-8-8-8-12c0-1 1-2 2-2h2l1-3Zm1 1-1 2h6l-1-2h-4Z"/>
+    </symbol>
+    <symbol id="it-bedroll" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M3 8c0-2 2-3 4-3h10c2 0 4 1 4 3 0 2-2 3-4 3H7C5 11 3 10 3 8Zm0 6c0-2 2-3 4-3h10c2 0 4 1 4 3 0 2-2 3-4 3H7c-2 0-4-1-4-3Zm0 6c0-2 2-3 4-3h10c2 0 4 1 4 3"/>
+    </symbol>
+    <symbol id="it-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 7h14l-2 12c0 1-1 2-2 2H9c-1 0-2-1-2-2L5 7Z"/>
+      <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+      <path d="M10 13h4"/>
+    </symbol>
+    <symbol id="brand-mark" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <!-- a heraldic open book / tome -->
+      <path d="M16 7c-3-2-7-2-10-1v18c3-1 7-1 10 1 3-2 7-2 10-1V6c-3-1-7-1-10 1Z"/>
+      <path d="M16 7v19"/>
+      <path d="M9 11h3M9 15h3M9 19h3M20 11h3M20 15h3M20 19h3"/>
+    </symbol>
+  </defs>
+</svg>
+
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ============= LEFT: DEMO CONTROLS ============= -->
+  <aside class="controls">
+    <h1>Inventory<br><em>redesign</em></h1>
+    <p class="lede">Mockup of the proposed leather-codex aesthetic for the OBR popover. Toggle states to inspect.</p>
+
+    <div class="group">
+      <span class="label">View</span>
+      <div class="seg" id="view-seg">
+        <button data-view="player-list" class="active">Player · List</button>
+        <button data-view="player-grid">Player · Grid</button>
+        <button data-view="player-empty">Empty</button>
+        <button data-view="gm">GM</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <span class="label">Modes</span>
+      <label class="toggle">
+        <input type="checkbox" id="t-unlock">
+        <span class="dot"></span>
+        <span class="label-text">Edit unlocked</span>
+      </label>
+      <div style="height:6px"></div>
+      <label class="toggle">
+        <input type="checkbox" id="t-card">
+        <span class="dot"></span>
+        <span class="label-text">Show item card</span>
+      </label>
+    </div>
+
+    <div class="footnote">
+      Fonts: <strong>Fraunces</strong> (display) · <strong>Manrope</strong> (body) · <strong>JetBrains Mono</strong> (numerals).
+      Window: 540×720 (player) / 760×720 (GM).
+    </div>
+  </aside>
+
+  <!-- ============= RIGHT: STAGE ============= -->
+  <main class="canvas">
+
+    <!-- ================ PLAYER STAGE ================ -->
+    <div class="stage" id="player-stage">
+      <div class="popover" id="popover">
+        <div class="lock-rail"></div>
+
+        <!-- HEADER -->
+        <div class="header">
+          <div class="brand">
+            <svg class="mark"><use href="#brand-mark"/></svg>
+            <span class="title">Tome of Holdings</span>
+            <span class="subtitle">Astrid Vex</span>
+          </div>
+
+          <div class="search">
+            <svg><use href="#i-search"/></svg>
+            <input type="text" placeholder="Seek by name…">
+          </div>
+
+          <div class="icon-pair" title="Collapse / expand all">
+            <button title="Collapse all"><svg><use href="#i-collapse"/></svg></button>
+            <button title="Expand all"><svg><use href="#i-expand"/></svg></button>
+          </div>
+
+          <div class="view-seg" id="view-toggle">
+            <button class="active" data-mode="list" title="List view"><svg><use href="#i-list"/></svg></button>
+            <button data-mode="grid" title="Grid view"><svg><use href="#i-grid"/></svg></button>
+          </div>
+
+          <button class="lock-pill" id="lock-pill">
+            <svg id="lock-icon"><use href="#i-lock"/></svg>
+            <span id="lock-text">Locked</span>
+          </button>
+        </div>
+
+        <!-- BODY: LIST VIEW -->
+        <div class="body" id="body-list">
+          <div class="cat">
+            <div class="cat-header">
+              <span class="chev"></span>
+              <div class="titlewrap"><span class="title">Weapons</span><span class="rule"></span></div>
+              <span class="count">3</span>
+            </div>
+            <div class="cat-body"><div class="cat-body-inner">
+              <div class="row" data-rarity="common">
+                <div class="row-icon"><svg><use href="#it-sword"/></svg></div>
+                <div><div class="row-name">Longsword</div></div>
+                <div class="row-meta">3 lb</div>
+                <div class="row-count">1</div>
+                <div class="row-actions">
+                  <button>−</button><button>+</button><button class="danger">×</button>
+                </div>
+              </div>
+              <div class="row" data-rarity="rare">
+                <div class="row-icon"><svg><use href="#it-sword"/></svg></div>
+                <div><div class="row-name">Flame Tongue</div></div>
+                <div class="row-meta">3 lb · attuned</div>
+                <div class="row-count">1</div>
+                <div class="row-actions">
+                  <button>−</button><button>+</button><button class="danger">×</button>
+                </div>
+              </div>
+              <div class="row" data-rarity="legendary">
+                <div class="row-icon"><svg><use href="#it-sword"/></svg></div>
+                <div><div class="row-name">Vorpal Sword</div></div>
+                <div class="row-meta">3 lb · attuned</div>
+                <div class="row-count">1</div>
+                <div class="row-actions">
+                  <button>−</button><button>+</button><button class="danger">×</button>
+                </div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="cat">
+            <div class="cat-header">
+              <span class="chev"></span>
+              <div class="titlewrap"><span class="title">Armor</span><span class="rule"></span></div>
+              <span class="count">2</span>
+            </div>
+            <div class="cat-body"><div class="cat-body-inner">
+              <div class="row" data-rarity="common">
+                <div class="row-icon"><svg><use href="#it-armor"/></svg></div>
+                <div><div class="row-name">Studded Leather</div></div>
+                <div class="row-meta">13 lb · equipped</div>
+                <div class="row-count">1</div>
+                <div class="row-actions">
+                  <button>−</button><button>+</button><button class="danger">×</button>
+                </div>
+              </div>
+              <div class="row" data-rarity="rare">
+                <div class="row-icon"><svg><use href="#it-shield"/></svg></div>
+                <div><div class="row-name">Shield, +1</div></div>
+                <div class="row-meta">6 lb</div>
+                <div class="row-count">1</div>
+                <div class="row-actions">
+                  <button>−</button><button>+</button><button class="danger">×</button>
+                </div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="cat">
+            <div class="cat-header">
+              <span class="chev"></span>
+              <div class="titlewrap"><span class="title">Consumables</span><span class="rule"></span></div>
+              <span class="count">4</span>
+            </div>
+            <div class="cat-body"><div class="cat-body-inner">
+              <div class="row" data-rarity="common">
+                <div class="row-icon"><svg><use href="#it-potion"/></svg></div>
+                <div><div class="row-name">Potion of Healing</div></div>
+                <div class="row-meta">0.5 lb</div>
+                <div class="row-count">6</div>
+                <div class="row-actions">
+                  <button>−</button><button>+</button><button class="danger">×</button>
+                </div>
+              </div>
+              <div class="row" data-rarity="uncommon">
+                <div class="row-icon"><svg><use href="#it-potion"/></svg></div>
+                <div><div class="row-name">Potion of Greater Healing</div></div>
+                <div class="row-meta">0.5 lb</div>
+                <div class="row-count">2</div>
+                <div class="row-actions">
+                  <button>−</button><button>+</button><button class="danger">×</button>
+                </div>
+              </div>
+              <div class="row" data-rarity="very-rare">
+                <div class="row-icon"><svg><use href="#it-potion"/></svg></div>
+                <div><div class="row-name">Potion of Storm Giant Strength</div></div>
+                <div class="row-meta">0.5 lb · 1 hour</div>
+                <div class="row-count">1</div>
+                <div class="row-actions">
+                  <button>−</button><button>+</button><button class="danger">×</button>
+                </div>
+              </div>
+              <div class="row" data-rarity="common">
+                <div class="row-icon"><svg><use href="#it-potion"/></svg></div>
+                <div><div class="row-name">Antitoxin</div></div>
+                <div class="row-meta">—</div>
+                <div class="row-count" data-zero="true">0</div>
+                <div class="row-actions">
+                  <button>−</button><button>+</button><button class="danger">×</button>
+                </div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="cat">
+            <div class="cat-header">
+              <span class="chev"></span>
+              <div class="titlewrap"><span class="title">Spell Scrolls</span><span class="rule"></span></div>
+              <span class="count">2</span>
+            </div>
+            <div class="cat-body"><div class="cat-body-inner">
+              <div class="row" data-rarity="uncommon">
+                <div class="row-icon"><svg><use href="#it-scroll"/></svg></div>
+                <div><div class="row-name">Scroll of Misty Step</div></div>
+                <div class="row-meta">—</div>
+                <div class="row-count">2</div>
+                <div class="row-actions">
+                  <button>−</button><button>+</button><button class="danger">×</button>
+                </div>
+              </div>
+              <div class="row" data-rarity="legendary">
+                <div class="row-icon"><svg><use href="#it-scroll"/></svg></div>
+                <div><div class="row-name">Scroll of Wish</div></div>
+                <div class="row-meta">—</div>
+                <div class="row-count">1</div>
+                <div class="row-actions">
+                  <button>−</button><button>+</button><button class="danger">×</button>
+                </div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="cat" data-collapsed="true">
+            <div class="cat-header">
+              <span class="chev"></span>
+              <div class="titlewrap"><span class="title">Adventuring Gear</span><span class="rule"></span></div>
+              <span class="count">11</span>
+            </div>
+            <div class="cat-body"><div class="cat-body-inner"></div></div>
+          </div>
+        </div>
+
+        <!-- BODY: GRID VIEW (hidden by default) -->
+        <div class="body" id="body-grid" style="display:none">
+          <div class="cat">
+            <div class="cat-header">
+              <span class="chev"></span>
+              <div class="titlewrap"><span class="title">Weapons</span><span class="rule"></span></div>
+              <span class="count">3</span>
+            </div>
+            <div class="cat-body"><div class="cat-body-inner">
+              <div class="grid">
+                <div class="cell" data-rarity="common">
+                  <div class="cell-icon"><svg><use href="#it-sword"/></svg></div>
+                  <div class="cell-count">1</div>
+                </div>
+                <div class="cell" data-rarity="rare">
+                  <div class="cell-icon"><svg><use href="#it-sword"/></svg></div>
+                  <div class="cell-count">1</div>
+                </div>
+                <div class="cell" data-rarity="legendary">
+                  <div class="cell-icon"><svg><use href="#it-sword"/></svg></div>
+                  <div class="cell-count">1</div>
+                </div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="cat">
+            <div class="cat-header">
+              <span class="chev"></span>
+              <div class="titlewrap"><span class="title">Armor</span><span class="rule"></span></div>
+              <span class="count">2</span>
+            </div>
+            <div class="cat-body"><div class="cat-body-inner">
+              <div class="grid">
+                <div class="cell" data-rarity="common">
+                  <div class="cell-icon"><svg><use href="#it-armor"/></svg></div>
+                  <div class="cell-count">1</div>
+                </div>
+                <div class="cell" data-rarity="rare">
+                  <div class="cell-icon"><svg><use href="#it-shield"/></svg></div>
+                  <div class="cell-count">1</div>
+                </div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="cat">
+            <div class="cat-header">
+              <span class="chev"></span>
+              <div class="titlewrap"><span class="title">Consumables</span><span class="rule"></span></div>
+              <span class="count">3</span>
+            </div>
+            <div class="cat-body"><div class="cat-body-inner">
+              <div class="grid">
+                <div class="cell" data-rarity="common">
+                  <div class="cell-icon"><svg><use href="#it-potion"/></svg></div>
+                  <div class="cell-count">6</div>
+                </div>
+                <div class="cell" data-rarity="uncommon">
+                  <div class="cell-icon"><svg><use href="#it-potion"/></svg></div>
+                  <div class="cell-count">2</div>
+                </div>
+                <div class="cell" data-rarity="very-rare">
+                  <div class="cell-icon"><svg><use href="#it-potion"/></svg></div>
+                  <div class="cell-count">1</div>
+                </div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="cat">
+            <div class="cat-header">
+              <span class="chev"></span>
+              <div class="titlewrap"><span class="title">Spell Scrolls</span><span class="rule"></span></div>
+              <span class="count">2</span>
+            </div>
+            <div class="cat-body"><div class="cat-body-inner">
+              <div class="grid">
+                <div class="cell" data-rarity="uncommon">
+                  <div class="cell-icon"><svg><use href="#it-scroll"/></svg></div>
+                  <div class="cell-count">2</div>
+                </div>
+                <div class="cell" data-rarity="legendary">
+                  <div class="cell-icon"><svg><use href="#it-scroll"/></svg></div>
+                  <div class="cell-count">1</div>
+                </div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="cat">
+            <div class="cat-header">
+              <span class="chev"></span>
+              <div class="titlewrap"><span class="title">Adventuring Gear</span><span class="rule"></span></div>
+              <span class="count">11</span>
+            </div>
+            <div class="cat-body"><div class="cat-body-inner">
+              <div class="grid">
+                <div class="cell" data-rarity="uncommon">
+                  <div class="cell-icon"><svg><use href="#it-bag"/></svg></div>
+                  <div class="cell-count">1</div>
+                </div>
+                <div class="cell"><div class="cell-icon"><svg><use href="#it-bedroll"/></svg></div><div class="cell-count">1</div></div>
+                <div class="cell"><div class="cell-icon"><svg><use href="#it-bow"/></svg></div><div class="cell-count">1</div></div>
+                <div class="cell"><div class="cell-icon"><svg><use href="#it-bag"/></svg></div><div class="cell-count">3</div></div>
+              </div>
+            </div></div>
+          </div>
+        </div>
+
+        <!-- BODY: EMPTY -->
+        <div class="body" id="body-empty" style="display:none">
+          <div class="empty">
+            <svg class="glyph"><use href="#it-empty"/></svg>
+            <h3>Your pack is empty</h3>
+            <p>Quests reward those prepared for them. Stock up on potions, scrolls, and arms before you set out.</p>
+            <button class="add" id="empty-add">+ Add to inventory</button>
+          </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+          <span class="weight">
+            <span class="num">42.5</span>
+            <span class="label">lb borne</span>
+          </span>
+          <button class="add">+ Add to inventory</button>
+        </div>
+
+        <!-- COIN POUCH -->
+        <div class="pouch">
+          <div class="coin" data-ccy="pp">
+            <span class="disc">PP</span>
+            <input value="2">
+          </div>
+          <div class="coin" data-ccy="gp">
+            <span class="disc">GP</span>
+            <input value="248">
+          </div>
+          <div class="coin" data-ccy="sp">
+            <span class="disc">SP</span>
+            <input value="14">
+          </div>
+          <div class="coin" data-ccy="cp">
+            <span class="disc">CP</span>
+            <input value="3">
+          </div>
+        </div>
+
+        <!-- ITEM CARD OVERLAY -->
+        <div class="card-overlay" id="card-overlay">
+          <div class="item-card" data-rarity="legendary">
+            <div class="ribbon"></div>
+            <div class="item-card-head">
+              <div class="item-card-icon"><svg><use href="#it-sword"/></svg></div>
+              <div>
+                <div class="item-card-tagline">Weapon · Sword · Legendary</div>
+                <div class="item-card-title">Vorpal Sword</div>
+              </div>
+            </div>
+            <div class="item-card-meta">
+              <div class="cell"><span class="k">Weight</span><span class="v">3 lb</span></div>
+              <div class="cell"><span class="k">Damage</span><span class="v">1d8 slashing</span></div>
+              <div class="cell"><span class="k">Attune</span><span class="v">Yes</span></div>
+            </div>
+            <div class="item-card-desc">
+              <p>You gain a +3 bonus to attack and damage rolls made with this magic weapon. The sword ignores resistance to slashing damage.</p>
+              <p>When you attack a creature that has at least one head with this weapon and roll a 20 on the attack roll, you cut off one of the creature's heads. The creature dies if it can't survive without the lost head.</p>
+            </div>
+            <div class="item-card-actions">
+              <div class="qty">
+                <button>−</button>
+                <span class="n">1</span>
+                <button>+</button>
+              </div>
+              <button class="transfer">Transfer →</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="stage-frame-label">Player popover · 540 × 720</div>
+    </div>
+
+    <!-- ================ GM STAGE ================ -->
+    <div class="gm-stage" id="gm-stage">
+      <div class="gm-popover">
+        <!-- LEFT: PLAYER RAIL -->
+        <aside class="player-rail">
+          <div class="rail-head">
+            <p class="crown">Party Records</p>
+            <p class="small">4 in fellowship</p>
+          </div>
+          <div class="rail-list">
+            <div class="rail-item active">
+              <div class="pip" style="color:#c45a2c">A</div>
+              <div class="who">
+                <span class="name">Astrid Vex</span>
+                <span class="stats">12 items · 42 lb</span>
+              </div>
+            </div>
+            <div class="rail-item">
+              <div class="pip" style="color:#5a7a3e">K</div>
+              <div class="who">
+                <span class="name">Kael of Ember</span>
+                <span class="stats">8 items · 51 lb</span>
+              </div>
+            </div>
+            <div class="rail-item">
+              <div class="pip" style="color:#3e6a9a">M</div>
+              <div class="who">
+                <span class="name">Mira Lenswright</span>
+                <span class="stats">19 items · 28 lb</span>
+              </div>
+            </div>
+            <div class="rail-item">
+              <div class="pip" style="color:#7e4f8e">T</div>
+              <div class="who">
+                <span class="name">Thane Brightwood</span>
+                <span class="stats">6 items · 14 lb</span>
+              </div>
+            </div>
+            <div class="rail-item">
+              <div class="pip" style="color:#c8a44e">G</div>
+              <div class="who">
+                <span class="name">You (GM)</span>
+                <span class="stats">3 items · 5 lb</span>
+              </div>
+            </div>
+          </div>
+          <div class="rail-foot">
+            <div class="meter">
+              <div class="row"><span>Vault</span><span class="num">1.9 / 5.0 KB</span></div>
+              <div class="bar"><div class="fill"></div></div>
+            </div>
+            <div class="actions">
+              <button title="Manage custom items"><svg><use href="#i-star"/></svg> Customs</button>
+              <button title="Download backup"><svg><use href="#i-download"/></svg> Export</button>
+            </div>
+          </div>
+        </aside>
+
+        <!-- RIGHT: ACTIVE PLAYER (re-uses popover content) -->
+        <div style="display:flex; flex-direction:column; min-width:0;">
+          <div class="lock-rail" style="opacity:1"></div>
+          <div class="header">
+            <div class="brand">
+              <svg class="mark"><use href="#brand-mark"/></svg>
+              <span class="title">Astrid Vex</span>
+              <span class="subtitle">Acting as · GM</span>
+            </div>
+            <div class="search">
+              <svg><use href="#i-search"/></svg>
+              <input type="text" placeholder="Seek by name…">
+            </div>
+            <div class="icon-pair">
+              <button><svg><use href="#i-collapse"/></svg></button>
+              <button><svg><use href="#i-expand"/></svg></button>
+            </div>
+            <div class="view-seg">
+              <button class="active"><svg><use href="#i-list"/></svg></button>
+              <button><svg><use href="#i-grid"/></svg></button>
+            </div>
+            <button class="lock-pill" style="background: linear-gradient(180deg,#c8a44e 0%,#a17f2c 100%); color:#14100b; border-color:#e8cf86; box-shadow: 0 0 0 1px #8a6f37, 0 0 12px rgba(232,207,134,0.32);">
+              <svg><use href="#i-unlock"/></svg> Unlocked
+            </button>
+          </div>
+          <div class="body">
+            <div class="cat">
+              <div class="cat-header">
+                <span class="chev"></span>
+                <div class="titlewrap"><span class="title">Weapons</span><span class="rule"></span></div>
+                <span class="count">3</span>
+              </div>
+              <div class="cat-body"><div class="cat-body-inner">
+                <div class="row" data-rarity="rare"><div class="row-icon"><svg><use href="#it-sword"/></svg></div><div><div class="row-name">Flame Tongue</div></div><div class="row-meta">3 lb</div><div class="row-count">1</div></div>
+                <div class="row" data-rarity="legendary"><div class="row-icon"><svg><use href="#it-sword"/></svg></div><div><div class="row-name">Vorpal Sword</div></div><div class="row-meta">3 lb</div><div class="row-count">1</div></div>
+              </div></div>
+            </div>
+            <div class="cat">
+              <div class="cat-header">
+                <span class="chev"></span>
+                <div class="titlewrap"><span class="title">Consumables</span><span class="rule"></span></div>
+                <span class="count">3</span>
+              </div>
+              <div class="cat-body"><div class="cat-body-inner">
+                <div class="row" data-rarity="common"><div class="row-icon"><svg><use href="#it-potion"/></svg></div><div><div class="row-name">Potion of Healing</div></div><div class="row-meta">0.5 lb</div><div class="row-count">6</div></div>
+                <div class="row" data-rarity="very-rare"><div class="row-icon"><svg><use href="#it-potion"/></svg></div><div><div class="row-name">Potion of Storm Giant Strength</div></div><div class="row-meta">0.5 lb</div><div class="row-count">1</div></div>
+              </div></div>
+            </div>
+          </div>
+          <div class="footer">
+            <span class="weight"><span class="num">42.5</span><span class="label">lb borne</span></span>
+            <button class="add">+ Add to inventory</button>
+          </div>
+          <div class="pouch">
+            <div class="coin" data-ccy="pp"><span class="disc">PP</span><input value="2"></div>
+            <div class="coin" data-ccy="gp"><span class="disc">GP</span><input value="248"></div>
+            <div class="coin" data-ccy="sp"><span class="disc">SP</span><input value="14"></div>
+            <div class="coin" data-ccy="cp"><span class="disc">CP</span><input value="3"></div>
+          </div>
+        </div>
+      </div>
+      <div class="stage-frame-label">GM popover · 760 × 720 (vertical player rail)</div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // ====== view switching =================================================
+  const playerStage = document.getElementById('player-stage');
+  const gmStage     = document.getElementById('gm-stage');
+  const bodyList    = document.getElementById('body-list');
+  const bodyGrid    = document.getElementById('body-grid');
+  const bodyEmpty   = document.getElementById('body-empty');
+  const popover     = document.getElementById('popover');
+  const cardOverlay = document.getElementById('card-overlay');
+  const lockPill    = document.getElementById('lock-pill');
+  const lockText    = document.getElementById('lock-text');
+  const lockIcon    = document.getElementById('lock-icon');
+
+  const viewSeg = document.getElementById('view-seg');
+  viewSeg.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    [...viewSeg.querySelectorAll('button')].forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    const v = b.dataset.view;
+    playerStage.style.display = (v === 'gm') ? 'none' : 'block';
+    gmStage.style.display     = (v === 'gm') ? 'block' : 'none';
+    bodyList.style.display  = (v === 'player-list')  ? '' : 'none';
+    bodyGrid.style.display  = (v === 'player-grid')  ? '' : 'none';
+    bodyEmpty.style.display = (v === 'player-empty') ? '' : 'none';
+  });
+
+  // in-popover view toggle (sync with side panel)
+  document.getElementById('view-toggle').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    [...e.currentTarget.querySelectorAll('button')].forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    const m = b.dataset.mode;
+    bodyList.style.display = (m === 'list') ? '' : 'none';
+    bodyGrid.style.display = (m === 'grid') ? '' : 'none';
+    bodyEmpty.style.display = 'none';
+    // sync side panel
+    [...viewSeg.querySelectorAll('button')].forEach(x => x.classList.remove('active'));
+    viewSeg.querySelector(`[data-view="player-${m}"]`).classList.add('active');
+  });
+
+  // ====== unlock toggle ==================================================
+  const tUnlock = document.getElementById('t-unlock');
+  function setUnlock(v) {
+    popover.dataset.unlocked = v ? 'true' : 'false';
+    lockText.textContent = v ? 'Unlocked' : 'Locked';
+    lockIcon.firstElementChild.setAttribute('href', v ? '#i-unlock' : '#i-lock');
+    tUnlock.checked = v;
+  }
+  tUnlock.addEventListener('change', () => setUnlock(tUnlock.checked));
+  lockPill.addEventListener('click', () => setUnlock(popover.dataset.unlocked !== 'true'));
+  setUnlock(false);
+
+  // ====== item card overlay ==============================================
+  const tCard = document.getElementById('t-card');
+  function setCard(v) {
+    cardOverlay.classList.toggle('visible', v);
+    tCard.checked = v;
+  }
+  tCard.addEventListener('change', () => setCard(tCard.checked));
+  cardOverlay.addEventListener('click', (e) => {
+    if (e.target === cardOverlay) setCard(false);
+  });
+
+  // ====== category collapse ==============================================
+  document.body.addEventListener('click', (e) => {
+    const h = e.target.closest('.cat-header');
+    if (!h) return;
+    const cat = h.closest('.cat');
+    const collapsed = cat.dataset.collapsed === 'true';
+    cat.dataset.collapsed = collapsed ? 'false' : 'true';
+  });
+
+  // ====== empty state add button opens card for demo flair ===============
+  document.getElementById('empty-add')?.addEventListener('click', () => setCard(true));
+</script>
+
+</body>
+</html>
