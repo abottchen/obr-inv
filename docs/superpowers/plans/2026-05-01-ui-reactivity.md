@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add visual feedback (pulse, glow, delta indicator, row enter/leave motion) to inventory state changes — increment, decrement, add, remove, transfer-out, transfer-received — across the player view and GM view.
+**Goal:** Add visual feedback (pulse, glow, delta indicator, row enter/leave motion) to inventory state changes — increment, decrement, add, remove, transfer-out, transfer-received — across the player view and the GM view, including for custom (ad-hoc) items.
 
-**Architecture:** A pure `PulseTracker` module diffs metadata snapshots and stamps timed pulse entries. `ui-shell.ts` calls `tracker.diff` + `tracker.mark` on every rerender; `ui-list.ts` reads pulses at row-render time and emits `data-pulse` attributes. CSS keyframes attached to `[data-pulse]` selectors do the rest. Transfer-received gets a louder treatment via a small `markReceived` method exposed on `ShellRefs`, called from the existing broadcast handler in `ui-player.ts`.
+**Architecture:** A pure `PulseTracker` module diffs metadata snapshots and stamps timed pulse entries. `ui-shell.ts` calls `tracker.diff` + `tracker.mark` on every rerender; `ui-list.ts` reads pulses at row-render time and emits `data-pulse` attributes. CSS keyframes attached to `[data-pulse]` selectors animate. Transfer-received uses a louder treatment via `ShellRefs.markReceived`, called from the existing broadcast handler in `ui-player.ts`. Custom items work by virtue of already being merged into the catalog before reaching the shell.
 
 **Tech Stack:** TypeScript, Vite, Vitest + jsdom, vanilla DOM. No new runtime dependencies.
 
@@ -17,15 +17,15 @@
 | File | Action | Responsibility |
 |---|---|---|
 | `src/types.ts` | Modify | Add `itemId: string` to `TransferReceivedMessage`. |
-| `src/transfer.ts` | Modify | Populate `itemId` when broadcasting. |
+| `src/transfer.ts` | Modify | Populate `itemId` in the broadcast `note`. |
 | `src/ui-feedback.ts` | Create | `PulseTracker` interface, `createPulseTracker`, durations, priority. |
 | `src/styles-feedback.ts` | Create | `FEEDBACK_CSS` string with all keyframes + reduced-motion branch. |
 | `src/styles-list.ts` | Modify | `.inv-count { position: relative }` so `.inv-delta` can absolute-position. |
-| `src/main.ts` | Modify | Inject `FEEDBACK_CSS`. |
-| `src/ui-list.ts` | Modify | Extend `ListState` with `tracker` and `phantomRemoves`; render synthetic remove rows; emit `data-pulse` + `.inv-delta`; `scrollIntoView` on received. |
-| `src/ui-shell.ts` | Modify | Construct tracker per shell; diff/mark on rerender; auto-expand collapsed categories on `received`; expose `markReceived(itemId, qty)` on `ShellRefs`. |
-| `src/ui-player.ts` | Modify | Call `refs.markReceived(...)` on `transfer-received` broadcast. |
-| `src/ui-gm.ts` | (no changes) | Verified by re-running existing smoke tests. |
+| `src/main.ts` | Modify | Inject `FEEDBACK_CSS` after `DIALOG_CSS`. |
+| `src/ui-list.ts` | Modify (surgical) | Extend `ListState` with `tracker` + `phantomRemoves`; render synthetic remove rows; emit `data-pulse` + `.inv-delta`; `scrollIntoView` on received. Preserve existing `escapeHtml`/`isSafeIconUrl` imports and alphabetic category sort. |
+| `src/ui-shell.ts` | Modify (surgical) | Construct tracker per shell; diff/mark on rerender; auto-expand collapsed categories on `received`; expose `markReceived(itemId, qty)` on `ShellRefs`. Preserve existing `onCreateCustomClick` GM button. |
+| `src/ui-player.ts` | Modify | Call `refs.markReceived(msg.itemId, msg.quantity)` and `refs.rerender(current, merged)` on `transfer-received`. |
+| `src/ui-gm.ts` | (no changes) | Standard pulses apply via the shell. Verified by re-running existing GM tests. |
 | `test/ui-feedback.test.ts` | Create | Pure `PulseTracker` tests. |
 | `test/ui-feedback-dom.test.ts` | Create | DOM integration via `mountShell`. |
 
@@ -34,13 +34,12 @@
 ## Task 1: Add `itemId` to the transfer-received message
 
 **Files:**
-- Modify: `src/types.ts:31-37`
+- Modify: `src/types.ts:40-46`
 - Modify: `src/transfer.ts:78-84`
-- Test: existing `test/transfer.test.ts` should still pass
 
 - [ ] **Step 1: Update the type**
 
-In `src/types.ts`, change:
+In `src/types.ts`, change the `TransferReceivedMessage` interface:
 
 ```ts
 export interface TransferReceivedMessage {
@@ -98,7 +97,7 @@ const note: TransferReceivedMessage = {
 npx tsc --noEmit
 npm test
 ```
-Expected: PASS (all 50+ tests still pass; typecheck clean).
+Expected: PASS — all 86 existing tests still pass; typecheck clean.
 
 - [ ] **Step 4: Commit**
 
@@ -113,7 +112,7 @@ git commit -m "feat(types): include itemId in transfer-received broadcast"
 
 **Files:**
 - Create: `src/ui-feedback.ts`
-- Test: `test/ui-feedback.test.ts`
+- Create: `test/ui-feedback.test.ts`
 
 - [ ] **Step 1: Write the test file**
 
@@ -221,7 +220,7 @@ describe("PulseTracker.mark + consume", () => {
     t.mark(new Map([["a", { kind: "inc", delta: 1 }]]));
     now = 1500;
     t.mark(new Map([["a", { kind: "inc", delta: 1 }]]));
-    now = 2100; // 600ms past second mark; still in 700ms window
+    now = 2100; // 600ms past second mark; still inside the 700ms window
     expect(t.consume("a")?.kind).toBe("inc");
   });
 
@@ -361,12 +360,12 @@ export function createPulseTracker(
 ```
 npm test -- test/ui-feedback.test.ts
 ```
-Expected: PASS — all tracker tests green. Then run full suite to confirm nothing else broke:
+Expected: PASS — all tracker tests green. Then run the full suite:
 
 ```
 npm test
 ```
-Expected: PASS.
+Expected: PASS (86 existing + 14 new = 100).
 
 - [ ] **Step 5: Commit**
 
@@ -381,7 +380,7 @@ git commit -m "feat(ui-feedback): add PulseTracker for timed visual feedback"
 
 **Files:**
 - Create: `src/styles-feedback.ts`
-- Modify: `src/main.ts:13-15`
+- Modify: `src/main.ts:9-11, 17-18`
 
 - [ ] **Step 1: Create `src/styles-feedback.ts`**
 
@@ -540,16 +539,16 @@ export const FEEDBACK_CSS = `
 `;
 ```
 
-- [ ] **Step 2: Inject in main.ts**
+- [ ] **Step 2: Inject in `main.ts`**
 
-In `src/main.ts`, change the imports:
+In `src/main.ts`, find the import lines:
 
 ```ts
 import { LIST_CSS } from "./styles-list";
 import { DIALOG_CSS } from "./styles-dialog";
 ```
 
-to:
+and add a third import below them:
 
 ```ts
 import { LIST_CSS } from "./styles-list";
@@ -557,14 +556,14 @@ import { DIALOG_CSS } from "./styles-dialog";
 import { FEEDBACK_CSS } from "./styles-feedback";
 ```
 
-And the inject calls:
+Then find the existing inject calls inside `OBR.onReady`:
 
 ```ts
 injectStyles(LIST_CSS, "obr-inv-list-styles");
 injectStyles(DIALOG_CSS, "obr-inv-dialog-styles");
 ```
 
-to:
+and add a third call below them:
 
 ```ts
 injectStyles(LIST_CSS, "obr-inv-list-styles");
@@ -636,7 +635,7 @@ Create `test/ui-feedback-dom.test.ts`:
 ```ts
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
-import { mountShell } from "../src/ui-shell";
+import { mountShell, type ShellHandlers } from "../src/ui-shell";
 import type { CatalogItem, PlayerInventoryRecord } from "../src/types";
 
 const catalog: CatalogItem[] = [
@@ -657,7 +656,7 @@ function rec(items: Array<[string, number]>): PlayerInventoryRecord {
 }
 
 function noop(): void {}
-function makeHandlers() {
+function makeHandlers(): ShellHandlers {
   return {
     onIncrement: async () => {},
     onDecrement: async () => {},
@@ -667,11 +666,6 @@ function makeHandlers() {
     onDescription: noop,
     onTransfer: noop,
   };
-}
-
-function unlock(root: HTMLElement) {
-  const lock = root.querySelector(".lock-toggle") as HTMLButtonElement;
-  lock.click();
 }
 
 function rowFor(root: HTMLElement, id: string): HTMLElement | null {
@@ -801,7 +795,7 @@ npm test -- test/ui-feedback-dom.test.ts
 ```
 Expected: FAIL — `markReceived` not defined on `ShellRefs`, no `data-pulse` on rows.
 
-- [ ] **Step 3: Don't commit yet** — these tests pass after Tasks 6 & 7. Leave them in working tree.
+- [ ] **Step 3: Don't commit yet** — these tests pass after Task 6. Leave them in working tree.
 
 ---
 
@@ -810,25 +804,44 @@ Expected: FAIL — `markReceived` not defined on `ShellRefs`, no `data-pulse` on
 This is one task because the changes are tightly coupled — `ListState` in `ui-list.ts` grows two new fields (`tracker`, `phantomRemoves`), and `ui-shell.ts` is the only caller that constructs them.
 
 **Files:**
-- Modify: `src/ui-list.ts` — entire file
-- Modify: `src/ui-shell.ts:5-18, 105-152, 184-188`
+- Modify: `src/ui-list.ts` — surgical edits
+- Modify: `src/ui-shell.ts` — surgical edits
 
-- [ ] **Step 1: Update `src/ui-list.ts`**
+- [ ] **Step 1: Add imports to `src/ui-list.ts`**
 
-Replace the file contents with:
+Find:
 
 ```ts
+import { escapeHtml, isSafeIconUrl } from "./escape";
+import type { CatalogItem, InventoryEntry, Rarity } from "./types";
+```
+
+and add a tracker import below it:
+
+```ts
+import { escapeHtml, isSafeIconUrl } from "./escape";
 import type { CatalogItem, InventoryEntry, Rarity } from "./types";
 import type { PulseTracker, PulseEntry } from "./ui-feedback";
+```
 
-export interface RowHandlers {
-  onIncrement: (id: string) => void;
-  onDecrement: (id: string) => void;
-  onRemove: (id: string) => void;
-  onDescription: (id: string, anchor: { x: number; y: number }) => void;
-  onTransfer: (id: string, anchor: { x: number; y: number }) => void;
+- [ ] **Step 2: Extend `ListState` in `src/ui-list.ts`**
+
+Find:
+
+```ts
+export interface ListState {
+  items: InventoryEntry[];
+  catalog: CatalogItem[];
+  search: string;
+  unlocked: boolean;
+  collapsed: Set<string>;
+  ghosts: Set<string>;
 }
+```
 
+and replace with:
+
+```ts
 export interface ListState {
   items: InventoryEntry[];
   catalog: CatalogItem[];
@@ -839,7 +852,13 @@ export interface ListState {
   tracker: PulseTracker;
   phantomRemoves: Set<string>;
 }
+```
 
+- [ ] **Step 3: Inject phantom rows + scroll-into-view in `renderList`**
+
+Find the current `renderList` body in `src/ui-list.ts`:
+
+```ts
 export function renderList(
   container: HTMLElement, state: ListState, handlers: RowHandlers,
 ): void {
@@ -847,7 +866,67 @@ export function renderList(
   const byId = new Map(state.catalog.map((c) => [c.id, c]));
   const search = state.search.trim().toLowerCase();
 
-  // Build the working list: real items + synthetic [id,0] entries for phantom removes.
+  const byCat = new Map<string, Array<{ entry: InventoryEntry; item: CatalogItem | null }>>();
+  for (const entry of state.items) {
+    const item = byId.get(entry[0]) ?? null;
+    if (entry[1] === 0 && !state.ghosts.has(entry[0])) continue;
+    if (search && !rowMatches(entry, item, search)) continue;
+    const cat = item?.category ?? "Unknown";
+    if (!byCat.has(cat)) byCat.set(cat, []);
+    byCat.get(cat)!.push({ entry, item });
+  }
+
+  if (byCat.size === 0) {
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.textContent = search ? `No items match "${state.search}"` : "Inventory is empty";
+    container.appendChild(empty);
+    return;
+  }
+
+  const sortedCats = [...byCat.entries()].sort(
+    ([a], [b]) => a.localeCompare(b),
+  );
+  for (const [cat, entries] of sortedCats) {
+    const collapsed = state.collapsed.has(cat);
+
+    const group = document.createElement("div");
+    group.className = "cat-group";
+    group.dataset.category = cat;
+    group.dataset.collapsed = collapsed ? "true" : "false";
+
+    const header = document.createElement("div");
+    header.className = "cat-header";
+    header.dataset.category = cat;
+    header.innerHTML = `<span><span class="chev">▾</span> ${escapeHtml(cat)}</span><span>(${entries.length})</span>`;
+    group.appendChild(header);
+
+    const bodyEl = document.createElement("div");
+    bodyEl.className = "cat-body";
+    const inner = document.createElement("div");
+    inner.className = "cat-body-inner";
+    for (const { entry, item } of entries) {
+      inner.appendChild(renderRow(entry, item, state.unlocked, search, handlers));
+    }
+    bodyEl.appendChild(inner);
+    group.appendChild(bodyEl);
+
+    container.appendChild(group);
+  }
+}
+```
+
+and replace with:
+
+```ts
+export function renderList(
+  container: HTMLElement, state: ListState, handlers: RowHandlers,
+): void {
+  container.innerHTML = "";
+  const byId = new Map(state.catalog.map((c) => [c.id, c]));
+  const search = state.search.trim().toLowerCase();
+
+  // Real items + synthetic [id, 0] entries for phantom removes (one render).
   const working: InventoryEntry[] = [...state.items];
   const realIds = new Set(state.items.map((e) => e[0]));
   for (const id of state.phantomRemoves) {
@@ -879,7 +958,10 @@ export function renderList(
 
   const receivedRows: HTMLElement[] = [];
 
-  for (const [cat, entries] of byCat.entries()) {
+  const sortedCats = [...byCat.entries()].sort(
+    ([a], [b]) => a.localeCompare(b),
+  );
+  for (const [cat, entries] of sortedCats) {
     const collapsed = state.collapsed.has(cat);
 
     const group = document.createElement("div");
@@ -890,7 +972,7 @@ export function renderList(
     const header = document.createElement("div");
     header.className = "cat-header";
     header.dataset.category = cat;
-    header.innerHTML = `<span><span class="chev">▾</span> ${escape(cat)}</span><span>(${entries.length})</span>`;
+    header.innerHTML = `<span><span class="chev">▾</span> ${escapeHtml(cat)}</span><span>(${entries.length})</span>`;
     group.appendChild(header);
 
     const bodyEl = document.createElement("div");
@@ -908,7 +990,6 @@ export function renderList(
     container.appendChild(group);
   }
 
-  // Side effect for received: scroll into view (after DOM attach).
   for (const row of receivedRows) {
     row.scrollIntoView({
       block: "center",
@@ -916,20 +997,46 @@ export function renderList(
     });
   }
 }
+```
 
-function rowMatches(
-  entry: InventoryEntry, item: CatalogItem | null, search: string,
-): boolean {
-  const name = item?.name ?? entry[0];
-  return name.toLowerCase().includes(search);
-}
+- [ ] **Step 4: Update `renderRow` signature and body in `src/ui-list.ts`**
 
-function formatDelta(delta: number): string {
-  if (delta > 0) return `+${delta}`;
-  if (delta < 0) return `−${Math.abs(delta)}`;
-  return "";
-}
+Find:
 
+```ts
+function renderRow(
+  entry: InventoryEntry, item: CatalogItem | null, unlocked: boolean,
+  search: string, h: RowHandlers,
+): HTMLElement {
+  const [id, count] = entry;
+  const row = document.createElement("div");
+  row.className = "inv-row";
+  if (item?.rarity) row.dataset.rarity = item.rarity as Rarity;
+  row.dataset.itemId = id;
+
+  const icon = document.createElement("div");
+  icon.className = "inv-icon";
+  if (item?.icon && isSafeIconUrl(item.icon)) {
+    icon.style.backgroundImage = `url("${item.icon}")`;
+  } else {
+    icon.textContent = "❓";
+  }
+  row.appendChild(icon);
+
+  const name = document.createElement("div");
+  name.className = "inv-name";
+  name.innerHTML = item ? highlight(item.name, search) : escapeHtml(`[${id}] (missing from catalog)`);
+  row.appendChild(name);
+
+  const cnt = document.createElement("div");
+  cnt.className = "inv-count";
+  cnt.textContent = `×${count}`;
+  row.appendChild(cnt);
+```
+
+and replace with:
+
+```ts
 function renderRow(
   entry: InventoryEntry, item: CatalogItem | null, unlocked: boolean,
   search: string, h: RowHandlers, tracker: PulseTracker,
@@ -942,13 +1049,16 @@ function renderRow(
 
   const icon = document.createElement("div");
   icon.className = "inv-icon";
-  if (item?.icon) icon.style.backgroundImage = `url("${item.icon}")`;
-  else icon.textContent = "❓";
+  if (item?.icon && isSafeIconUrl(item.icon)) {
+    icon.style.backgroundImage = `url("${item.icon}")`;
+  } else {
+    icon.textContent = "❓";
+  }
   row.appendChild(icon);
 
   const name = document.createElement("div");
   name.className = "inv-name";
-  name.innerHTML = item ? highlight(item.name, search) : escape(`[${id}] (missing from catalog)`);
+  name.innerHTML = item ? highlight(item.name, search) : escapeHtml(`[${id}] (missing from catalog)`);
   row.appendChild(name);
 
   const cnt = document.createElement("div");
@@ -964,172 +1074,85 @@ function renderRow(
     row.dataset.pulse = pulse.kind;
     if (pulse.delta != null) delta.textContent = formatDelta(pulse.delta);
   }
-
-  if (unlocked) {
-    const dec = document.createElement("button");
-    dec.className = "btn-step"; dec.textContent = "−"; dec.title = "Decrease";
-    dec.dataset.action = "dec";
-    dec.onclick = () => h.onDecrement(id);
-    row.appendChild(dec);
-
-    const inc = document.createElement("button");
-    inc.className = "btn-step"; inc.textContent = "+"; inc.title = "Increase";
-    inc.dataset.action = "inc";
-    inc.onclick = () => h.onIncrement(id);
-    row.appendChild(inc);
-
-    const rm = document.createElement("button");
-    rm.className = "btn-x"; rm.textContent = "✕"; rm.title = "Remove";
-    rm.dataset.action = "remove";
-    rm.onclick = () => h.onRemove(id);
-    row.appendChild(rm);
-  }
-
-  // Right-click and shift+right-click open description / transfer.
-  // Bound to the whole row so the entire visual element is hit-testable;
-  // exempt the ± / × buttons so right-clicking those does nothing surprising.
-  row.addEventListener("contextmenu", (ev) => {
-    const t = ev.target as HTMLElement;
-    if (t.closest(".btn-step, .btn-x")) return;
-    ev.preventDefault();
-    const me = ev as MouseEvent;
-    if (me.shiftKey) h.onTransfer(id, { x: me.clientX, y: me.clientY });
-    else h.onDescription(id, { x: me.clientX, y: me.clientY });
-  });
-
-  return row;
-}
-
-function escape(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  }[c]!));
-}
-
-function highlight(text: string, search: string): string {
-  if (!search) return escape(text);
-  const lower = text.toLowerCase();
-  const idx = lower.indexOf(search);
-  if (idx < 0) return escape(text);
-  return escape(text.slice(0, idx))
-    + `<mark>${escape(text.slice(idx, idx + search.length))}</mark>`
-    + escape(text.slice(idx + search.length));
-}
 ```
 
-- [ ] **Step 2: Update `src/ui-shell.ts`**
+(The remainder of the function — the `unlocked` block and the contextmenu listener — stays exactly as it is.)
 
-Replace the file with:
+- [ ] **Step 5: Add the `formatDelta` helper to `src/ui-list.ts`**
+
+Find:
+
+```ts
+function rowMatches(
+```
+
+and insert above it:
+
+```ts
+function formatDelta(delta: number): string {
+  if (delta > 0) return `+${delta}`;
+  if (delta < 0) return `−${Math.abs(delta)}`;
+  return "";
+}
+
+function rowMatches(
+```
+
+- [ ] **Step 6: Add imports to `src/ui-shell.ts`**
+
+Find:
+
+```ts
+import { renderList, type ListState, type RowHandlers } from "./ui-list";
+import { totalWeight } from "./inventory";
+import type { CatalogItem, PlayerInventoryRecord } from "./types";
+```
+
+and add the tracker import:
 
 ```ts
 import { renderList, type ListState, type RowHandlers } from "./ui-list";
 import { totalWeight } from "./inventory";
 import { createPulseTracker, type PulseTracker } from "./ui-feedback";
 import type { CatalogItem, PlayerInventoryRecord } from "./types";
+```
 
-export interface ShellHandlers extends Omit<RowHandlers, "onIncrement" | "onDecrement" | "onRemove"> {
-  onIncrement: (id: string) => Promise<void>;
-  onDecrement: (id: string) => Promise<void>;
-  onRemove: (id: string) => Promise<void>;
-  onCurrencyChange: (
-    field: "pp" | "gp" | "sp" | "cp", value: number,
-  ) => Promise<void>;
-  onAddClick: () => void;
+- [ ] **Step 7: Add `markReceived` to `ShellRefs`**
+
+Find:
+
+```ts
+export interface ShellRefs {
+  rerender: (record: PlayerInventoryRecord, catalog: CatalogItem[]) => void;
+  destroy: () => void;
 }
+```
 
+and replace with:
+
+```ts
 export interface ShellRefs {
   rerender: (record: PlayerInventoryRecord, catalog: CatalogItem[]) => void;
   markReceived: (itemId: string, quantity: number) => void;
   destroy: () => void;
 }
+```
 
-export function mountShell(
-  root: HTMLElement,
-  initialRecord: PlayerInventoryRecord,
-  catalog: CatalogItem[],
-  handlers: ShellHandlers,
-): ShellRefs {
-  root.innerHTML = "";
-  const wrap = document.createElement("div");
-  wrap.className = "shell";
+- [ ] **Step 8: Construct the tracker per shell**
 
-  const header = document.createElement("div");
-  header.className = "shell-header";
-  const search = document.createElement("input");
-  search.className = "shell-search";
-  search.placeholder = "Search inventory...";
-  header.appendChild(search);
-  const lockBtn = document.createElement("button");
-  lockBtn.className = "lock-toggle";
-  lockBtn.textContent = "🔒";
-  lockBtn.title = "Click to unlock editing";
-  header.appendChild(lockBtn);
-  wrap.appendChild(header);
+Find:
 
-  const body = document.createElement("div");
-  body.className = "shell-body";
-  wrap.appendChild(body);
+```ts
+  let unlocked = false;
+  const collapsed = new Set<string>();
+  const ghosts = new Set<string>();
+  let currentRecord = initialRecord;
+  let currentCatalog = catalog;
+```
 
-  const footer = document.createElement("div");
-  footer.className = "shell-footer";
-  const weightEl = document.createElement("span");
-  weightEl.textContent = "⚖ 0 lb";
-  footer.appendChild(weightEl);
-  const addBtn = document.createElement("button");
-  addBtn.className = "btn-add";
-  addBtn.textContent = "+ Add to inventory";
-  addBtn.onclick = handlers.onAddClick;
-  footer.appendChild(addBtn);
-  wrap.appendChild(footer);
+and replace with:
 
-  const gold = document.createElement("div");
-  gold.className = "gold-strip";
-  const ccyInputs: Record<string, HTMLInputElement> = {} as any;
-  const tip = "Type a number to set, +N to add, -N to subtract";
-  for (const f of ["pp", "gp", "sp", "cp"] as const) {
-    const cell = document.createElement("div");
-    cell.className = "gold-cell";
-    cell.dataset.ccy = f;
-    cell.title = tip;
-    const lbl = document.createElement("label");
-    lbl.textContent = f;
-    cell.appendChild(lbl);
-    const inp = document.createElement("input");
-    inp.type = "text";
-    inp.inputMode = "numeric";
-    inp.value = "0";
-    inp.title = tip;
-    const currentValue = () => currentRecord.currency[f] ?? 0;
-    const commit = () => {
-      const parsed = parseCurrencyInput(inp.value, currentValue());
-      if (parsed === null) {
-        inp.value = String(currentValue());
-        return;
-      }
-      const clamped = Math.max(0, Math.floor(parsed));
-      inp.value = String(clamped);
-      void handlers.onCurrencyChange(f, clamped);
-    };
-    inp.onchange = commit;
-    inp.onfocus = () => inp.select();
-    inp.onkeydown = (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        commit();
-        inp.blur();
-      } else if (e.key === "Escape") {
-        inp.value = String(currentValue());
-        inp.blur();
-      }
-    };
-    cell.appendChild(inp);
-    gold.appendChild(cell);
-    ccyInputs[f] = inp;
-  }
-  wrap.appendChild(gold);
-
-  root.appendChild(wrap);
-
+```ts
   let unlocked = false;
   const collapsed = new Set<string>();
   const ghosts = new Set<string>();
@@ -1137,13 +1160,52 @@ export function mountShell(
   let prevRecord: PlayerInventoryRecord | null = null;
   let currentRecord = initialRecord;
   let currentCatalog = catalog;
+```
 
-  const updateLockUI = () => {
-    lockBtn.textContent = unlocked ? "🔓" : "🔒";
-    lockBtn.classList.toggle("unlocked", unlocked);
-    lockBtn.title = unlocked ? "Click to lock editing" : "Click to unlock editing";
+- [ ] **Step 9: Wire diff/mark/auto-expand/phantomRemoves into `rerender`**
+
+Find:
+
+```ts
+  const rerender = (record: PlayerInventoryRecord, cat: CatalogItem[]) => {
+    currentRecord = record;
+    currentCatalog = cat;
+    for (const f of ["pp","gp","sp","cp"] as const) {
+      if (document.activeElement !== ccyInputs[f]) {
+        ccyInputs[f].value = String(record.currency[f] ?? 0);
+      }
+    }
+    weightEl.textContent = `⚖ ${formatWeight(totalWeight(record.items, cat))} lb`;
+    const state: ListState = {
+      items: record.items,
+      catalog: cat,
+      search: search.value,
+      unlocked,
+      collapsed,
+      ghosts,
+    };
+    renderList(body, state, {
+      onIncrement: (id) => {
+        ghosts.add(id);
+        void handlers.onIncrement(id);
+      },
+      onDecrement: (id) => {
+        ghosts.add(id);
+        void handlers.onDecrement(id);
+      },
+      onRemove: (id) => {
+        ghosts.delete(id);
+        void handlers.onRemove(id);
+      },
+      onDescription: handlers.onDescription,
+      onTransfer: handlers.onTransfer,
+    });
   };
+```
 
+and replace with:
+
+```ts
   const rerender = (record: PlayerInventoryRecord, cat: CatalogItem[]) => {
     currentRecord = record;
     currentCatalog = cat;
@@ -1157,7 +1219,8 @@ export function mountShell(
     // Diff vs. previous record (if any) and stamp pulses.
     const marks = tracker.diff(prevRecord, record);
 
-    // Auto-expand any collapsed category that contains a `received` mark.
+    // Auto-expand any collapsed category that contains a `received` mark, so
+    // the row is visible the same frame the louder pulse plays.
     if (marks.size > 0) {
       const byId = new Map(cat.map((c) => [c.id, c]));
       for (const [id, m] of marks) {
@@ -1204,37 +1267,22 @@ export function mountShell(
       onTransfer: handlers.onTransfer,
     });
   };
+```
 
-  search.addEventListener("input", () => rerender(currentRecord, currentCatalog));
-  search.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      search.value = "";
-      rerender(currentRecord, currentCatalog);
-    }
-  });
-  body.addEventListener("click", (e) => {
-    const t = e.target as HTMLElement;
-    const headerEl = t.closest<HTMLElement>(".cat-header");
-    if (!headerEl) return;
-    const cat = headerEl.dataset.category;
-    if (!cat) return;
-    const willCollapse = !collapsed.has(cat);
-    if (willCollapse) collapsed.add(cat); else collapsed.delete(cat);
-    // Toggle data-collapsed on the persistent .cat-group element so the
-    // CSS grid-rows transition animates. A full rerender would replace
-    // the DOM and skip the transition.
-    const group = headerEl.closest<HTMLElement>(".cat-group");
-    if (group) group.dataset.collapsed = willCollapse ? "true" : "false";
-  });
-  lockBtn.onclick = () => {
-    unlocked = !unlocked;
-    updateLockUI();
-    rerender(currentRecord, currentCatalog);
+- [ ] **Step 10: Add `markReceived` to the returned ShellRefs**
+
+Find:
+
+```ts
+  return {
+    rerender,
+    destroy: () => { root.innerHTML = ""; },
   };
+```
 
-  updateLockUI();
-  rerender(initialRecord, catalog);
+and replace with:
 
+```ts
   return {
     rerender,
     markReceived: (itemId, quantity) => {
@@ -1242,49 +1290,25 @@ export function mountShell(
     },
     destroy: () => { root.innerHTML = ""; },
   };
-}
-
-function formatWeight(w: number): string {
-  if (w === 0) return "0";
-  if (Number.isInteger(w)) return String(w);
-  return w.toFixed(1);
-}
-
-/**
- * Parse a currency input value:
- * - "123"   → set to 123
- * - "+45"   → current + 45
- * - "-20"   → current - 20  (caller clamps at 0)
- * - "" or junk → null (caller reverts)
- */
-export function parseCurrencyInput(raw: string, current: number): number | null {
-  const t = raw.trim();
-  const m = /^([+-]?)(\d+)$/.exec(t);
-  if (!m) return null;
-  const n = parseInt(m[2], 10);
-  if (m[1] === "+") return current + n;
-  if (m[1] === "-") return current - n;
-  return n;
-}
 ```
 
-- [ ] **Step 3: Run typecheck**
+- [ ] **Step 11: Run typecheck**
 
 ```
 npx tsc --noEmit
 ```
 Expected: PASS.
 
-- [ ] **Step 4: Run the DOM integration tests + full suite**
+- [ ] **Step 12: Run the full test suite**
 
 ```
 npm test
 ```
-Expected: PASS — all tracker tests, all integration tests, and all pre-existing tests green.
+Expected: PASS — 86 pre-existing + 14 tracker + 7 DOM-integration = 107 tests, all green.
 
-If a pre-existing test fails because the initial-mount diff stamps pulses on every item: that should NOT happen because `tracker.diff(null, ...)` returns empty. If it does fail, debug; do not skip.
+If `test/ui-smoke.test.ts` fails because of a missing `tracker` field in `ListState`: that file does not call `renderList` directly; it goes through `mountShell`. The shell now constructs the tracker, so smoke tests should still pass without edits. If they don't, debug — do not skip.
 
-- [ ] **Step 5: Commit (Tasks 5 + 6 together)**
+- [ ] **Step 13: Commit (Tasks 5 + 6 together)**
 
 ```
 git add test/ui-feedback-dom.test.ts src/ui-list.ts src/ui-shell.ts
@@ -1296,53 +1320,47 @@ git commit -m "feat(ui): wire PulseTracker through list and shell rendering"
 ## Task 7: Mark received transfers in the player view
 
 **Files:**
-- Modify: `src/ui-player.ts:30, 101-111`
+- Modify: `src/ui-player.ts:112-122`
 
-- [ ] **Step 1: Capture the shell ref and call markReceived**
+- [ ] **Step 1: Update the broadcast handler**
 
-In `src/ui-player.ts`, change:
-
-```ts
-const refs = mountShell(opts.root, current, opts.catalog, {
-```
-
-— it already captures `refs`, no rename needed.
-
-In the broadcast handler block, change:
+In `src/ui-player.ts`, find:
 
 ```ts
-const unsubBroadcast = OBR.broadcast.onMessage(
-  BROADCAST_CHANNEL, (ev) => {
-    const msg = ev.data as BroadcastMessage;
-    if (msg.type === "transfer-received" && msg.toPlayerId === opts.playerId) {
-      OBR.notification?.show?.(
-        `${msg.fromName} gave you ${msg.quantity}× ${msg.itemName}`,
-        "INFO",
-      )?.catch?.(() => console.warn("notification.show unavailable"));
-    }
-  },
-);
+  const unsubBroadcast = OBR.broadcast.onMessage(
+    BROADCAST_CHANNEL, (ev) => {
+      const msg = ev.data as BroadcastMessage;
+      if (msg.type === "transfer-received" && msg.toPlayerId === opts.playerId) {
+        OBR.notification?.show?.(
+          `${msg.fromName} gave you ${msg.quantity}× ${msg.itemName}`,
+          "INFO",
+        )?.catch?.(() => console.warn("notification.show unavailable"));
+      }
+    },
+  );
 ```
 
-to:
+and replace with:
 
 ```ts
-const unsubBroadcast = OBR.broadcast.onMessage(
-  BROADCAST_CHANNEL, (ev) => {
-    const msg = ev.data as BroadcastMessage;
-    if (msg.type === "transfer-received" && msg.toPlayerId === opts.playerId) {
-      refs.markReceived(msg.itemId, msg.quantity);
-      // The metadata change that follows will diff to "inc"; precedence keeps "received".
-      // Kick a render in case the broadcast outpaces the metadata event.
-      refs.rerender(current, opts.catalog);
-      OBR.notification?.show?.(
-        `${msg.fromName} gave you ${msg.quantity}× ${msg.itemName}`,
-        "INFO",
-      )?.catch?.(() => console.warn("notification.show unavailable"));
-    }
-  },
-);
+  const unsubBroadcast = OBR.broadcast.onMessage(
+    BROADCAST_CHANNEL, (ev) => {
+      const msg = ev.data as BroadcastMessage;
+      if (msg.type === "transfer-received" && msg.toPlayerId === opts.playerId) {
+        refs.markReceived(msg.itemId, msg.quantity);
+        // The metadata change that follows will diff to "inc"; precedence keeps "received".
+        // Kick a render in case the broadcast outpaces the metadata event.
+        refs.rerender(current, merged);
+        OBR.notification?.show?.(
+          `${msg.fromName} gave you ${msg.quantity}× ${msg.itemName}`,
+          "INFO",
+        )?.catch?.(() => console.warn("notification.show unavailable"));
+      }
+    },
+  );
 ```
+
+Note the rerender argument is `merged` (the resolved catalog including customs), not `opts.catalog`.
 
 - [ ] **Step 2: Run typecheck + full tests**
 
@@ -1370,11 +1388,11 @@ git commit -m "feat(ui-player): pulse transfer-received with the louder treatmen
 ```
 npm run build
 ```
-Expected: PASS. Note that `npm run build` runs `tsc && vite build`.
+Expected: PASS. (`npm run build` runs `tsc && vite build`.)
 
 - [ ] **Step 2: Walk the manual checklist (from §7.3 of the spec)**
 
-The dev server is presumably already running on http://localhost:5173/. Open it in OBR's extension iframe (the project README explains how if the user hasn't done it yet) and:
+The dev server is already running on http://localhost:5173/. In OBR's extension iframe:
 
 1. Player view: tap +/− on a row. Confirm: count brightens + scales, `+1`/`−1` floats up, row glows.
 2. Player view: tap × on a row with count > 0. Confirm: amber pulse, row collapses, then it's gone.
@@ -1384,6 +1402,7 @@ The dev server is presumably already running on http://localhost:5173/. Open it 
 6. Toggle OS reduced motion. Repeat #1. Confirm: color shift only, no scale or float; delta hidden.
 7. Mash + button 5× quickly. Confirm: animation restarts cleanly, no pile-up.
 8. Type a search filter that excludes the pulsing row. Confirm: no console errors.
+9. **Custom-item check**: As GM, create a custom item via "+ Create item", add it to a player's inventory, then transfer some to another player. Confirm: pulses fire on the custom-item row exactly like a catalog item.
 
 - [ ] **Step 3: Stop here. No further commits unless verification reveals a defect.**
 
@@ -1391,6 +1410,7 @@ The dev server is presumably already running on http://localhost:5173/. Open it 
 
 ## Self-review notes (already applied)
 
-- Spec coverage: every section of the spec maps to a task. §4.1 → Task 2; §4.2 → Task 3; §4.3 → Task 6 (ui-list); §4.4 → Task 6 (ui-shell); §4.5 → Task 7; §4.6 verified by running existing tests in Task 6; §4.7 → Task 3; §4.8 → Task 1; §6 (CSS) → Task 3; §7 (testing) → Tasks 2, 5; §7.3 (manual) → Task 8.
+- Spec coverage: every section maps to a task. §4.1 → Task 2; §4.2 → Task 3; §4.3 → Task 6 (ui-list); §4.4 → Task 6 (ui-shell); §4.5 → Task 7; §4.6 verified by re-running tests in Task 6; §4.7 → Task 3; §4.8 → Task 1; §6 (CSS) → Task 3; §7 (testing) → Tasks 2, 5; §7.3 (manual) → Task 8. Custom-item compatibility verified by Step 9 of Task 8.
 - Type consistency: `PulseTracker`, `PulseEntry`, `PulseMark`, `PulseKind`, `markReceived(itemId, quantity)` are used consistently across tasks 2, 5, 6, 7.
-- No placeholders. Every code step shows the full text that ends up in the file (replacement-style edits show both before and after).
+- No placeholders. Every code step shows the full text that ends up in the file (replacement-style edits show before and after).
+- Surgical edits in Task 6 preserve the post-rebase state of `ui-list.ts` (escapeHtml/isSafeIconUrl from `./escape`, alphabetic category sort) and `ui-shell.ts` (optional `onCreateCustomClick` for the "+ Create item" button, typed `ccyInputs`).
