@@ -194,7 +194,11 @@ export const LIST_CSS = `
 
 .cat-header {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  /* Two grid children in markup: titlewrap (chev + name + decorative
+   * rule) takes the elastic 1fr column; the count badge sits in the
+   * trailing auto column. The earlier auto/1fr/auto template assumed a
+   * three-child shape and let the badge stretch the whole row. */
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 10px;
   padding: 4px 0 6px;

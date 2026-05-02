@@ -231,14 +231,138 @@ export const DIALOG_CSS = `
 }
 .description-popover .desc-transfer:hover { filter: brightness(1.08); }
 
-.transfer-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
-.transfer-list button {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--bg-1); color: var(--text);
-  border: 1px solid var(--border); border-radius: 6px;
-  padding: 5px 8px; cursor: pointer; text-align: left;
+/* ─── Transfer popover ─────────────────────────────────────────────── */
+/* A second popover that follows the description popover's "Transfer →"
+ * tap. Pre-redesign it inherited the bare .popover style and read as
+ * floating debris over the description card. Now it's clearly a
+ * deliberate next step: gilt top accent, beefier shadow, scale-in
+ * entrance, and the target list reads as gilt-edged action buttons
+ * instead of unstyled list items. */
+.transfer-popover {
+  z-index: 60;
+  min-width: 240px;
+  max-width: 320px;
+  padding: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
+  border: 1px solid var(--accent-soft);
+  border-radius: 6px;
+  box-shadow:
+    0 22px 48px -12px rgba(0,0,0,0.85),
+    0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent),
+    0 0 22px color-mix(in srgb, var(--accent-soft) 28%, transparent),
+    0 2px 0 rgba(255,255,255,0.05) inset;
+  animation: transfer-pop-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.transfer-list button:hover { background: var(--accent); border-color: var(--accent-soft); }
+.transfer-popover::before {
+  content: "";
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--accent-soft) 30%,
+    color-mix(in srgb, var(--accent-soft) 100%, #fff 20%) 50%,
+    var(--accent-soft) 70%,
+    transparent 100%);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent-soft) 50%, transparent);
+}
+@keyframes transfer-pop-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.transfer-popover h4 {
+  margin: 0;
+  padding: 12px 14px 4px;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "wght" 500, "WONK" 1;
+  font-size: 16px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.transfer-popover .meta {
+  margin: 0;
+  padding: 8px 14px 10px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.22);
+}
+.transfer-qty-label {
+  font: 700 9.5px var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-dim);
+}
+.transfer-popover .transfer-qty {
+  background: var(--bg-1);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  width: 64px;
+  outline: none;
+  font: 700 13px var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.transfer-popover .transfer-qty:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+.transfer-qty-max {
+  font: 600 11px var(--font-mono);
+  color: var(--text-dim);
+}
+
+.transfer-sub {
+  padding: 8px 14px 4px;
+  font: 700 9.5px var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--accent-soft);
+}
+
+.transfer-list {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 4px 10px 12px;
+  margin-top: 0;
+}
+.transfer-list button {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-1);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 8px 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "wght" 500;
+  font-size: 13.5px;
+  letter-spacing: -0.005em;
+  transition: all 110ms ease;
+  position: relative;
+}
+.transfer-list button::after {
+  content: "→";
+  margin-left: auto;
+  font-family: var(--font-body);
+  color: var(--text-dim);
+  font-size: 14px;
+  transition: transform 120ms, color 120ms;
+}
+.transfer-list button:hover {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 22%, var(--bg-2)),
+    color-mix(in srgb, var(--accent) 8%, var(--bg-1)));
+  border-color: var(--accent-soft);
+  color: var(--text);
+}
+.transfer-list button:hover::after {
+  color: var(--accent-soft);
+  transform: translateX(3px);
+}
 .transfer-qty {
   background: var(--bg-1); color: var(--text);
   border: 1px solid var(--border); border-radius: 4px;

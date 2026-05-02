@@ -44,8 +44,16 @@ export function showTransfer(opts: ShowTransferOpts): void {
 
   const meta = document.createElement("div");
   meta.className = "meta";
-  meta.innerHTML = `qty: <input class="transfer-qty" type="number" min="1" max="${opts.maxQty}" value="1" /> (max ${opts.maxQty})`;
+  meta.innerHTML = `<span class="transfer-qty-label">Quantity</span><input class="transfer-qty" type="number" min="1" max="${opts.maxQty}" value="1" /><span class="transfer-qty-max">/ ${opts.maxQty}</span>`;
   pop.appendChild(meta);
+
+  // "Send to" subheader makes the player list read as a deliberate next
+  // step rather than incidental list-of-options. Sits as its own band
+  // between the qty meta and the action buttons.
+  const sub = document.createElement("div");
+  sub.className = "transfer-sub";
+  sub.textContent = "Send to";
+  pop.appendChild(sub);
 
   const list = document.createElement("div");
   list.className = "transfer-list";

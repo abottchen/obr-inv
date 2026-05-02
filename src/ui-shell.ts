@@ -182,18 +182,44 @@ export function mountShell(
     const wrapRect = wrap.getBoundingClientRect();
     const tipW = tooltipLayer.offsetWidth || 0;
     const tipH = tooltipLayer.offsetHeight || 24;
-    const above = rect.top - tipH - 6 > 4;
     const margin = 4;
-    const desiredLeft = rect.left + rect.width / 2 - tipW / 2;
+    const gap = 8;
+
+    // Side-positioning. The previous above/below algorithm covered the
+    // category line on top-row hovers and the icon above for other rows.
+    // Right-of-cell is the default; for cells near the right edge the
+    // tooltip flips to the left of the cell. Only when neither side fits
+    // (very narrow popover) do we fall back to above/below.
     const minLeft = wrapRect.left + margin;
     const maxLeft = wrapRect.right - margin - tipW;
-    const clampedLeft = maxLeft < minLeft
-      ? minLeft
-      : Math.min(Math.max(desiredLeft, minLeft), maxLeft);
-    tooltipLayer.style.left = `${clampedLeft}px`;
-    tooltipLayer.style.top = above
-      ? `${rect.top - tipH - 6}px`
-      : `${rect.bottom + 6}px`;
+    const rightLeft = rect.right + gap;
+    const leftLeft  = rect.left - gap - tipW;
+    let placed = false;
+    if (rightLeft <= maxLeft) {
+      tooltipLayer.style.left = `${rightLeft}px`;
+      placed = true;
+    } else if (leftLeft >= minLeft) {
+      tooltipLayer.style.left = `${leftLeft}px`;
+      placed = true;
+    }
+    if (placed) {
+      // Vertical centre on the cell, clamped inside the popover.
+      const minTop = wrapRect.top + margin;
+      const maxTop = wrapRect.bottom - margin - tipH;
+      const desiredTop = rect.top + rect.height / 2 - tipH / 2;
+      tooltipLayer.style.top = `${Math.min(Math.max(desiredTop, minTop), maxTop)}px`;
+    } else {
+      // Pop-out fallback for very narrow widths.
+      const desiredLeft = rect.left + rect.width / 2 - tipW / 2;
+      const clampedLeft = maxLeft < minLeft
+        ? minLeft
+        : Math.min(Math.max(desiredLeft, minLeft), maxLeft);
+      tooltipLayer.style.left = `${clampedLeft}px`;
+      const above = rect.top - tipH - gap > margin;
+      tooltipLayer.style.top = above
+        ? `${rect.top - tipH - gap}px`
+        : `${rect.bottom + gap}px`;
+    }
   });
   body.addEventListener("mouseout", (e) => {
     const cell = (e.target as HTMLElement).closest<HTMLElement>(".inv-cell");
