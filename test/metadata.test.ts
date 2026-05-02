@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
 import {
   deleteRecord, ensureRecord, getCustoms, getRecord, listInventoryRecords,
-  recordKey, roomDataByteSize, writeCustoms, writeRecord,
+  onRoomMetadataChange, recordKey, roomDataByteSize, writeCustoms, writeRecord,
 } from "../src/metadata";
 import { OverCapError } from "../src/types";
 import { CUSTOMS_KEY, STORAGE_CAP_BYTES } from "../src/constants";
@@ -50,6 +50,29 @@ describe("metadata", () => {
     __testHooks.store.set("other.extension/key", { junk: true });
     const recs = await listInventoryRecords();
     expect(Object.keys(recs)).toEqual(["p1"]);
+  });
+
+  it("listInventoryRecords skips null tombstones (OBR can persist nulls)", async () => {
+    await writeRecord("p1", {
+      name: "A", color: "#fff",
+      items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
+    });
+    __testHooks.store.set("com.abottchen.obr-inv/v1/ghost", null);
+    const recs = await listInventoryRecords();
+    expect(Object.keys(recs)).toEqual(["p1"]);
+  });
+
+  it("onRoomMetadataChange skips null tombstones in delivered records", async () => {
+    const seen: Array<Record<string, unknown>> = [];
+    const unsub = onRoomMetadataChange((r) => seen.push(r));
+    __testHooks.store.set("com.abottchen.obr-inv/v1/ghost", null);
+    await writeRecord("p1", {
+      name: "A", color: "#fff",
+      items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
+    });
+    unsub();
+    const last = seen[seen.length - 1];
+    expect(Object.keys(last)).toEqual(["p1"]);
   });
 
   it("ensureRecord creates an empty record when absent", async () => {
