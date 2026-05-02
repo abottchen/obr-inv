@@ -116,9 +116,18 @@ export function mountShell(
     else delete tooltipLayer.dataset.rarity;
     tooltipLayer.style.display = "block";
     const rect = cell.getBoundingClientRect();
+    const wrapRect = wrap.getBoundingClientRect();
+    const tipW = tooltipLayer.offsetWidth || 0;
     const tipH = tooltipLayer.offsetHeight || 24;
     const above = rect.top - tipH - 6 > 4;
-    tooltipLayer.style.left = `${rect.left + rect.width / 2}px`;
+    const margin = 4;
+    const desiredLeft = rect.left + rect.width / 2 - tipW / 2;
+    const minLeft = wrapRect.left + margin;
+    const maxLeft = wrapRect.right - margin - tipW;
+    const clampedLeft = maxLeft < minLeft
+      ? minLeft
+      : Math.min(Math.max(desiredLeft, minLeft), maxLeft);
+    tooltipLayer.style.left = `${clampedLeft}px`;
     tooltipLayer.style.top = above
       ? `${rect.top - tipH - 6}px`
       : `${rect.bottom + 6}px`;
