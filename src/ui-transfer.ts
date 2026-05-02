@@ -1,6 +1,12 @@
+import OBR from "@owlbear-rodeo/sdk";
 import { clampToFrame } from "./frame";
 import { escapeHtml } from "./escape";
 import type { PlayerInventoryRecord } from "./types";
+
+function notify(text: string): void {
+  OBR.notification?.show?.(text, "INFO")
+    ?.catch?.(() => console.warn("notification.show unavailable"));
+}
 
 let active: HTMLElement | null = null;
 let outsideHandler: ((e: MouseEvent) => void) | null = null;
@@ -20,7 +26,14 @@ export interface ShowTransferOpts {
 
 export function showTransfer(opts: ShowTransferOpts): void {
   closeTransfer();
-  if (opts.targets.length === 0 || opts.maxQty <= 0) return;
+  if (opts.maxQty <= 0) {
+    notify(`Nothing to transfer — ${opts.itemName} is at ×0`);
+    return;
+  }
+  if (opts.targets.length === 0) {
+    notify("No other players in the room to transfer to");
+    return;
+  }
 
   const pop = document.createElement("div");
   pop.className = "popover transfer-popover";
