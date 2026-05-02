@@ -79,6 +79,7 @@ export async function transferItem(req: TransferRequest): Promise<void> {
     type: "transfer-received",
     fromName: sender.name,
     toPlayerId: req.toPlayerId,
+    itemId: req.itemId,
     itemName: req.itemName,
     quantity: req.qty,
   };

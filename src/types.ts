@@ -41,6 +41,7 @@ export interface TransferReceivedMessage {
   type: "transfer-received";
   fromName: string;
   toPlayerId: string;
+  itemId: string;
   itemName: string;
   quantity: number;
 }
