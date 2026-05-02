@@ -59,6 +59,16 @@ const SPRITE_SVG = `
       <path d="M5 9h14l-1.5 11c0 1-1 2-2 2H8.5c-1 0-2-1-2-2L5 9Z"/>
       <circle cx="12" cy="6" r="3"/>
     </symbol>
+    <symbol id="i-zoom-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="7"/>
+      <path d="m20 20-3.5-3.5"/>
+      <path d="M11 8v6M8 11h6"/>
+    </symbol>
+    <symbol id="i-zoom-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="7"/>
+      <path d="m20 20-3.5-3.5"/>
+      <path d="M8 11h6"/>
+    </symbol>
     <symbol id="i-brand" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <path d="M16 7c-3-2-7-2-10-1v18c3-1 7-1 10 1 3-2 7-2 10-1V6c-3-1-7-1-10 1Z"/>
       <path d="M16 7v19"/>
