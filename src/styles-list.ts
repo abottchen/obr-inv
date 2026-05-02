@@ -60,7 +60,7 @@ export const LIST_CSS = `
 }
 .inv-name { flex: 1; }
 .inv-name mark { background: rgba(124,77,255,0.25); color: inherit; padding: 0 1px; }
-.inv-count { font-variant-numeric: tabular-nums; min-width: 26px; text-align: right; color: var(--text-dim); }
+.inv-count { font-variant-numeric: tabular-nums; min-width: 26px; text-align: right; color: var(--text-dim); position: relative; }
 
 .btn-step, .btn-x {
   width: 24px; height: 24px;
