@@ -271,6 +271,17 @@ export function mountGmView(opts: GmViewOpts): () => void {
           currentBytes: msg.currentBytes,
           cap: msg.cap,
         });
+        return;
+      }
+      if (msg.type === "transfer-received") {
+        // Sender doesn't get a self-echo. (The GM's own player record
+        // can be the sender when they're acting from their own tab.)
+        if (msg.fromPlayerId === opts.selfId) return;
+        const text = msg.toPlayerId === opts.selfId
+          ? `${msg.fromName} gave you ${msg.quantity}× ${msg.itemName}`
+          : `${msg.fromName} just transferred ${msg.quantity}× ${msg.itemName} to ${msg.toName}`;
+        OBR.notification?.show?.(text, "INFO")
+          ?.catch?.(() => console.warn("notification.show unavailable"));
       }
     },
   );

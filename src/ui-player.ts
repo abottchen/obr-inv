@@ -116,13 +116,22 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
   const unsubBroadcast = OBR.broadcast.onMessage(
     BROADCAST_CHANNEL, (ev) => {
       const msg = ev.data as BroadcastMessage;
-      if (msg.type === "transfer-received" && msg.toPlayerId === opts.playerId) {
+      if (msg.type !== "transfer-received") return;
+      // Sender already knows; don't echo their own action back at them.
+      if (msg.fromPlayerId === opts.playerId) return;
+
+      if (msg.toPlayerId === opts.playerId) {
         refs.markReceived(msg.itemId, msg.quantity);
         // The metadata change that follows will diff to "inc"; precedence keeps "received".
         // Kick a render in case the broadcast outpaces the metadata event.
         refs.rerender(current, merged);
         OBR.notification?.show?.(
           `${msg.fromName} gave you ${msg.quantity}× ${msg.itemName}`,
+          "INFO",
+        )?.catch?.(() => console.warn("notification.show unavailable"));
+      } else {
+        OBR.notification?.show?.(
+          `${msg.fromName} just transferred ${msg.quantity}× ${msg.itemName} to ${msg.toName}`,
           "INFO",
         )?.catch?.(() => console.warn("notification.show unavailable"));
       }

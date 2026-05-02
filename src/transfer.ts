@@ -77,8 +77,10 @@ export async function transferItem(req: TransferRequest): Promise<void> {
 
   const note: TransferReceivedMessage = {
     type: "transfer-received",
+    fromPlayerId: req.fromPlayerId,
     fromName: sender.name,
     toPlayerId: req.toPlayerId,
+    toName: recipient.name,
     itemId: req.itemId,
     itemName: req.itemName,
     quantity: req.qty,
