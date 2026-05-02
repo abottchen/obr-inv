@@ -21,6 +21,12 @@ export interface DescriptionOpts {
     onDecrement: () => void;
     onRemove: () => void;
   };
+  /** When provided AND `editControls` is absent, the popover renders an
+   *  "Unlock to edit" call-to-action in place of the edit cluster. The
+   *  shell uses this to let a user who right-clicks an item while locked
+   *  unlock and resume editing in a single click — particularly useful
+   *  in grid view where lock state isn't visible at a glance. */
+  onUnlock?: () => void;
 }
 
 export function showDescription(
@@ -97,9 +103,33 @@ export function showDescription(
   desc.textContent = item?.description ?? "Item missing from catalog.";
   pop.appendChild(desc);
 
-  if (opts?.editControls || opts?.onTransfer) {
+  // Show the actions row when there's anything to put in it: edit
+  // controls, a transfer button, or the unlock CTA (only meaningful when
+  // edit controls are absent — i.e. shell is locked).
+  const showUnlock = !opts?.editControls && !!opts?.onUnlock;
+  if (opts?.editControls || opts?.onTransfer || showUnlock) {
     const actions = document.createElement("div");
     actions.className = "desc-actions";
+
+    if (showUnlock) {
+      const unlockBtn = document.createElement("button");
+      unlockBtn.type = "button";
+      unlockBtn.className = "desc-unlock";
+      unlockBtn.title = "Unlock editing for this inventory";
+      unlockBtn.appendChild(svgIcon("i-lock", "desc-unlock-icon"));
+      const lbl = document.createElement("span");
+      lbl.textContent = "Unlock to edit";
+      unlockBtn.appendChild(lbl);
+      unlockBtn.onclick = () => {
+        const cb = opts!.onUnlock;
+        // Don't call closeDescription() here — the shell's onUnlock
+        // re-fires the description, which calls closeDescription before
+        // mounting the new popover. Closing twice would race and leave
+        // the new popover orphaned of its outside-click handlers.
+        cb?.();
+      };
+      actions.appendChild(unlockBtn);
+    }
 
     if (opts.editControls) {
       const ec = opts.editControls;

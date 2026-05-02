@@ -293,6 +293,7 @@ export function mountGmView(opts: GmViewOpts): () => void {
             onDecrement: ctx.onDecrement,
             onRemove:    ctx.onRemove,
           } : undefined,
+          onUnlock: ctx.onUnlock,
         });
       },
     });

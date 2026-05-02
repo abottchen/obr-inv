@@ -231,6 +231,33 @@ export const DIALOG_CSS = `
 }
 .description-popover .desc-transfer:hover { filter: brightness(1.08); }
 
+/* "Unlock to edit" CTA — only renders when shell is locked. Sits before
+ * Transfer in the actions row and reads as the primary path forward. */
+.description-popover .desc-unlock {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,0,0,0.32);
+  color: var(--accent-soft);
+  border: 1px dashed color-mix(in srgb, var(--accent-soft) 70%, transparent);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "wght" 500;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  margin-right: auto;
+  transition: all 140ms ease;
+}
+.description-popover .desc-unlock svg { width: 12px; height: 12px; }
+.description-popover .desc-unlock:hover {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 22%, var(--bg-2)),
+    color-mix(in srgb, var(--accent) 8%, var(--bg-1)));
+  border-style: solid;
+  color: var(--accent-soft);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent-soft) 30%, transparent);
+}
+
 /* ─── Transfer popover ─────────────────────────────────────────────── */
 /* A second popover that follows the description popover's "Transfer →"
  * tap. Pre-redesign it inherited the bare .popover style and read as

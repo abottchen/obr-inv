@@ -101,6 +101,7 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
           onDecrement: ctx.onDecrement,
           onRemove:    ctx.onRemove,
         } : undefined,
+        onUnlock: ctx.onUnlock,
       });
     },
   });
