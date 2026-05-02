@@ -1,24 +1,6 @@
 export const LIST_CSS = `
 .shell { display: flex; flex-direction: column; height: 100%; position: relative; }
 
-/* ─── Lock accent rail ──────────────────────────────────────────────── */
-/* A thin gilt glow at the very top of the panel. Visible only when the
- * shell is unlocked, so edit-mode is unmistakable from anywhere — even
- * scrolled past the lock pill. */
-.lock-rail {
-  height: 3px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    color-mix(in srgb, var(--accent) 70%, transparent) 20%,
-    var(--accent-soft) 50%,
-    color-mix(in srgb, var(--accent) 70%, transparent) 80%,
-    transparent 100%);
-  box-shadow: 0 0 14px color-mix(in srgb, var(--accent-soft) 50%, transparent);
-  opacity: 0;
-  transition: opacity 220ms ease;
-}
-.shell[data-unlocked="true"] .lock-rail { opacity: 1; }
-
 /* ─── Header ────────────────────────────────────────────────────────── */
 .shell-header {
   position: sticky; top: 0; z-index: 5;
@@ -162,33 +144,6 @@ export const LIST_CSS = `
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 50%, transparent) inset;
 }
 
-/* Lock toggle is a labelled pill. Locked = ghost on dark; unlocked = gilt
- * fill so the state shift is obvious without reading the label. */
-.lock-toggle {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(0,0,0,0.3);
-  color: var(--text-dim);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 0 10px;
-  height: 28px;
-  font: 600 10.5px var(--font-body);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  transition: all 140ms ease;
-}
-.lock-toggle .lock-icon { width: 12px; height: 12px; }
-.lock-toggle:hover { color: var(--text); }
-.lock-toggle.unlocked {
-  background: linear-gradient(180deg, var(--accent) 0%,
-    color-mix(in srgb, var(--accent) 75%, #000) 100%);
-  color: var(--bg-0);
-  border-color: var(--accent-soft);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-soft) 60%, transparent),
-              0 0 10px color-mix(in srgb, var(--accent-soft) 35%, transparent);
-}
-
 /* ─── Body ──────────────────────────────────────────────────────────── */
 .shell-body { flex: 1; overflow-y: auto; padding: 10px 12px 4px; }
 
@@ -267,6 +222,7 @@ export const LIST_CSS = `
   border: 1px solid var(--border);
   border-left: 3px solid var(--rarity-common);
   border-radius: 5px;
+  cursor: pointer;
   transition: background 120ms ease, border-color 120ms ease;
 }
 .inv-row:hover {
@@ -536,7 +492,7 @@ export const LIST_CSS = `
   border: 1px solid var(--border);
   border-radius: 5px;
   overflow: visible;
-  cursor: context-menu;
+  cursor: pointer;
   user-select: none;
   box-shadow:
     0 1px 0 rgba(255,255,255,0.03) inset,

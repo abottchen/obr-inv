@@ -1,14 +1,14 @@
 import { escapeHtml } from "./escape";
 import type { CatalogItem, InventoryEntry, Rarity } from "./types";
 import { appendIconImage } from "./ui-icon";
-import { icon as svgIcon } from "./ui-icons";
 import { groupByCategory } from "./ui-items-data";
 import type { PulseTracker, PulseEntry } from "./ui-feedback";
 
 export interface RowHandlers {
-  onIncrement: (id: string) => void;
-  onDecrement: (id: string) => void;
-  onRemove: (id: string) => void;
+  /** Open the description popover at an anchor point. Both left- and
+   *  right-click on the row route here; the popover hosts every edit
+   *  action (− / + / × / Transfer). The shell no longer renders any
+   *  edit affordance inline on the row. */
   onDescription: (id: string, anchor: { x: number; y: number }) => void;
 }
 
@@ -16,7 +16,6 @@ export interface ListState {
   items: InventoryEntry[];
   catalog: CatalogItem[];
   search: string;
-  unlocked: boolean;
   collapsed: Set<string>;
   ghosts: Set<string>;
   tracker: PulseTracker;
@@ -89,7 +88,7 @@ export function renderList(
     const inner = document.createElement("div");
     inner.className = "cat-body-inner";
     for (const { entry, item } of entries) {
-      const row = renderRow(entry, item, state.unlocked, search, handlers, state.tracker);
+      const row = renderRow(entry, item, search, handlers, state.tracker);
       if (row.dataset.pulse === "received") receivedRows.push(row);
       inner.appendChild(row);
     }
@@ -115,7 +114,7 @@ function formatDelta(delta: number): string {
 }
 
 function renderRow(
-  entry: InventoryEntry, item: CatalogItem | null, unlocked: boolean,
+  entry: InventoryEntry, item: CatalogItem | null,
   search: string, h: RowHandlers, tracker: PulseTracker,
 ): HTMLElement {
   const [id, count] = entry;
@@ -150,38 +149,17 @@ function renderRow(
     if (pulse.delta != null) delta.textContent = formatDelta(pulse.delta);
   }
 
-  if (unlocked) {
-    const dec = document.createElement("button");
-    dec.className = "btn-step"; dec.textContent = "−"; dec.title = "Decrease";
-    dec.dataset.action = "dec";
-    dec.onclick = () => h.onDecrement(id);
-    row.appendChild(dec);
-
-    const inc = document.createElement("button");
-    inc.className = "btn-step"; inc.textContent = "+"; inc.title = "Increase";
-    inc.dataset.action = "inc";
-    inc.onclick = () => h.onIncrement(id);
-    row.appendChild(inc);
-
-    const rm = document.createElement("button");
-    rm.className = "btn-x"; rm.title = "Delete this item";
-    rm.appendChild(svgIcon("i-trash"));
-    rm.dataset.action = "remove";
-    rm.onclick = () => h.onRemove(id);
-    row.appendChild(rm);
-  }
-
-  // Right-click anywhere on the row opens the description popover, which
-  // contains a Transfer button when applicable. Shift+right-click was the
-  // previous transfer shortcut but Firefox forces its native menu when
-  // Shift is held, bypassing preventDefault.
-  // Exempt the ± / × buttons so right-clicking those does nothing surprising.
+  // Both left- and right-click open the description popover. The popover
+  // hosts every edit affordance (− / + / × / Transfer); rows are
+  // read-only chrome. preventDefault on contextmenu suppresses the
+  // browser's native menu so the popover takes its place.
+  const open = (ev: MouseEvent) => {
+    h.onDescription(id, { x: ev.clientX, y: ev.clientY });
+  };
+  row.addEventListener("click", open);
   row.addEventListener("contextmenu", (ev) => {
-    const t = ev.target as HTMLElement;
-    if (t.closest(".btn-step, .btn-x")) return;
     ev.preventDefault();
-    const me = ev as MouseEvent;
-    h.onDescription(id, { x: me.clientX, y: me.clientY });
+    open(ev);
   });
 
   return row;

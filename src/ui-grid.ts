@@ -12,7 +12,6 @@ export interface GridState {
   items: InventoryEntry[];
   catalog: CatalogItem[];
   search: string;
-  unlocked: boolean;
   collapsed: Set<string>;
   ghosts: Set<string>;
   tracker: PulseTracker;
@@ -141,10 +140,18 @@ function renderCell(
   const pulse = tracker.consume(id);
   if (pulse) cell.dataset.pulse = pulse.kind;
 
+  // Both left- and right-click open the description popover. The popover
+  // is the sole edit surface in grid view (cells are visually identical
+  // regardless of intent), so making the primary mouse button work as
+  // well as the context menu is purely a discoverability win — no
+  // behaviour conflict.
+  const open = (ev: MouseEvent) => {
+    h.onDescription(id, { x: ev.clientX, y: ev.clientY });
+  };
+  cell.addEventListener("click", open);
   cell.addEventListener("contextmenu", (ev) => {
     ev.preventDefault();
-    const me = ev as MouseEvent;
-    h.onDescription(id, { x: me.clientX, y: me.clientY });
+    open(ev);
   });
 
   return cell;

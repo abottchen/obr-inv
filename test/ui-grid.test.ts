@@ -19,7 +19,6 @@ function baseState(overrides: Partial<GridState> = {}): GridState {
     items: [],
     catalog,
     search: "",
-    unlocked: false,
     collapsed: new Set<string>(),
     ghosts: new Set<string>(),
     tracker: createPulseTracker(),
@@ -118,14 +117,10 @@ describe("renderGrid", () => {
     expect(cell?.closest<HTMLElement>(".cat-group")?.dataset.category).toBe("Unknown");
   });
 
-  it("renders cells identically locked vs unlocked (no inline edit controls in either case)", () => {
-    const lockedRoot = document.createElement("div");
-    renderGrid(lockedRoot, baseState({ items: [["h1", 2]], unlocked: false }), noopHandlers());
-    const unlockedRoot = document.createElement("div");
-    renderGrid(unlockedRoot, baseState({ items: [["h1", 2]], unlocked: true }), noopHandlers());
-    expect(lockedRoot.querySelectorAll('[data-action]').length).toBe(0);
-    expect(unlockedRoot.querySelectorAll('[data-action]').length).toBe(0);
-    expect(lockedRoot.innerHTML).toBe(unlockedRoot.innerHTML);
+  it("cells carry no inline edit affordances (popover is the sole edit surface)", () => {
+    const root = document.createElement("div");
+    renderGrid(root, baseState({ items: [["h1", 2]] }), noopHandlers());
+    expect(root.querySelectorAll('[data-action]').length).toBe(0);
   });
 
   it("right-click on a cell calls onDescription with the item id and click coordinates", () => {
@@ -142,6 +137,20 @@ describe("renderGrid", () => {
     cell.dispatchEvent(ev);
     expect(captured).toEqual({ id: "h1", x: 42, y: 99 });
     expect(ev.defaultPrevented).toBe(true);
+  });
+
+  it("left-click on a cell also calls onDescription (popover-as-sole-edit-surface)", () => {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    let captured: { id: string; x: number; y: number } | null = null;
+    renderGrid(root, baseState({ items: [["h1", 1]] }), {
+      onDescription: (id, anchor) => {
+        captured = { id, x: anchor.x, y: anchor.y };
+      },
+    });
+    const cell = cellFor(root, "h1")!;
+    cell.dispatchEvent(new MouseEvent("click", { clientX: 11, clientY: 22, bubbles: true }));
+    expect(captured).toEqual({ id: "h1", x: 11, y: 22 });
   });
 
   it("filters cells by search query", () => {

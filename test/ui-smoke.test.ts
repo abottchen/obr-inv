@@ -30,23 +30,13 @@ describe("ui-shell smoke", () => {
     expect(rows.length).toBe(2);
   });
 
-  it("hides ± and × buttons when locked", () => {
+  it("rows carry no inline edit buttons (popover is the sole edit surface)", () => {
     const root = document.createElement("div");
     document.body.appendChild(root);
     mountShell(root, record, catalog, makeNoopHandlers());
     expect(root.querySelectorAll('[data-action="dec"]').length).toBe(0);
     expect(root.querySelectorAll('[data-action="inc"]').length).toBe(0);
     expect(root.querySelectorAll('[data-action="remove"]').length).toBe(0);
-  });
-
-  it("reveals ± and × after clicking the lock toggle", () => {
-    const root = document.createElement("div");
-    document.body.appendChild(root);
-    mountShell(root, record, catalog, makeNoopHandlers());
-    (root.querySelector(".lock-toggle") as HTMLButtonElement).click();
-    expect(root.querySelectorAll('[data-action="dec"]').length).toBe(2);
-    expect(root.querySelectorAll('[data-action="inc"]').length).toBe(2);
-    expect(root.querySelectorAll('[data-action="remove"]').length).toBe(2);
   });
 
   it("filters by name only on search (description match doesn't show)", () => {
