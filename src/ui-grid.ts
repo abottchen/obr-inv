@@ -57,7 +57,7 @@ export function renderGrid(
     const header = document.createElement("div");
     header.className = "cat-header";
     header.dataset.category = cat;
-    header.innerHTML = `<span><span class="chev">▾</span> ${escapeHtml(cat)}</span><span>(${entries.length})</span>`;
+    header.innerHTML = `<span><span class="chev"></span><span class="cat-title">${escapeHtml(cat)}</span></span><span class="cat-count">${entries.length}</span>`;
     group.appendChild(header);
 
     const bodyEl = document.createElement("div");

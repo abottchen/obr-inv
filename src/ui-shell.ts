@@ -2,6 +2,7 @@ import { renderList, type ListState, type RowHandlers } from "./ui-list";
 import { renderGrid, type GridState } from "./ui-grid";
 import { totalWeight } from "./inventory";
 import { createPulseTracker, type PulseTracker } from "./ui-feedback";
+import { mountIconSprite, icon, setIcon } from "./ui-icons";
 import type { CatalogItem, PlayerInventoryRecord } from "./types";
 
 const VIEW_MODE_KEY = "obr-inv:viewMode";
@@ -63,33 +64,95 @@ export function mountShell(
   handlers: ShellHandlers,
 ): ShellRefs {
   root.innerHTML = "";
+  mountIconSprite();
+
   const wrap = document.createElement("div");
   wrap.className = "shell";
 
+  // Top accent rail. CSS shows it only when the shell is unlocked, so the
+  // gilt glow becomes the unmistakable signal that edit mode is on — even
+  // for a player who scrolled past the lock pill.
+  const lockRail = document.createElement("div");
+  lockRail.className = "lock-rail";
+  wrap.appendChild(lockRail);
+
   const header = document.createElement("div");
   header.className = "shell-header";
+
+  // Brand bar — heraldic mark + name of the bound inventory. Spans the
+  // header's full width above the controls row.
+  const brand = document.createElement("div");
+  brand.className = "brand";
+  const brandMark = icon("i-brand", "brand-mark");
+  brand.appendChild(brandMark);
+  const brandTitle = document.createElement("span");
+  brandTitle.className = "brand-title font-display";
+  brandTitle.textContent = "Tome of Holdings";
+  brand.appendChild(brandTitle);
+  const brandSub = document.createElement("span");
+  brandSub.className = "brand-sub";
+  brandSub.textContent = initialRecord.name;
+  brand.appendChild(brandSub);
+  header.appendChild(brand);
+
+  // Controls row. Wrapper splits the header into [brand], then [controls];
+  // CSS lays out the controls children left-to-right (search dominant).
+  const controls = document.createElement("div");
+  controls.className = "shell-controls";
+
+  const searchWrap = document.createElement("label");
+  searchWrap.className = "search-wrap";
+  searchWrap.appendChild(icon("i-search", "search-icon"));
   const search = document.createElement("input");
   search.className = "shell-search";
-  search.placeholder = "Search inventory...";
-  header.appendChild(search);
+  search.placeholder = "Seek by name…";
+  searchWrap.appendChild(search);
+  controls.appendChild(searchWrap);
+
+  const iconPair = document.createElement("div");
+  iconPair.className = "icon-pair";
   const collapseAllBtn = document.createElement("button");
   collapseAllBtn.className = "shell-btn";
-  collapseAllBtn.textContent = "⊟";
   collapseAllBtn.title = "Collapse all categories";
-  header.appendChild(collapseAllBtn);
+  collapseAllBtn.appendChild(icon("i-collapse"));
+  iconPair.appendChild(collapseAllBtn);
   const expandAllBtn = document.createElement("button");
   expandAllBtn.className = "shell-btn";
-  expandAllBtn.textContent = "⊞";
   expandAllBtn.title = "Expand all categories";
-  header.appendChild(expandAllBtn);
-  const viewToggleBtn = document.createElement("button");
-  viewToggleBtn.className = "shell-btn view-toggle";
-  header.appendChild(viewToggleBtn);
+  expandAllBtn.appendChild(icon("i-expand"));
+  iconPair.appendChild(expandAllBtn);
+  controls.appendChild(iconPair);
+
+  // Segmented view toggle: list on the left, grid on the right. The
+  // .view-toggle class on the grid button satisfies legacy tests that
+  // grab the toggle by class; clicking either child swaps mode.
+  const viewSeg = document.createElement("div");
+  viewSeg.className = "view-seg";
+  const viewListBtn = document.createElement("button");
+  viewListBtn.dataset.mode = "list";
+  viewListBtn.title = "List view";
+  viewListBtn.appendChild(icon("i-list"));
+  viewSeg.appendChild(viewListBtn);
+  const viewGridBtn = document.createElement("button");
+  viewGridBtn.className = "view-toggle";
+  viewGridBtn.dataset.mode = "grid";
+  viewGridBtn.title = "Grid view";
+  viewGridBtn.appendChild(icon("i-grid"));
+  viewSeg.appendChild(viewGridBtn);
+  controls.appendChild(viewSeg);
+
   const lockBtn = document.createElement("button");
   lockBtn.className = "lock-toggle";
-  lockBtn.textContent = "🔒";
   lockBtn.title = "Click to unlock editing";
-  header.appendChild(lockBtn);
+  const lockIcon = icon("i-lock", "lock-icon");
+  const lockLabel = document.createElement("span");
+  lockLabel.className = "lock-label";
+  lockLabel.textContent = "Locked";
+  lockBtn.appendChild(lockIcon);
+  lockBtn.appendChild(lockLabel);
+  controls.appendChild(lockBtn);
+
+  header.appendChild(controls);
   wrap.appendChild(header);
 
   const body = document.createElement("div");
@@ -143,47 +206,67 @@ export function mountShell(
 
   const footer = document.createElement("div");
   footer.className = "shell-footer";
-  const weightEl = document.createElement("span");
-  weightEl.textContent = "⚖ 0 lb";
-  footer.appendChild(weightEl);
+  const weightWrap = document.createElement("span");
+  weightWrap.className = "weight";
+  const weightNum = document.createElement("span");
+  weightNum.className = "weight-num font-mono";
+  weightNum.textContent = "0";
+  const weightUnit = document.createElement("span");
+  weightUnit.className = "weight-unit";
+  weightUnit.textContent = "lb borne";
+  weightWrap.appendChild(weightNum);
+  weightWrap.appendChild(weightUnit);
+  footer.appendChild(weightWrap);
+  // Compatibility alias: `weightEl` was the single span the original
+  // shell wrote into. The rerender path still calls `weightEl.textContent`,
+  // so keep it pointing at the number node — the unit is static.
+  const weightEl = weightNum;
   // Trailing cluster: optional "+ Create item" (GM only) followed by
   // the always-present "+ Add to inventory" button.
   const actions = document.createElement("div");
-  actions.style.display = "flex";
-  actions.style.gap = "6px";
+  actions.className = "shell-actions";
   if (handlers.onCreateCustomClick) {
     const createBtn = document.createElement("button");
-    createBtn.className = "btn-create";
-    createBtn.textContent = "+ Create item";
+    createBtn.className = "btn-create font-display";
+    createBtn.textContent = "Create item";
     createBtn.title = "Create a one-off custom item (GM only)";
     createBtn.onclick = handlers.onCreateCustomClick;
     actions.appendChild(createBtn);
   }
   const addBtn = document.createElement("button");
-  addBtn.className = "btn-add";
-  addBtn.textContent = "+ Add to inventory";
+  addBtn.className = "btn-add font-display";
+  addBtn.textContent = "Add to inventory";
   addBtn.onclick = handlers.onAddClick;
   actions.appendChild(addBtn);
   footer.appendChild(actions);
   wrap.appendChild(footer);
 
   const gold = document.createElement("div");
-  gold.className = "gold-strip";
+  gold.className = "gold-strip pouch";
   const ccyInputs = {} as Record<"pp" | "gp" | "sp" | "cp", HTMLInputElement>;
   const tip = "Type a number to set, +N to add, -N to subtract";
   for (const f of ["pp", "gp", "sp", "cp"] as const) {
     const cell = document.createElement("div");
-    cell.className = "gold-cell";
+    cell.className = "gold-cell coin";
     cell.dataset.ccy = f;
     cell.title = tip;
+    const disc = document.createElement("span");
+    disc.className = "coin-disc font-display";
+    disc.textContent = f.toUpperCase();
+    cell.appendChild(disc);
+    // Hidden alias kept for any legacy CSS that targets the label;
+    // visible label is now the coin disc above.
     const lbl = document.createElement("label");
     lbl.textContent = f;
+    lbl.style.display = "none";
     cell.appendChild(lbl);
     const inp = document.createElement("input");
     inp.type = "text";
     inp.inputMode = "numeric";
+    inp.className = "coin-input font-mono";
     inp.value = "0";
     inp.title = tip;
+    inp.setAttribute("aria-label", `${f.toUpperCase()} coins`);
     const currentValue = () => currentRecord.currency[f] ?? 0;
     const commit = () => {
       const parsed = parseCurrencyInput(inp.value, currentValue());
@@ -228,20 +311,20 @@ export function mountShell(
   let currentCatalog = catalog;
 
   const updateLockUI = () => {
-    lockBtn.textContent = unlocked ? "🔓" : "🔒";
+    setIcon(lockIcon, unlocked ? "i-unlock" : "i-lock");
+    lockLabel.textContent = unlocked ? "Unlocked" : "Locked";
     lockBtn.classList.toggle("unlocked", unlocked);
     lockBtn.title = unlocked ? "Click to lock editing" : "Click to unlock editing";
+    // The wrap data-attr drives both the gilt accent rail and any other
+    // unlocked-mode treatments (row-action visibility, etc.).
+    wrap.dataset.unlocked = unlocked ? "true" : "false";
   };
 
-  // Toggle button shows the *target* mode (what clicking will switch to).
+  // Segmented control: each button reflects its own mode. The active class
+  // moves to whichever button matches the current viewMode.
   const updateViewToggleUI = () => {
-    if (viewMode === "list") {
-      viewToggleBtn.textContent = "▦";
-      viewToggleBtn.title = "Switch to grid view";
-    } else {
-      viewToggleBtn.textContent = "☰";
-      viewToggleBtn.title = "Switch to list view";
-    }
+    viewListBtn.classList.toggle("active", viewMode === "list");
+    viewGridBtn.classList.toggle("active", viewMode === "grid");
   };
 
   const rerender = (record: PlayerInventoryRecord, cat: CatalogItem[]) => {
@@ -270,7 +353,7 @@ export function mountShell(
       }
     }
 
-    weightEl.textContent = `⚖ ${formatWeight(totalWeight(working.items, cat))} lb`;
+    weightEl.textContent = formatWeight(totalWeight(working.items, cat));
 
     // Diff vs. previous record (if any) and stamp pulses.
     const marks = tracker.diff(prevRecord, working);
@@ -363,12 +446,17 @@ export function mountShell(
     updateLockUI();
     rerender(currentRecord, currentCatalog);
   };
-  viewToggleBtn.onclick = () => {
-    viewMode = viewMode === "list" ? "grid" : "list";
+  // Segmented control: each button selects its mode. Clicking the already-
+  // active button is a no-op.
+  const setView = (mode: ViewMode) => {
+    if (mode === viewMode) return;
+    viewMode = mode;
     writeViewMode(viewMode);
     updateViewToggleUI();
     rerender(currentRecord, currentCatalog);
   };
+  viewListBtn.onclick = () => setView("list");
+  viewGridBtn.onclick = () => setView("grid");
   collapseAllBtn.onclick = () => {
     body.querySelectorAll<HTMLElement>(".cat-group").forEach((group) => {
       const cat = group.dataset.category;
