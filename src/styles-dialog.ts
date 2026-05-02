@@ -172,10 +172,9 @@ export const DIALOG_CSS = `
 .drop-zone.over { background: var(--bg-2); border-color: var(--accent); color: var(--text); }
 
 .tabs {
-  display: flex; gap: 4px;
+  display: flex; flex-wrap: wrap; gap: 4px;
   padding: 6px 8px;
   border-bottom: 1px solid var(--border);
-  overflow-x: auto;
   background: var(--bg-0);
 }
 .tab {
