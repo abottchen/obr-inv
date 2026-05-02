@@ -1,6 +1,7 @@
 import { escapeHtml } from "./escape";
 import type { CatalogItem, InventoryEntry, Rarity } from "./types";
 import { appendIconImage } from "./ui-icon";
+import { icon as svgIcon } from "./ui-icons";
 import { groupByCategory } from "./ui-items-data";
 import type { PulseTracker, PulseEntry } from "./ui-feedback";
 
@@ -60,7 +61,9 @@ export function renderList(
     const header = document.createElement("div");
     header.className = "cat-header";
     header.dataset.category = cat;
-    header.innerHTML = `<span><span class="chev">▾</span> ${escapeHtml(cat)}</span><span>(${entries.length})</span>`;
+    // Chev is a CSS-drawn arrow (see .cat-header .chev rule); the span is
+    // empty so it doesn't render any glyph beneath the borders.
+    header.innerHTML = `<span><span class="chev"></span><span class="cat-title">${escapeHtml(cat)}</span></span><span class="cat-count">${entries.length}</span>`;
     group.appendChild(header);
 
     const bodyEl = document.createElement("div");
@@ -143,7 +146,8 @@ function renderRow(
     row.appendChild(inc);
 
     const rm = document.createElement("button");
-    rm.className = "btn-x"; rm.textContent = "🗑"; rm.title = "Delete this item";
+    rm.className = "btn-x"; rm.title = "Delete this item";
+    rm.appendChild(svgIcon("i-trash"));
     rm.dataset.action = "remove";
     rm.onclick = () => h.onRemove(id);
     row.appendChild(rm);

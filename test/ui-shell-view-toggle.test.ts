@@ -67,7 +67,7 @@ describe("ui-shell view toggle", () => {
     expect(root.querySelectorAll(".inv-cell").length).toBe(0);
   });
 
-  it("clicking the toggle swaps the rendered view and persists to localStorage", () => {
+  it("clicking the segmented toggle swaps the rendered view and persists to localStorage", () => {
     const root = document.createElement("div");
     document.body.appendChild(root);
     mountShell(root, record, catalog, noopHandlers());
@@ -75,14 +75,19 @@ describe("ui-shell view toggle", () => {
     expect(root.querySelectorAll(".inv-row").length).toBe(2);
     expect(root.querySelectorAll(".inv-cell").length).toBe(0);
 
-    const toggle = root.querySelector<HTMLButtonElement>(".view-toggle")!;
-    toggle.click();
+    // .view-toggle is the grid-mode button in the segmented control;
+    // .view-seg button[data-mode="list"] is the list-mode button.
+    const gridBtn = root.querySelector<HTMLButtonElement>(".view-toggle")!;
+    const listBtn = root.querySelector<HTMLButtonElement>(
+      '.view-seg button[data-mode="list"]',
+    )!;
+    gridBtn.click();
 
     expect(root.querySelectorAll(".inv-cell").length).toBe(2);
     expect(root.querySelectorAll(".inv-row").length).toBe(0);
     expect(localStorage.getItem("obr-inv:viewMode")).toBe("grid");
 
-    toggle.click();
+    listBtn.click();
     expect(root.querySelectorAll(".inv-row").length).toBe(2);
     expect(root.querySelectorAll(".inv-cell").length).toBe(0);
     expect(localStorage.getItem("obr-inv:viewMode")).toBe("list");
@@ -157,8 +162,8 @@ describe("ui-shell view toggle", () => {
     expect(() => mountShell(root, record, catalog, noopHandlers())).not.toThrow();
     expect(root.querySelectorAll(".inv-row").length).toBe(2);
 
-    const toggle = root.querySelector<HTMLButtonElement>(".view-toggle")!;
-    expect(() => toggle.click()).not.toThrow();
+    const gridBtn = root.querySelector<HTMLButtonElement>(".view-toggle")!;
+    expect(() => gridBtn.click()).not.toThrow();
     expect(root.querySelectorAll(".inv-cell").length).toBe(2);
 
     getSpy.mockRestore();

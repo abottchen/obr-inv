@@ -1,58 +1,275 @@
 export const LIST_CSS = `
-.shell { display: flex; flex-direction: column; height: 100%; }
+.shell { display: flex; flex-direction: column; height: 100%; position: relative; }
+
+/* ─── Lock accent rail ──────────────────────────────────────────────── */
+/* A thin gilt glow at the very top of the panel. Visible only when the
+ * shell is unlocked, so edit-mode is unmistakable from anywhere — even
+ * scrolled past the lock pill. */
+.lock-rail {
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--accent) 70%, transparent) 20%,
+    var(--accent-soft) 50%,
+    color-mix(in srgb, var(--accent) 70%, transparent) 80%,
+    transparent 100%);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent-soft) 50%, transparent);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.shell[data-unlocked="true"] .lock-rail { opacity: 1; }
+
+/* ─── Header ────────────────────────────────────────────────────────── */
 .shell-header {
-  position: sticky; top: 0;
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px; background: var(--bg-0);
+  position: sticky; top: 0; z-index: 5;
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 10px 12px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.022), transparent 60%),
+    var(--bg-0);
   border-bottom: 1px solid var(--border);
 }
+
+.brand {
+  display: flex; align-items: baseline; gap: 10px;
+  min-width: 0;
+}
+.brand-mark {
+  width: 18px; height: 18px;
+  flex-shrink: 0; align-self: center;
+  color: var(--accent-soft);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent-soft) 35%, transparent));
+}
+.brand-title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "wght" 500, "SOFT" 30;
+  font-size: 17px;
+  line-height: 1;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.brand-sub {
+  margin-left: auto;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 50%;
+}
+
+.shell-controls {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Search field with a leading icon. The icon is a sibling, not a
+ * pseudo-element, so it picks up currentColor and stays sharp. */
+.search-wrap {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+.search-icon {
+  position: absolute;
+  left: 10px; top: 50%;
+  transform: translateY(-50%);
+  width: 13px; height: 13px;
+  color: var(--text-dim);
+  pointer-events: none;
+}
 .shell-search {
-  flex: 1;
-  background: var(--bg-1); color: var(--text);
-  border: 1px solid var(--border); border-radius: 6px;
-  padding: 6px 10px; outline: none;
+  width: 100%;
+  background: rgba(0,0,0,0.3);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 7px 10px 7px 30px;
+  outline: none;
+  font: 500 12.5px/1 var(--font-body);
+  transition: border-color 120ms, box-shadow 120ms;
 }
-.shell-search:focus { border-color: var(--accent); }
-.lock-toggle {
-  background: var(--bg-1); color: var(--text);
-  border: 1px solid var(--border); border-radius: 6px;
-  padding: 6px 10px; cursor: pointer;
+.shell-search::placeholder { color: var(--text-dim); font-style: italic; }
+.shell-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent) inset,
+              0 0 10px color-mix(in srgb, var(--accent-soft) 30%, transparent);
 }
-.lock-toggle.unlocked { background: var(--accent); color: #fff; border-color: var(--accent-soft); }
+
+/* Paired collapse/expand controls — read as one cluster, not two
+ * orphan buttons. */
+.icon-pair {
+  display: inline-flex;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.icon-pair .shell-btn {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  width: 28px; height: 28px;
+  color: var(--text-dim);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 100ms, color 100ms;
+}
+.icon-pair .shell-btn:hover { background: var(--bg-2); color: var(--text); }
+.icon-pair .shell-btn + .shell-btn { border-left: 1px solid var(--border); }
+.icon-pair .shell-btn svg { width: 13px; height: 13px; }
+
+/* Stand-alone shell buttons (kept for any future use; current header
+ * groups them in icon-pair / view-seg). */
 .shell-btn {
   background: var(--bg-1); color: var(--text);
-  border: 1px solid var(--border); border-radius: 6px;
+  border: 1px solid var(--border); border-radius: 5px;
   padding: 6px 10px; cursor: pointer;
   font-size: 13px; line-height: 1;
 }
 .shell-btn:hover { border-color: var(--accent-soft); }
 
-.shell-body { flex: 1; overflow-y: auto; padding: 4px 8px; }
+/* Segmented view toggle. The active button gets the gilt treatment so
+ * the current mode is obvious at a glance. */
+.view-seg {
+  display: inline-flex;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 2px;
+}
+.view-seg button {
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  width: 28px; height: 24px;
+  color: var(--text-dim);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 100ms, color 100ms;
+}
+.view-seg button svg { width: 12px; height: 12px; }
+.view-seg button:hover { color: var(--text); }
+.view-seg button.active {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 35%, var(--bg-2)),
+    color-mix(in srgb, var(--accent) 12%, var(--bg-1)));
+  color: var(--accent-soft);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 50%, transparent) inset;
+}
+
+/* Lock toggle is a labelled pill. Locked = ghost on dark; unlocked = gilt
+ * fill so the state shift is obvious without reading the label. */
+.lock-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,0,0,0.3);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0 10px;
+  height: 28px;
+  font: 600 10.5px var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+.lock-toggle .lock-icon { width: 12px; height: 12px; }
+.lock-toggle:hover { color: var(--text); }
+.lock-toggle.unlocked {
+  background: linear-gradient(180deg, var(--accent) 0%,
+    color-mix(in srgb, var(--accent) 75%, #000) 100%);
+  color: var(--bg-0);
+  border-color: var(--accent-soft);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-soft) 60%, transparent),
+              0 0 10px color-mix(in srgb, var(--accent-soft) 35%, transparent);
+}
+
+/* ─── Body ──────────────────────────────────────────────────────────── */
+.shell-body { flex: 1; overflow-y: auto; padding: 10px 12px 4px; }
+
 .cat-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 6px 4px; color: var(--text-dim);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 6px;
   cursor: pointer; user-select: none;
-  text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;
+}
+.cat-header > span:first-child {
+  display: inline-flex; align-items: baseline; gap: 8px;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 60, "wght" 500;
+  font-size: 13.5px;
+  letter-spacing: 0;
+  color: var(--text);
+  text-transform: none;
+}
+.cat-header > span:first-child::after {
+  content: "";
+  display: inline-block;
+  height: 1px;
+  flex: 1;
+  min-width: 24px;
+  background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+  align-self: center;
+  transform: translateY(-2px);
+}
+.cat-header > span:last-child {
+  font: 600 10px var(--font-mono);
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  background: rgba(0,0,0,0.25);
 }
 .cat-header .chev {
-  width: 10px;
+  width: 8px; height: 8px;
   display: inline-block;
+  border-right: 1.5px solid var(--accent);
+  border-bottom: 1.5px solid var(--accent);
+  transform: rotate(45deg) translate(-1px,-1px);
   transform-origin: 50% 55%;
-  transition: transform 180ms ease;
+  transition: transform 200ms ease;
 }
-.cat-group[data-collapsed="true"] .chev { transform: rotate(-90deg); }
+.cat-group[data-collapsed="true"] .chev {
+  transform: rotate(-45deg) translate(0,1px);
+}
 .cat-body {
   display: grid;
   grid-template-rows: 1fr;
-  transition: grid-template-rows 220ms ease;
+  transition: grid-template-rows 220ms ease, opacity 200ms ease;
 }
-.cat-group[data-collapsed="true"] .cat-body { grid-template-rows: 0fr; }
+.cat-group[data-collapsed="true"] .cat-body { grid-template-rows: 0fr; opacity: 0; }
 .cat-body-inner { overflow: hidden; min-height: 0; box-sizing: border-box; }
+
+/* Spacing between category groups — replaces the cat-body bottom padding
+ * that would have leaked when collapsed. */
+.cat-group { margin-bottom: 12px; }
+.cat-group:last-child { margin-bottom: 6px; }
+
+/* ─── Rows ──────────────────────────────────────────────────────────── */
 .inv-row {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 8px; margin-bottom: 4px;
-  background: var(--bg-1); border: 1px solid var(--border);
-  border-radius: 6px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px; margin-bottom: 4px;
+  background: linear-gradient(180deg, var(--bg-2) 0%,
+    color-mix(in srgb, var(--bg-2) 70%, var(--bg-0)) 100%);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--rarity-common);
+  border-radius: 5px;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.inv-row:hover {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--bg-2) 80%, var(--accent) 6%) 0%,
+    var(--bg-2) 100%);
+  border-color: color-mix(in srgb, var(--border) 70%, var(--accent) 30%);
 }
 .inv-row[data-rarity="uncommon"] { border-left: 3px solid var(--rarity-uncommon); }
 .inv-row[data-rarity="rare"] { border-left: 3px solid var(--rarity-rare); }
@@ -61,87 +278,202 @@ export const LIST_CSS = `
 .inv-row[data-rarity="common"], .inv-row:not([data-rarity]) { border-left: 3px solid var(--rarity-common); }
 
 .inv-icon {
-  width: 26px; height: 26px; flex-shrink: 0;
-  background: var(--bg-2); border-radius: 4px;
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: var(--bg-0); border-radius: 4px;
+  border: 1px solid var(--border);
   overflow: hidden;
   display: flex; align-items: center; justify-content: center;
 }
-.inv-name { flex: 1; }
-.inv-name mark { background: rgba(124,77,255,0.25); color: inherit; padding: 0 1px; }
-/* Rarity-tinted item names. Common stays at default text color so the long
- * tail of mundane items doesn't add visual noise; uncommon/rare get a flat
- * tint; very-rare/legendary get a subtle text-shadow glow on top, signalling
- * "this is special" without competing with the pulse animations. */
-.inv-name[data-rarity="uncommon"]  { color: var(--rarity-uncommon); }
-.inv-name[data-rarity="rare"]      { color: var(--rarity-rare); }
+.inv-name {
+  flex: 1;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "wght" 450;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.inv-name mark {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+.inv-name[data-rarity="uncommon"]  { color: color-mix(in srgb, var(--rarity-uncommon) 70%, var(--text)); }
+.inv-name[data-rarity="rare"]      { color: color-mix(in srgb, var(--rarity-rare) 65%, var(--text)); }
 .inv-name[data-rarity="very rare"] {
-  color: var(--rarity-very-rare);
-  text-shadow: 0 0 6px color-mix(in srgb, var(--rarity-very-rare) 45%, transparent);
+  color: color-mix(in srgb, var(--rarity-very-rare) 70%, var(--text));
+  text-shadow: 0 0 6px color-mix(in srgb, var(--rarity-very-rare) 40%, transparent);
 }
 .inv-name[data-rarity="legendary"] {
-  color: var(--rarity-legendary);
+  color: color-mix(in srgb, var(--rarity-legendary) 75%, var(--text));
   text-shadow: 0 0 8px color-mix(in srgb, var(--rarity-legendary) 50%, transparent);
 }
-.inv-count { font-variant-numeric: tabular-nums; min-width: 26px; text-align: right; color: var(--text-dim); position: relative; }
+.inv-count {
+  font: 700 12.5px var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  min-width: 28px; text-align: right;
+  color: var(--text-dim);
+  position: relative;
+}
 
 .btn-step, .btn-x {
   width: 24px; height: 24px;
-  background: var(--bg-2); border: 1px solid var(--border);
+  background: var(--bg-1); border: 1px solid var(--border);
   border-radius: 4px; color: var(--text); cursor: pointer;
+  font: 600 13px var(--font-body);
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all 100ms;
 }
-.btn-step:hover, .btn-x:hover { background: var(--accent); border-color: var(--accent-soft); }
-.btn-x:hover { background: var(--bad); border-color: var(--bad); }
+.btn-step:hover {
+  color: var(--accent-soft);
+  border-color: var(--accent-soft);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-1));
+}
+.btn-x:hover {
+  color: #fff;
+  background: var(--bad);
+  border-color: var(--bad);
+}
+.btn-x svg { width: 13px; height: 13px; }
 
+/* ─── Footer ────────────────────────────────────────────────────────── */
 .shell-footer {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 8px; padding: 6px 8px;
-  border-top: 1px solid var(--border); background: var(--bg-0);
-  color: var(--text-dim); font-size: 12px;
+  gap: 10px; padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.25) 100%);
 }
+.weight {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  color: var(--text-dim);
+}
+.weight-num {
+  font: 700 13px var(--font-mono);
+  color: var(--text);
+}
+.weight-unit {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+.shell-actions {
+  display: inline-flex; gap: 6px;
+}
+
+/* Primary "Add to inventory" — gilt stamped button with a serif label.
+ * Stronger visual weight than any other footer control because it's the
+ * default action a player takes after looting. */
 .btn-add {
-  background: var(--accent); color: #fff;
-  border: none; border-radius: 6px;
-  padding: 6px 12px; cursor: pointer;
+  background: linear-gradient(180deg, var(--accent) 0%,
+    color-mix(in srgb, var(--accent) 75%, #000) 100%);
+  color: var(--bg-0);
+  border: 1px solid var(--accent-soft);
+  border-radius: 5px;
+  padding: 7px 14px;
+  font-variation-settings: "opsz" 36, "wght" 600;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.18) inset,
+    0 -1px 0 rgba(0,0,0,0.25) inset,
+    0 3px 10px rgba(0,0,0,0.4);
+  transition: filter 100ms;
 }
+.btn-add:hover { filter: brightness(1.08); }
+.btn-add:active { transform: translateY(1px); }
+
+/* Secondary action ("Create item", GM only) — subtler, ghost on dark. */
+.btn-create {
+  background: rgba(0,0,0,0.3);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 7px 12px;
+  font-variation-settings: "opsz" 36, "wght" 500;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.btn-create:hover {
+  color: var(--accent-soft);
+  border-color: var(--accent-soft);
+}
+
+/* ─── Coin pouch (currency) ─────────────────────────────────────────── */
 .gold-strip {
-  display: flex; gap: 4px; padding: 6px 8px;
-  border-top: 1px solid var(--border); background: var(--bg-0);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 8px 12px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-0);
 }
 .gold-cell {
-  flex: 1 1 0; min-width: 0;
-  display: flex; align-items: center; gap: 4px;
-  background: var(--bg-1); border: 1px solid var(--border);
-  border-radius: 4px; padding: 0 6px;
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(0,0,0,0.32);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px 4px 4px;
+  transition: border-color 120ms, box-shadow 120ms;
 }
-.gold-cell[data-ccy="pp"] { border-left: 2px solid var(--ccy-pp); }
-.gold-cell[data-ccy="gp"] { border-left: 2px solid var(--ccy-gp); }
-.gold-cell[data-ccy="sp"] { border-left: 2px solid var(--ccy-sp); }
-.gold-cell[data-ccy="cp"] { border-left: 2px solid var(--ccy-cp); }
-.gold-cell:focus-within { border-color: var(--accent); }
-.gold-cell:focus-within[data-ccy="pp"] { border-left-color: var(--ccy-pp); }
-.gold-cell:focus-within[data-ccy="gp"] { border-left-color: var(--ccy-gp); }
-.gold-cell:focus-within[data-ccy="sp"] { border-left-color: var(--ccy-sp); }
-.gold-cell:focus-within[data-ccy="cp"] { border-left-color: var(--ccy-cp); }
-.gold-cell label {
-  text-transform: uppercase;
-  font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+.gold-cell:focus-within {
+  border-color: var(--accent-soft);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-soft) 40%, transparent) inset;
+}
+
+/* Stamped coin disc — round, with a faint inner ring. The base colour
+ * comes from the per-currency rules below. */
+.coin-disc {
+  width: 24px; height: 24px;
+  border-radius: 50%;
   flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-variation-settings: "opsz" 12, "wght" 700;
+  font-size: 9.5px;
+  letter-spacing: 0;
+  position: relative;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.28) inset,
+    0 -2px 2px rgba(0,0,0,0.4) inset,
+    0 1px 2px rgba(0,0,0,0.5);
 }
-.gold-cell[data-ccy="pp"] label { color: var(--ccy-pp); }
-.gold-cell[data-ccy="gp"] label { color: var(--ccy-gp); }
-.gold-cell[data-ccy="sp"] label { color: var(--ccy-sp); }
-.gold-cell[data-ccy="cp"] label { color: var(--ccy-cp); }
-.gold-cell input {
+.coin-disc::after {
+  content: "";
+  position: absolute; inset: 2px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0,0,0,0.22);
+}
+.gold-cell[data-ccy="pp"] .coin-disc {
+  background: linear-gradient(135deg, #f0f0f5 0%, #9aa0b0 100%);
+  color: #2a2f3c;
+}
+.gold-cell[data-ccy="gp"] .coin-disc {
+  background: linear-gradient(135deg, #f5d774 0%, #b58020 100%);
+  color: #3a2810;
+}
+.gold-cell[data-ccy="sp"] .coin-disc {
+  background: linear-gradient(135deg, #e6e6e6 0%, #8a8a8a 100%);
+  color: #2a2a2a;
+}
+.gold-cell[data-ccy="cp"] .coin-disc {
+  background: linear-gradient(135deg, #d2895a 0%, #7a3e1f 100%);
+  color: #2a160a;
+}
+
+.coin-input, .gold-cell input {
   flex: 1 1 0; width: 0; min-width: 0;
   background: transparent; color: var(--text);
   border: none; outline: none;
   padding: 4px 0;
+  font: 700 13px var(--font-mono);
   font-variant-numeric: tabular-nums;
   text-align: right;
-  font-size: 12px;
 }
 
-.empty-state { padding: 24px 8px; text-align: center; color: var(--text-dim); }
+.empty-state { padding: 28px 8px; text-align: center; color: var(--text-dim); font-style: italic; }
 
 /* ─── Grid view ─────────────────────────────────────────────────────── */
 .grid-cells {
@@ -153,31 +485,44 @@ export const LIST_CSS = `
    * a strip under the header. Visual breathing room lives on .cat-group
    * margin instead. */
 }
-.cat-group:has(.grid-cells) { margin-bottom: 6px; }
+.cat-group:has(.grid-cells) { margin-bottom: 8px; }
 .cat-group:has(.grid-cells) .cat-header { padding-bottom: 4px; }
 .inv-cell {
   position: relative;
   aspect-ratio: 1;
-  background: var(--bg-1);
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.05) 0%, transparent 50%),
+    linear-gradient(180deg, var(--bg-2) 0%, var(--bg-0) 100%);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 5px;
   overflow: visible;
   cursor: context-menu;
   user-select: none;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.03) inset,
+    0 -2px 6px rgba(0,0,0,0.35) inset;
+  transition: transform 120ms ease, border-color 120ms ease;
 }
-.inv-cell[data-rarity="uncommon"]  { border-color: var(--rarity-uncommon); }
-.inv-cell[data-rarity="rare"]      { border-color: var(--rarity-rare); }
+.inv-cell:hover { transform: translateY(-1px); }
+.inv-cell[data-rarity="uncommon"]  { border-color: color-mix(in srgb, var(--rarity-uncommon) 60%, var(--border)); }
+.inv-cell[data-rarity="rare"]      { border-color: color-mix(in srgb, var(--rarity-rare) 60%, var(--border)); }
 .inv-cell[data-rarity="very rare"] {
-  border-color: var(--rarity-very-rare);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--rarity-very-rare) 45%, transparent);
+  border-color: color-mix(in srgb, var(--rarity-very-rare) 60%, var(--border));
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.03) inset,
+    0 -2px 6px rgba(0,0,0,0.35) inset,
+    0 0 8px color-mix(in srgb, var(--rarity-very-rare) 35%, transparent);
 }
 .inv-cell[data-rarity="legendary"] {
-  border-color: var(--rarity-legendary);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--rarity-legendary) 50%, transparent);
+  border-color: color-mix(in srgb, var(--rarity-legendary) 70%, var(--border));
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.05) inset,
+    0 -2px 6px rgba(0,0,0,0.35) inset,
+    0 0 12px color-mix(in srgb, var(--rarity-legendary) 45%, transparent);
 }
 .cell-image {
   position: absolute; inset: 2px;
-  background-color: var(--bg-2);
+  background-color: var(--bg-1);
   border-radius: 4px;
   overflow: hidden;
   display: flex; align-items: center; justify-content: center;
@@ -192,15 +537,16 @@ export const LIST_CSS = `
 }
 .cell-count {
   position: absolute; right: 3px; bottom: 3px;
-  background: rgba(0,0,0,0.65);
-  color: #fff;
-  font-size: 11px; font-weight: 700;
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font: 700 10.5px var(--font-mono);
   font-variant-numeric: tabular-nums;
-  padding: 1px 5px; border-radius: 8px;
+  padding: 1px 5px; border-radius: 3px;
   pointer-events: none;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
-/* In-cell .cell-tooltip is now a hidden data carrier (text + data-rarity).
+/* In-cell .cell-tooltip is a hidden data carrier (text + data-rarity).
  * Actual rendering happens in .cell-tooltip-layer (a single position:fixed
  * element on the shell), which the shell shows on cell mouseover. The layer
  * escapes every .cat-body-inner overflow:hidden so tooltips never get clipped
@@ -211,21 +557,25 @@ export const LIST_CSS = `
   background: var(--bg-0);
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 3px 8px;
+  padding: 4px 9px;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "wght" 500;
   font-size: 12px; line-height: 1.2;
+  letter-spacing: -0.005em;
   white-space: nowrap;
   pointer-events: none;
   z-index: 1000;
   color: var(--text);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
 }
-.cell-tooltip-layer[data-rarity="uncommon"]  { color: var(--rarity-uncommon); }
-.cell-tooltip-layer[data-rarity="rare"]      { color: var(--rarity-rare); }
+.cell-tooltip-layer[data-rarity="uncommon"]  { color: color-mix(in srgb, var(--rarity-uncommon) 70%, var(--text)); }
+.cell-tooltip-layer[data-rarity="rare"]      { color: color-mix(in srgb, var(--rarity-rare) 65%, var(--text)); }
 .cell-tooltip-layer[data-rarity="very rare"] {
-  color: var(--rarity-very-rare);
-  text-shadow: 0 0 6px color-mix(in srgb, var(--rarity-very-rare) 45%, transparent);
+  color: color-mix(in srgb, var(--rarity-very-rare) 70%, var(--text));
+  text-shadow: 0 0 6px color-mix(in srgb, var(--rarity-very-rare) 40%, transparent);
 }
 .cell-tooltip-layer[data-rarity="legendary"] {
-  color: var(--rarity-legendary);
+  color: color-mix(in srgb, var(--rarity-legendary) 75%, var(--text));
   text-shadow: 0 0 8px color-mix(in srgb, var(--rarity-legendary) 50%, transparent);
 }
 `;
