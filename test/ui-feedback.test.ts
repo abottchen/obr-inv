@@ -38,9 +38,14 @@ describe("PulseTracker.diff", () => {
     expect(out.get("a")).toEqual({ kind: "dec", delta: -3 });
   });
 
-  it("flags count → 0 as 'remove'", () => {
+  it("flags count → 0 as 'dec' when the id stays in the items array (ghost)", () => {
     const out = t.diff(rec([["a", 2]]), rec([["a", 0]]));
-    expect(out.get("a")).toEqual({ kind: "remove" });
+    expect(out.get("a")).toEqual({ kind: "dec", delta: -2 });
+  });
+
+  it("flags count 0 → N (ghost revival) as 'inc'", () => {
+    const out = t.diff(rec([["a", 0]]), rec([["a", 3]]));
+    expect(out.get("a")).toEqual({ kind: "inc", delta: 3 });
   });
 
   it("skips ids with unchanged count", () => {

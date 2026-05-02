@@ -49,17 +49,24 @@ export function createPulseTracker(
       const nextMap = new Map(next.items);
       const allIds = new Set<string>([...prevMap.keys(), ...nextMap.keys()]);
 
+      // Classify by *presence* in the items array, not by count alone:
+      //   - removeItem filters the id out of items entirely → "remove"
+      //   - decrementItem clamps at 0 but keeps the id in items → "dec"
+      //   - incrementItem on a count-0 ghost → "inc" (the row never went away)
+      //   - addItem on a brand-new id → "add"
       for (const id of allIds) {
+        const prevHad = prevMap.has(id);
+        const nextHas = nextMap.has(id);
         const p = prevMap.get(id) ?? 0;
         const n = nextMap.get(id) ?? 0;
-        if (p === n) continue;
-        if (p === 0 && n > 0) {
-          out.set(id, { kind: "add", delta: n });
-        } else if (n === 0) {
+
+        if (prevHad && !nextHas) {
           out.set(id, { kind: "remove" });
+        } else if (!prevHad && nextHas && n > 0) {
+          out.set(id, { kind: "add", delta: n });
         } else if (n > p) {
           out.set(id, { kind: "inc", delta: n - p });
-        } else {
+        } else if (n < p) {
           out.set(id, { kind: "dec", delta: n - p });
         }
       }
