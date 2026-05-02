@@ -1,5 +1,6 @@
 import { renderList, type ListState, type RowHandlers } from "./ui-list";
 import { totalWeight } from "./inventory";
+import { createPulseTracker, type PulseTracker } from "./ui-feedback";
 import type { CatalogItem, PlayerInventoryRecord } from "./types";
 
 export interface ShellHandlers extends Omit<RowHandlers, "onIncrement" | "onDecrement" | "onRemove"> {
@@ -18,6 +19,7 @@ export interface ShellHandlers extends Omit<RowHandlers, "onIncrement" | "onDecr
 
 export interface ShellRefs {
   rerender: (record: PlayerInventoryRecord, catalog: CatalogItem[]) => void;
+  markReceived: (itemId: string, quantity: number) => void;
   destroy: () => void;
 }
 
@@ -125,6 +127,8 @@ export function mountShell(
   let unlocked = false;
   const collapsed = new Set<string>();
   const ghosts = new Set<string>();
+  const tracker: PulseTracker = createPulseTracker();
+  let prevRecord: PlayerInventoryRecord | null = null;
   let currentRecord = initialRecord;
   let currentCatalog = catalog;
 
@@ -143,6 +147,19 @@ export function mountShell(
       }
     }
     weightEl.textContent = `⚖ ${formatWeight(totalWeight(record.items, cat))} lb`;
+
+    // Diff vs. previous record (if any) and stamp pulses.
+    const marks = tracker.diff(prevRecord, record);
+
+    // Ids removed this render get one frame as phantom rows.
+    const phantomRemoves = new Set<string>();
+    for (const [id, m] of marks) {
+      if (m.kind === "remove") phantomRemoves.add(id);
+    }
+
+    tracker.mark(marks);
+    prevRecord = record;
+
     const state: ListState = {
       items: record.items,
       catalog: cat,
@@ -150,6 +167,8 @@ export function mountShell(
       unlocked,
       collapsed,
       ghosts,
+      tracker,
+      phantomRemoves,
     };
     renderList(body, state, {
       onIncrement: (id) => {
@@ -201,6 +220,14 @@ export function mountShell(
 
   return {
     rerender,
+    markReceived: (itemId, quantity) => {
+      tracker.mark(new Map([[itemId, { kind: "received", delta: quantity }]]));
+      // Ensure the row will be visible when the next render fires the louder
+      // pulse — the diff path never produces "received", so auto-expand has
+      // to happen here.
+      const item = currentCatalog.find((c) => c.id === itemId);
+      if (item) collapsed.delete(item.category);
+    },
     destroy: () => { root.innerHTML = ""; },
   };
 }
