@@ -7,6 +7,52 @@ let active: HTMLElement | null = null;
 let outsideHandler: ((e: MouseEvent) => void) | null = null;
 let escHandler: ((e: KeyboardEvent) => void) | null = null;
 
+/**
+ * Discrete zoom levels for the description popover. 1.0 is the
+ * baseline; 0.85 a tighter pass for users who want to see more at
+ * once; up through 1.75 for accessibility / shared-screen readability.
+ * Persisted per-browser in localStorage so the next popover opens at
+ * the user's last setting.
+ */
+const ZOOM_LEVELS = [0.85, 1.0, 1.15, 1.3, 1.5, 1.75] as const;
+const DEFAULT_ZOOM = 1.0;
+const ZOOM_KEY = "obr-inv:descZoom";
+
+function snapToLevel(z: number): number {
+  // Pick the closest defined level — guards against legacy / hand-edited
+  // localStorage values that don't match the current step list.
+  let best = DEFAULT_ZOOM;
+  let bestDelta = Infinity;
+  for (const level of ZOOM_LEVELS) {
+    const d = Math.abs(level - z);
+    if (d < bestDelta) { bestDelta = d; best = level; }
+  }
+  return best;
+}
+
+function readZoom(): number {
+  try {
+    const raw = localStorage.getItem(ZOOM_KEY);
+    if (raw == null) return DEFAULT_ZOOM;
+    const n = parseFloat(raw);
+    if (!Number.isFinite(n)) return DEFAULT_ZOOM;
+    return snapToLevel(n);
+  } catch {
+    return DEFAULT_ZOOM;
+  }
+}
+
+function writeZoom(z: number): void {
+  try { localStorage.setItem(ZOOM_KEY, String(z)); }
+  catch (e) { console.warn("[obr-inv] localStorage write failed for desc zoom", e); }
+}
+
+function stepZoom(current: number, dir: 1 | -1): number {
+  const idx = ZOOM_LEVELS.indexOf(snapToLevel(current) as typeof ZOOM_LEVELS[number]);
+  const nextIdx = Math.min(ZOOM_LEVELS.length - 1, Math.max(0, idx + dir));
+  return ZOOM_LEVELS[nextIdx];
+}
+
 export interface DescriptionOpts {
   /** When provided, the popover renders a "Transfer…" button that
    *  closes the popover and invokes this callback. Omit for read-only
@@ -38,6 +84,13 @@ export function showDescription(
   pop.className = "popover description-popover";
   if (item?.rarity) pop.dataset.rarity = item.rarity;
 
+  // Apply persisted zoom before append so getBoundingClientRect below
+  // reads the zoomed dimensions and clampToFrame keeps the popover in
+  // the iframe even at the largest step. CSS uses
+  // `zoom: var(--popover-zoom, 1)` on .description-popover.
+  let zoom = readZoom();
+  pop.style.setProperty("--popover-zoom", String(zoom));
+
   const header = document.createElement("div");
   header.className = "desc-header";
 
@@ -68,13 +121,62 @@ export function showDescription(
   titleBlock.appendChild(title);
   header.appendChild(titleBlock);
 
+  // Trailing controls cluster: zoom out / zoom in / close. Sized to
+  // match the existing close button so the row stays compact.
+  const ctrls = document.createElement("div");
+  ctrls.className = "desc-ctrls";
+
+  const zOut = document.createElement("button");
+  zOut.type = "button";
+  zOut.className = "desc-zoom-btn";
+  zOut.title = "Zoom out";
+  zOut.appendChild(svgIcon("i-zoom-out"));
+  ctrls.appendChild(zOut);
+
+  const zIn = document.createElement("button");
+  zIn.type = "button";
+  zIn.className = "desc-zoom-btn";
+  zIn.title = "Zoom in";
+  zIn.appendChild(svgIcon("i-zoom-in"));
+  ctrls.appendChild(zIn);
+
   const close = document.createElement("button");
   close.type = "button";
   close.className = "popover-close";
   close.appendChild(svgIcon("i-x"));
   close.title = "Close";
   close.onclick = closeDescription;
-  header.appendChild(close);
+  ctrls.appendChild(close);
+
+  header.appendChild(ctrls);
+
+  // Update zoom buttons' disabled state to reflect the current level
+  // so the user gets a visual hint when they've hit the floor or ceiling.
+  const refreshZoomBtns = () => {
+    zOut.disabled = zoom <= ZOOM_LEVELS[0];
+    zIn.disabled  = zoom >= ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
+  };
+  refreshZoomBtns();
+
+  // Zoom click handler — steps the level, persists, applies the CSS
+  // variable, and re-clamps the popover position so growing toward the
+  // bottom-right doesn't push it past the iframe edge.
+  const applyZoom = (next: number) => {
+    if (next === zoom) return;
+    zoom = next;
+    pop.style.setProperty("--popover-zoom", String(zoom));
+    writeZoom(zoom);
+    refreshZoomBtns();
+    // Re-measure post-zoom and clamp from the popover's current top-left.
+    const r = pop.getBoundingClientRect();
+    const curLeft = parseFloat(pop.style.left) || r.left;
+    const curTop  = parseFloat(pop.style.top)  || r.top;
+    const { x, y } = clampToFrame({ x: curLeft, y: curTop, width: r.width, height: r.height });
+    pop.style.left = `${x}px`;
+    pop.style.top  = `${y}px`;
+  };
+  zOut.onclick = (e) => { e.stopPropagation(); applyZoom(stepZoom(zoom, -1)); };
+  zIn.onclick  = (e) => { e.stopPropagation(); applyZoom(stepZoom(zoom,  1)); };
 
   pop.appendChild(header);
 

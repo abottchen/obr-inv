@@ -20,6 +20,12 @@ export const DIALOG_CSS = `
   max-width: 340px;
   background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
   border-top: 4px solid var(--rarity-common);
+  /* Per-popover zoom controlled by ui-description.ts. The CSS zoom
+   * property (Baseline 2024 — works in Chromium, Firefox 126+, Safari
+   * 17+) reflows layout based on the scaled box, so getBoundingClientRect
+   * after a change reads the new dimensions and clampToFrame keeps the
+   * popover inside the iframe at every step. */
+  zoom: var(--popover-zoom, 1);
 }
 .description-popover[data-rarity="uncommon"]   { border-top-color: var(--rarity-uncommon); }
 .description-popover[data-rarity="rare"]       { border-top-color: var(--rarity-rare); }
@@ -82,7 +88,18 @@ export const DIALOG_CSS = `
   text-shadow: 0 0 12px color-mix(in srgb, var(--rarity-legendary) 50%, transparent);
 }
 
-.popover-close {
+/* Trailing controls cluster on the item card header — zoom out, zoom
+ * in, close. Aligned to the start of the row so they sit at the top
+ * regardless of the title block's height. */
+.description-popover .desc-ctrls {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  align-self: start;
+  flex-shrink: 0;
+}
+.popover-close,
+.desc-zoom-btn {
   flex-shrink: 0;
   background: transparent;
   border: none;
@@ -92,10 +109,17 @@ export const DIALOG_CSS = `
   border-radius: 3px;
   line-height: 1;
   display: inline-flex; align-items: center; justify-content: center;
-  align-self: start;
 }
-.popover-close svg { width: 12px; height: 12px; }
-.popover-close:hover { background: var(--bg-1); color: var(--text); }
+.popover-close svg,
+.desc-zoom-btn svg { width: 13px; height: 13px; }
+.popover-close:hover,
+.desc-zoom-btn:hover { background: var(--bg-1); color: var(--text); }
+.desc-zoom-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: transparent;
+}
+.desc-zoom-btn:disabled:hover { background: transparent; color: var(--text-dim); }
 
 /* Three-up meta strip: cells with a small uppercase key + display-font value. */
 .description-popover .meta {
