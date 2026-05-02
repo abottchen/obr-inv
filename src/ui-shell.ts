@@ -1,9 +1,39 @@
 import { renderList, type ListState, type RowHandlers } from "./ui-list";
+import { renderGrid, type GridState } from "./ui-grid";
 import { totalWeight } from "./inventory";
 import { createPulseTracker, type PulseTracker } from "./ui-feedback";
 import type { CatalogItem, PlayerInventoryRecord } from "./types";
 
-export interface ShellHandlers extends Omit<RowHandlers, "onIncrement" | "onDecrement" | "onRemove"> {
+const VIEW_MODE_KEY = "obr-inv:viewMode";
+type ViewMode = "list" | "grid";
+
+function readViewMode(): ViewMode {
+  try {
+    const v = localStorage.getItem(VIEW_MODE_KEY);
+    if (v === "grid" || v === "list") return v;
+  } catch (e) {
+    console.warn("[obr-inv] localStorage read failed for view mode", e);
+  }
+  return "list";
+}
+
+function writeViewMode(mode: ViewMode): void {
+  try {
+    localStorage.setItem(VIEW_MODE_KEY, mode);
+  } catch (e) {
+    console.warn("[obr-inv] localStorage write failed for view mode", e);
+  }
+}
+
+export interface DescriptionCtx {
+  unlocked: boolean;
+  count: number;
+  onIncrement: () => void;
+  onDecrement: () => void;
+  onRemove: () => void;
+}
+
+export interface ShellHandlers extends Omit<RowHandlers, "onIncrement" | "onDecrement" | "onRemove" | "onDescription"> {
   onIncrement: (id: string) => Promise<void>;
   onDecrement: (id: string) => Promise<void>;
   onRemove: (id: string) => Promise<void>;
@@ -11,6 +41,9 @@ export interface ShellHandlers extends Omit<RowHandlers, "onIncrement" | "onDecr
     field: "pp" | "gp" | "sp" | "cp", value: number,
   ) => Promise<void>;
   onAddClick: () => void;
+  onDescription: (
+    id: string, anchor: { x: number; y: number }, ctx: DescriptionCtx,
+  ) => void;
   /** GM-only entry point for creating a custom item. Omit on the
    *  player view to suppress the button; the shell hides it when
    *  this handler is not provided. */
@@ -49,6 +82,9 @@ export function mountShell(
   expandAllBtn.textContent = "⊞";
   expandAllBtn.title = "Expand all categories";
   header.appendChild(expandAllBtn);
+  const viewToggleBtn = document.createElement("button");
+  viewToggleBtn.className = "shell-btn view-toggle";
+  header.appendChild(viewToggleBtn);
   const lockBtn = document.createElement("button");
   lockBtn.className = "lock-toggle";
   lockBtn.textContent = "🔒";
@@ -59,6 +95,42 @@ export function mountShell(
   const body = document.createElement("div");
   body.className = "shell-body";
   wrap.appendChild(body);
+
+  // Tooltip lives at shell-wrap level (position: fixed, escaping every
+  // .cat-body-inner overflow:hidden) and is populated on cell hover via
+  // event delegation on shell-body. Grid view depends on this; list view
+  // ignores it (its .inv-cell selector won't match).
+  const tooltipLayer = document.createElement("div");
+  tooltipLayer.className = "cell-tooltip-layer";
+  tooltipLayer.style.display = "none";
+  wrap.appendChild(tooltipLayer);
+
+  const hideTooltip = () => { tooltipLayer.style.display = "none"; };
+  body.addEventListener("mouseover", (e) => {
+    const cell = (e.target as HTMLElement).closest<HTMLElement>(".inv-cell");
+    if (!cell) return;
+    const tipEl = cell.querySelector<HTMLElement>(".cell-tooltip");
+    if (!tipEl) return;
+    tooltipLayer.textContent = tipEl.textContent;
+    if (tipEl.dataset.rarity) tooltipLayer.dataset.rarity = tipEl.dataset.rarity;
+    else delete tooltipLayer.dataset.rarity;
+    tooltipLayer.style.display = "block";
+    const rect = cell.getBoundingClientRect();
+    const tipH = tooltipLayer.offsetHeight || 24;
+    const above = rect.top - tipH - 6 > 4;
+    tooltipLayer.style.left = `${rect.left + rect.width / 2}px`;
+    tooltipLayer.style.top = above
+      ? `${rect.top - tipH - 6}px`
+      : `${rect.bottom + 6}px`;
+  });
+  body.addEventListener("mouseout", (e) => {
+    const cell = (e.target as HTMLElement).closest<HTMLElement>(".inv-cell");
+    if (!cell) return;
+    const related = e.relatedTarget as HTMLElement | null;
+    if (related && cell.contains(related)) return;
+    hideTooltip();
+  });
+  body.addEventListener("scroll", hideTooltip);
 
   const footer = document.createElement("div");
   footer.className = "shell-footer";
@@ -135,6 +207,7 @@ export function mountShell(
   root.appendChild(wrap);
 
   let unlocked = false;
+  let viewMode: ViewMode = readViewMode();
   const collapsed = new Set<string>();
   const ghosts = new Set<string>();
   const tracker: PulseTracker = createPulseTracker();
@@ -151,9 +224,21 @@ export function mountShell(
     lockBtn.title = unlocked ? "Click to lock editing" : "Click to unlock editing";
   };
 
+  // Toggle button shows the *target* mode (what clicking will switch to).
+  const updateViewToggleUI = () => {
+    if (viewMode === "list") {
+      viewToggleBtn.textContent = "▦";
+      viewToggleBtn.title = "Switch to grid view";
+    } else {
+      viewToggleBtn.textContent = "☰";
+      viewToggleBtn.title = "Switch to list view";
+    }
+  };
+
   const rerender = (record: PlayerInventoryRecord, cat: CatalogItem[]) => {
     currentRecord = record;
     currentCatalog = cat;
+    hideTooltip();
     for (const f of ["pp","gp","sp","cp"] as const) {
       if (document.activeElement !== ccyInputs[f]) {
         ccyInputs[f].value = String(record.currency[f] ?? 0);
@@ -190,31 +275,57 @@ export function mountShell(
     tracker.mark(marks);
     prevRecord = working;
 
-    const state: ListState = {
-      items: working.items,
-      catalog: cat,
-      search: search.value,
-      unlocked,
-      collapsed,
-      ghosts,
-      tracker,
-      phantomRemoves,
+    const wrappedOnDescription = (id: string, anchor: { x: number; y: number }) => {
+      const entry = working.items.find(([eid]) => eid === id);
+      const count = entry?.[1] ?? 0;
+      handlers.onDescription(id, anchor, {
+        unlocked,
+        count,
+        onIncrement: () => { ghosts.add(id); void handlers.onIncrement(id); },
+        onDecrement: () => { ghosts.add(id); void handlers.onDecrement(id); },
+        onRemove:    () => { ghosts.delete(id); void handlers.onRemove(id); },
+      });
     };
-    renderList(body, state, {
-      onIncrement: (id) => {
-        ghosts.add(id);
-        void handlers.onIncrement(id);
-      },
-      onDecrement: (id) => {
-        ghosts.add(id);
-        void handlers.onDecrement(id);
-      },
-      onRemove: (id) => {
-        ghosts.delete(id);
-        void handlers.onRemove(id);
-      },
-      onDescription: handlers.onDescription,
-    });
+
+    if (viewMode === "grid") {
+      const gridState: GridState = {
+        items: working.items,
+        catalog: cat,
+        search: search.value,
+        unlocked,
+        collapsed,
+        ghosts,
+        tracker,
+        phantomRemoves,
+      };
+      renderGrid(body, gridState, { onDescription: wrappedOnDescription });
+    } else {
+      const listState: ListState = {
+        items: working.items,
+        catalog: cat,
+        search: search.value,
+        unlocked,
+        collapsed,
+        ghosts,
+        tracker,
+        phantomRemoves,
+      };
+      renderList(body, listState, {
+        onIncrement: (id) => {
+          ghosts.add(id);
+          void handlers.onIncrement(id);
+        },
+        onDecrement: (id) => {
+          ghosts.add(id);
+          void handlers.onDecrement(id);
+        },
+        onRemove: (id) => {
+          ghosts.delete(id);
+          void handlers.onRemove(id);
+        },
+        onDescription: wrappedOnDescription,
+      });
+    }
   };
 
   search.addEventListener("input", () => rerender(currentRecord, currentCatalog));
@@ -243,6 +354,12 @@ export function mountShell(
     updateLockUI();
     rerender(currentRecord, currentCatalog);
   };
+  viewToggleBtn.onclick = () => {
+    viewMode = viewMode === "list" ? "grid" : "list";
+    writeViewMode(viewMode);
+    updateViewToggleUI();
+    rerender(currentRecord, currentCatalog);
+  };
   collapseAllBtn.onclick = () => {
     body.querySelectorAll<HTMLElement>(".cat-group").forEach((group) => {
       const cat = group.dataset.category;
@@ -258,6 +375,7 @@ export function mountShell(
   };
 
   updateLockUI();
+  updateViewToggleUI();
   rerender(initialRecord, catalog);
 
   return {

@@ -92,9 +92,15 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
         },
       });
     },
-    onDescription: (id, anchor) => {
+    onDescription: (id, anchor, ctx) => {
       showDescription(anchor, byId.get(id) ?? null, id, {
         onTransfer: () => { void openTransferFor(id, anchor); },
+        editControls: ctx.unlocked ? {
+          count: ctx.count,
+          onIncrement: ctx.onIncrement,
+          onDecrement: ctx.onDecrement,
+          onRemove:    ctx.onRemove,
+        } : undefined,
       });
     },
   });

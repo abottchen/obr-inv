@@ -47,7 +47,7 @@ export const LIST_CSS = `
   transition: grid-template-rows 220ms ease;
 }
 .cat-group[data-collapsed="true"] .cat-body { grid-template-rows: 0fr; }
-.cat-body-inner { overflow: hidden; min-height: 0; }
+.cat-body-inner { overflow: hidden; min-height: 0; box-sizing: border-box; }
 .inv-row {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 8px; margin-bottom: 4px;
@@ -141,4 +141,85 @@ export const LIST_CSS = `
 }
 
 .empty-state { padding: 24px 8px; text-align: center; color: var(--text-dim); }
+
+/* ─── Grid view ─────────────────────────────────────────────────────── */
+.grid-cells {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 6px;
+  /* No padding here on purpose: padding inside .cat-body-inner survives
+   * the grid-template-rows: 0fr collapse (it's part of the box) and leaks
+   * a strip under the header. Visual breathing room lives on .cat-group
+   * margin instead. */
+}
+.cat-group:has(.grid-cells) { margin-bottom: 6px; }
+.cat-group:has(.grid-cells) .cat-header { padding-bottom: 4px; }
+.inv-cell {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: visible;
+  cursor: context-menu;
+  user-select: none;
+}
+.inv-cell[data-rarity="uncommon"]  { border-color: var(--rarity-uncommon); }
+.inv-cell[data-rarity="rare"]      { border-color: var(--rarity-rare); }
+.inv-cell[data-rarity="very rare"] {
+  border-color: var(--rarity-very-rare);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--rarity-very-rare) 45%, transparent);
+}
+.inv-cell[data-rarity="legendary"] {
+  border-color: var(--rarity-legendary);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--rarity-legendary) 50%, transparent);
+}
+.cell-image {
+  position: absolute; inset: 2px;
+  background-color: var(--bg-2);
+  background-size: cover;
+  background-position: center;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: var(--text-dim);
+}
+.cell-count {
+  position: absolute; right: 3px; bottom: 3px;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  font-size: 11px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  padding: 1px 5px; border-radius: 8px;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+/* In-cell .cell-tooltip is now a hidden data carrier (text + data-rarity).
+ * Actual rendering happens in .cell-tooltip-layer (a single position:fixed
+ * element on the shell), which the shell shows on cell mouseover. The layer
+ * escapes every .cat-body-inner overflow:hidden so tooltips never get clipped
+ * by the collapse-animation container. */
+.cell-tooltip { display: none; }
+.cell-tooltip-layer {
+  position: fixed;
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 12px; line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+  z-index: 1000;
+  color: var(--text);
+}
+.cell-tooltip-layer[data-rarity="uncommon"]  { color: var(--rarity-uncommon); }
+.cell-tooltip-layer[data-rarity="rare"]      { color: var(--rarity-rare); }
+.cell-tooltip-layer[data-rarity="very rare"] {
+  color: var(--rarity-very-rare);
+  text-shadow: 0 0 6px color-mix(in srgb, var(--rarity-very-rare) 45%, transparent);
+}
+.cell-tooltip-layer[data-rarity="legendary"] {
+  color: var(--rarity-legendary);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--rarity-legendary) 50%, transparent);
+}
 `;
