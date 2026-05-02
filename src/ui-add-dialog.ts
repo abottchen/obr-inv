@@ -51,8 +51,10 @@ export function openAddDialog(opts: AddDialogOpts): void {
   document.body.appendChild(overlay);
 
   // Default to all categories collapsed so the long catalog isn't a wall of
-  // rows on first open. Populated on first render from the actual catalog
-  // categories. User toggles override; search auto-expands matching groups.
+  // rows on first open. Seeded once on first render from the catalog. User
+  // toggles override; search auto-expands matching groups. Categories that
+  // appear mid-session (e.g. a custom item GM-created while this dialog
+  // stays open) render expanded; closing and reopening reseeds.
   const collapsed = new Set<string>();
   let collapsedSeeded = false;
   let dragId: string | null = null;
@@ -202,6 +204,9 @@ export function openAddDialog(opts: AddDialogOpts): void {
       ch.onclick = () => {
         const willCollapse = !collapsed.has(cat);
         if (willCollapse) collapsed.add(cat); else collapsed.delete(cat);
+        // Mutate data-collapsed on the persistent .cat-group so the CSS
+        // grid-rows transition animates. A full re-render would replace
+        // the DOM and skip the animation.
         group.dataset.collapsed = willCollapse ? "true" : "false";
       };
       group.appendChild(ch);

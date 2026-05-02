@@ -128,6 +128,9 @@ export function mountShell(
   const collapsed = new Set<string>();
   const ghosts = new Set<string>();
   const tracker: PulseTracker = createPulseTracker();
+  // prevRecord starts null so the very first rerender (from initial mount
+  // below) diffs to an empty mark map — no on-load pulse storm. Subsequent
+  // rerenders diff against the prior render's record.
   let prevRecord: PlayerInventoryRecord | null = null;
   let currentRecord = initialRecord;
   let currentCatalog = catalog;
@@ -222,11 +225,12 @@ export function mountShell(
     rerender,
     markReceived: (itemId, quantity) => {
       tracker.mark(new Map([[itemId, { kind: "received", delta: quantity }]]));
-      // Ensure the row will be visible when the next render fires the louder
-      // pulse — the diff path never produces "received", so auto-expand has
-      // to happen here.
+      // The diff path never produces "received", so auto-expand has to
+      // happen here. Schedule a render immediately so the pulse is visible
+      // even if the metadata event never lands (broadcast-only path).
       const item = currentCatalog.find((c) => c.id === itemId);
       if (item) collapsed.delete(item.category);
+      rerender(currentRecord, currentCatalog);
     },
     destroy: () => { root.innerHTML = ""; },
   };
