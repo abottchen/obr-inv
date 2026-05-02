@@ -55,6 +55,13 @@ export function showDescription(
   desc.textContent = item?.description ?? "Item missing from catalog.";
   pop.appendChild(desc);
 
+  // Right-click anywhere inside the popover dismisses it. (Right-clicking
+  // outside is already handled by the mousedown-outside listener below.)
+  pop.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    closeDescription();
+  });
+
   document.body.appendChild(pop);
   const r = pop.getBoundingClientRect();
   const { x, y } = clampToFrame({
