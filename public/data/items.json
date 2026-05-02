@@ -4,7 +4,7 @@
     "name": "Padded Armor",
     "category": "Armor",
     "icon": "https://5e.tools/img/items/XPHB/Padded%20Armor.webp",
-    "description": "AC 11 + Dex modifier. Stealth: Disadvantage. Padded armor consists of quilted layers of cloth and batting. (Light Armor \u2014 1 Minute to Don or Doff)",
+    "description": "AC 11 + Dex modifier. Stealth: Disadvantage. Padded armor consists of quilted layers of cloth and batting. (Light Armor — 1 Minute to Don or Doff)",
     "rarity": "common",
     "weight": 8
   },
@@ -13,7 +13,7 @@
     "name": "Leather Armor",
     "category": "Armor",
     "icon": "https://5e.tools/img/items/XPHB/Leather%20Armor.webp",
-    "description": "AC 11 + Dex modifier. The breastplate and shoulder protectors of this armor are made of leather that has been stiffened by being boiled in oil. The rest of the armor is made of softer and more flexible materials. (Light Armor \u2014 1 Minute to Don or Doff)",
+    "description": "AC 11 + Dex modifier. The breastplate and shoulder protectors of this armor are made of leather that has been stiffened by being boiled in oil. The rest of the armor is made of softer and more flexible materials. (Light Armor — 1 Minute to Don or Doff)",
     "rarity": "common",
     "weight": 10
   },
@@ -22,7 +22,7 @@
     "name": "Studded Leather Armor",
     "category": "Armor",
     "icon": "https://5e.tools/img/items/XPHB/Studded%20Leather%20Armor.webp",
-    "description": "AC 12 + Dex modifier. Made from tough but flexible leather, studded leather is reinforced with close-set rivets or spikes. (Light Armor \u2014 1 Minute to Don or Doff)",
+    "description": "AC 12 + Dex modifier. Made from tough but flexible leather, studded leather is reinforced with close-set rivets or spikes. (Light Armor — 1 Minute to Don or Doff)",
     "rarity": "common",
     "weight": 13
   },
@@ -31,7 +31,7 @@
     "name": "Hide Armor",
     "category": "Armor",
     "icon": "https://5e.tools/img/items/XPHB/Hide%20Armor.webp",
-    "description": "AC 12 + Dex modifier (max 2). This crude armor consists of thick furs and pelts. It is commonly worn by barbarian tribes, evil humanoids, and other folk who lack access to the tools and materials needed to create better armor. (Medium Armor \u2014 5 Minutes to Don, 1 Minute to Doff)",
+    "description": "AC 12 + Dex modifier (max 2). This crude armor consists of thick furs and pelts. It is commonly worn by barbarian tribes, evil humanoids, and other folk who lack access to the tools and materials needed to create better armor. (Medium Armor — 5 Minutes to Don, 1 Minute to Doff)",
     "rarity": "common",
     "weight": 12
   },
@@ -40,7 +40,7 @@
     "name": "Chain Shirt",
     "category": "Armor",
     "icon": "https://5e.tools/img/items/XPHB/Chain%20Shirt.webp",
-    "description": "AC 13 + Dex modifier (max 2). Made of interlocking metal rings, a chain shirt is worn between layers of clothing or leather. This armor offers modest protection to the wearer's upper body and allows the sound of the rings rubbing against one another to be muffled by outer layers. (Medium Armor \u2014 5 Minutes to Don, 1 Minute to Doff)",
+    "description": "AC 13 + Dex modifier (max 2). Made of interlocking metal rings, a chain shirt is worn between layers of clothing or leather. This armor offers modest protection to the wearer's upper body and allows the sound of the rings rubbing against one another to be muffled by outer layers. (Medium Armor — 5 Minutes to Don, 1 Minute to Doff)",
     "rarity": "common",
     "weight": 20
   },
@@ -49,7 +49,7 @@
     "name": "Scale Mail",
     "category": "Armor",
     "icon": "https://5e.tools/img/items/XPHB/Scale%20Mail.webp",
-    "description": "AC 14 + Dex modifier (max 2). Stealth: Disadvantage. This armor consists of a coat and leggings (and perhaps a separate skirt) of leather covered with overlapping pieces of metal, much like the scales of a fish. The suit includes gauntlets. (Medium Armor \u2014 5 Minutes to Don, 1 Minute to Doff)",
+    "description": "AC 14 + Dex modifier (max 2). Stealth: Disadvantage. This armor consists of a coat and leggings (and perhaps a separate skirt) of leather covered with overlapping pieces of metal, much like the scales of a fish. The suit includes gauntlets. (Medium Armor — 5 Minutes to Don, 1 Minute to Doff)",
     "rarity": "common",
     "weight": 45
   },
@@ -58,7 +58,7 @@
     "name": "Breastplate",
     "category": "Armor",
     "icon": "https://5e.tools/img/items/XPHB/Breastplate.webp",
-    "description": "AC 14 + Dex modifier (max 2). This armor consists of a fitted metal chest piece worn with supple leather. Although it leaves the legs and arms relatively unprotected, this armor provides good protection for the wearer's vital organs while leaving the wearer relatively unencumbered. (Medium Armor \u2014 5 Minutes to Don, 1 Minute to Doff)",
+    "description": "AC 14 + Dex modifier (max 2). This armor consists of a fitted metal chest piece worn with supple leather. Although it leaves the legs and arms relatively unprotected, this armor provides good protection for the wearer's vital organs while leaving the wearer relatively unencumbered. (Medium Armor — 5 Minutes to Don, 1 Minute to Doff)",
     "rarity": "common",
     "weight": 20
   },
@@ -67,7 +67,7 @@
     "name": "Half Plate Armor",
     "category": "Armor",
     "icon": "https://5e.tools/img/items/XPHB/Half%20Plate%20Armor.webp",
-    "description": "AC 15 + Dex modifier (max 2). Stealth: Disadvantage. Half plate consists of shaped metal plates that cover most of the wearer's body. It does not include leg protection beyond simple greaves that are attached with leather straps. (Medium Armor \u2014 5 Minutes to Don, 1 Minute to Doff)",
+    "description": "AC 15 + Dex modifier (max 2). Stealth: Disadvantage. Half plate consists of shaped metal plates that cover most of the wearer's body. It does not include leg protection beyond simple greaves that are attached with leather straps. (Medium Armor — 5 Minutes to Don, 1 Minute to Doff)",
     "rarity": "common",
     "weight": 40
   },
@@ -76,7 +76,7 @@
     "name": "Ring Mail",
     "category": "Armor",
     "icon": "https://5e.tools/img/items/XPHB/Ring%20Mail.webp",
-    "description": "AC 14. Stealth: Disadvantage. This armor is leather armor with heavy rings sewn into it. The rings help reinforce the armor against blows from swords and axes. Ring mail is inferior to chain mail, and it's usually worn only by those who can't afford better armor. (Heavy Armor \u2014 10 Minutes to Don, 5 Minutes to Doff)",
+    "description": "AC 14. Stealth: Disadvantage. This armor is leather armor with heavy rings sewn into it. The rings help reinforce the armor against blows from swords and axes. Ring mail is inferior to chain mail, and it's usually worn only by those who can't afford better armor. (Heavy Armor — 10 Minutes to Don, 5 Minutes to Doff)",
     "rarity": "common",
     "weight": 40
   },
@@ -85,7 +85,7 @@
     "name": "Chain Mail",
     "category": "Armor",
     "icon": "https://5e.tools/img/items/XPHB/Chain%20Mail.webp",
-    "description": "AC 16. Strength: 13. Stealth: Disadvantage. Made of interlocking metal rings, chain mail includes a layer of quilted fabric worn underneath the mail to prevent chafing and to cushion the impact of blows. The suit includes gauntlets. (Heavy Armor \u2014 10 Minutes to Don, 5 Minutes to Doff)",
+    "description": "AC 16. Strength: 13. Stealth: Disadvantage. Made of interlocking metal rings, chain mail includes a layer of quilted fabric worn underneath the mail to prevent chafing and to cushion the impact of blows. The suit includes gauntlets. (Heavy Armor — 10 Minutes to Don, 5 Minutes to Doff)",
     "rarity": "common",
     "weight": 55
   },
@@ -94,7 +94,7 @@
     "name": "Splint Armor",
     "category": "Armor",
     "icon": "https://5e.tools/img/items/XPHB/Splint%20Armor.webp",
-    "description": "AC 17. Strength: 15. Stealth: Disadvantage. This armor is made of narrow vertical strips of metal riveted to a backing of leather that is worn over cloth padding. Flexible chain mail protects the joints. (Heavy Armor \u2014 10 Minutes to Don, 5 Minutes to Doff)",
+    "description": "AC 17. Strength: 15. Stealth: Disadvantage. This armor is made of narrow vertical strips of metal riveted to a backing of leather that is worn over cloth padding. Flexible chain mail protects the joints. (Heavy Armor — 10 Minutes to Don, 5 Minutes to Doff)",
     "rarity": "common",
     "weight": 60
   },
@@ -103,7 +103,7 @@
     "name": "Plate Armor",
     "category": "Armor",
     "icon": "https://5e.tools/img/items/XPHB/Plate%20Armor.webp",
-    "description": "AC 18. Strength: 15. Stealth: Disadvantage. Plate consists of shaped, interlocking metal plates to cover the entire body. A suit of plate includes gauntlets, heavy leather boots, a visored helmet, and thick layers of padding underneath the armor. Buckles and straps distribute the weight over the body. (Heavy Armor \u2014 10 Minutes to Don, 5 Minutes to Doff)",
+    "description": "AC 18. Strength: 15. Stealth: Disadvantage. Plate consists of shaped, interlocking metal plates to cover the entire body. A suit of plate includes gauntlets, heavy leather boots, a visored helmet, and thick layers of padding underneath the armor. Buckles and straps distribute the weight over the body. (Heavy Armor — 10 Minutes to Don, 5 Minutes to Doff)",
     "rarity": "common",
     "weight": 65
   },
@@ -1888,7 +1888,7 @@
     "name": "Bag of Holding",
     "category": "Wondrous Item",
     "icon": "https://5e.tools/img/items/XDMG/Bag%20of%20Holding.webp",
-    "description": "This bag has an interior space considerably larger than its outside dimensions\u2014roughly 2 feet square and 4 feet deep on the inside. The bag can hold up to 500 pounds, not exceeding a volume of 64 cubic feet. The bag weighs 5 pounds, regardless of its contents. Retrieving an item from the bag requires a Utilize action.",
+    "description": "This bag has an interior space considerably larger than its outside dimensions—roughly 2 feet square and 4 feet deep on the inside. The bag can hold up to 500 pounds, not exceeding a volume of 64 cubic feet. The bag weighs 5 pounds, regardless of its contents. Retrieving an item from the bag requires a Utilize action.",
     "rarity": "uncommon",
     "weight": 15
   },
@@ -2527,7 +2527,7 @@
     "name": "Prosthetic Limb",
     "category": "Wondrous Item",
     "icon": "https://5e.tools/img/items/XDMG/Prosthetic%20Limb.webp",
-    "description": "This magic item replaces a lost limb\u2014a hand, an arm, a foot, a leg, or a similar body part. While the prosthetic is attached, it functions identically to the part it replaces. You can detach or reattach it as a Magic action, and it can't be removed against your will while you are alive.",
+    "description": "This magic item replaces a lost limb—a hand, an arm, a foot, a leg, or a similar body part. While the prosthetic is attached, it functions identically to the part it replaces. You can detach or reattach it as a Magic action, and it can't be removed against your will while you are alive.",
     "rarity": "common"
   },
   {
@@ -2643,5 +2643,31 @@
     "icon": "https://5e.tools/img/items/XDMG/Winged%20Boots.webp",
     "description": "Requires attunement. These boots have 4 charges and regain 1d4 expended charges daily at dawn. While wearing the boots, you can take a Magic action to expend 1 charge, gaining a Fly Speed of 30 feet for 1 hour. If you are flying when the duration expires, you descend at a rate of 30 feet per round until you land.",
     "rarity": "uncommon"
+  },
+  {
+    "id": "hlpqYI",
+    "name": "Chalk",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/chalk-outline-murder.svg",
+    "description": "A piece of chalk. While holding it, you can take a Utilize action to make marks on a surface that last until something washes them away.",
+    "rarity": "common"
+  },
+  {
+    "id": "LvXfEi",
+    "name": "Fishing Tackle",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/fishing-pole.svg",
+    "description": "Ability: Wisdom. Weight: 4 lb. Utilize: Catch fish (DC 10). Includes a wooden rod, silken line, corkwood bobbers, steel hooks, lead sinkers, velvet lures, and narrow netting. (Utility Tool)",
+    "rarity": "common",
+    "weight": 4
+  },
+  {
+    "id": "WoHmRu",
+    "name": "Hammer",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/flat-hammer.svg",
+    "description": "Weight: 3 lb. A common hammer suitable for driving pitons, nails, or stakes.",
+    "rarity": "common",
+    "weight": 3
   }
 ]
