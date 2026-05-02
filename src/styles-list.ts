@@ -215,7 +215,6 @@ export const LIST_CSS = `
   font-size: 12px; line-height: 1.2;
   white-space: nowrap;
   pointer-events: none;
-  transform: translateX(-50%);
   z-index: 1000;
   color: var(--text);
 }
