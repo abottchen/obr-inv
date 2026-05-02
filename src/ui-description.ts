@@ -194,13 +194,15 @@ export function showDescription(
     applyDimensionsCap(pop, zoom);
     writeZoom(zoom);
     refreshZoomBtns();
-    // Re-measure post-zoom and clamp from the popover's current top-left.
+    // Re-measure post-zoom and clamp from the popover's current
+    // rendered position. clampToFrame works in viewport pixels, so we
+    // feed it r.{left,top,width,height} and then divide the result by
+    // zoom — same reason as the initial placement below: CSS `zoom`
+    // scales style.top/left, so the rendered position is style × zoom.
     const r = pop.getBoundingClientRect();
-    const curLeft = parseFloat(pop.style.left) || r.left;
-    const curTop  = parseFloat(pop.style.top)  || r.top;
-    const { x, y } = clampToFrame({ x: curLeft, y: curTop, width: r.width, height: r.height });
-    pop.style.left = `${x}px`;
-    pop.style.top  = `${y}px`;
+    const { x, y } = clampToFrame({ x: r.left, y: r.top, width: r.width, height: r.height });
+    pop.style.left = `${x / zoom}px`;
+    pop.style.top  = `${y / zoom}px`;
   };
   zOut.onclick = (e) => { e.stopPropagation(); applyZoom(stepZoom(zoom, -1)); };
   zIn.onclick  = (e) => { e.stopPropagation(); applyZoom(stepZoom(zoom,  1)); };
@@ -354,8 +356,12 @@ export function showDescription(
   const { x, y } = clampToFrame({
     x: anchor.x, y: anchor.y, width: r.width, height: r.height,
   });
-  pop.style.left = `${x}px`;
-  pop.style.top = `${y}px`;
+  // CSS `zoom` scales the element's positional offsets too, so the
+  // rendered top/left is style.top/left × zoom. Divide here so the
+  // rendered position lands at (x, y) — the value clampToFrame just
+  // computed against the unscaled viewport.
+  pop.style.left = `${x / zoom}px`;
+  pop.style.top = `${y / zoom}px`;
 
   active = pop;
   outsideHandler = (e: MouseEvent) => {
