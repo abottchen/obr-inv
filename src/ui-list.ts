@@ -166,7 +166,7 @@ function renderRow(
     row.appendChild(inc);
 
     const rm = document.createElement("button");
-    rm.className = "btn-x"; rm.textContent = "✕"; rm.title = "Remove";
+    rm.className = "btn-x"; rm.textContent = "🗑"; rm.title = "Delete this item";
     rm.dataset.action = "remove";
     rm.onclick = () => h.onRemove(id);
     row.appendChild(rm);
