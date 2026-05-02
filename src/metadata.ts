@@ -24,6 +24,8 @@ export async function listInventoryRecords(): Promise<Record<string, PlayerInven
   const out: Record<string, PlayerInventoryRecord> = {};
   for (const [k, v] of Object.entries(md)) {
     if (!isRecordKey(k)) continue;
+    // OBR persists deleted keys as null tombstones — skip them.
+    if (v == null) continue;
     out[playerIdFromKey(k)] = v as PlayerInventoryRecord;
   }
   return out;
@@ -153,7 +155,8 @@ export function onRoomMetadataChange(
   return OBR.room.onMetadataChange((md) => {
     const out: Record<string, PlayerInventoryRecord> = {};
     for (const [k, v] of Object.entries(md)) {
-      if (isRecordKey(k)) out[playerIdFromKey(k)] = v as PlayerInventoryRecord;
+      if (!isRecordKey(k) || v == null) continue;
+      out[playerIdFromKey(k)] = v as PlayerInventoryRecord;
     }
     cb(out);
   });
