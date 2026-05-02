@@ -6,9 +6,13 @@ Per-player inventory tracker for Owlbear Rodeo.
 
 - Each player sees their own inventory; the GM sees all of them via tabs.
 - Collapsible categories with animated expand/collapse, name-only search.
-- Right-click any row → description popover (rarity-tinted, with icon, weight, description).
-- Shift+right-click any row → transfer popover (other players, including offline ones via cached name + color).
-- Single global lock toggle gates ± / × on rows; currency is always editable and accepts `+45` / `-20` deltas.
+- Item names tinted by rarity (uncommon/rare flat color; very-rare/legendary add a soft glow); rows carry a colored left-stripe for the same signal at a glance.
+- Right-click any row → description popover (rarity-titled, with icon, weight, description). When the row is from your own inventory, the popover also exposes a **Transfer…** button. Right-click the popover (or click outside / press Esc) to dismiss.
+- Visual feedback on every state change — count pulse + scale, floating "+1" / "−1", row glow on inc/dec/add. Removes pulse amber and collapse out. Items received via transfer get a louder pulse with a name flash and auto-scroll the row into view; the row's category auto-expands if it was collapsed. Honors `prefers-reduced-motion`.
+- Transfer announcements broadcast to everyone in the room: the recipient sees `Alice gave you 3× Healing Potion`; observers see `Alice just transferred 3× Healing Potion to Bob`.
+- Single global lock toggle gates the +/−/🗑 buttons; currency is always editable and accepts `+45` / `-20` deltas.
+- Decrementing to 0 keeps the row visible (a "ghost" you can re-stock with +); the trashcan button is the explicit way to drop a row entirely.
+- Add-to-inventory dialog opens with all categories collapsed (the catalog is 305+ items); typing in the search auto-expands matching groups, and clearing the search restores the prior state.
 - Color-coded denominations on the gold strip (pp/gp/sp/cp).
 - GM-only "Create custom item" for one-off items not in the catalog (e.g., "you find a flower"); they live in room metadata, behave like normal items, and auto-clean up after promotion to the canonical catalog.
 - 5 KB room-metadata cap shared between inventories and customs, with a GM-side meter and over-cap modal.
@@ -45,7 +49,7 @@ A player's view only mounts their own inventory record. The GM's view mounts a t
 ```bash
 npm install
 npm run dev      # vite dev server (CORS configured for owlbear.rodeo)
-npm test         # vitest run (85 tests)
+npm test         # vitest run
 npm run build    # tsc + vite build → dist/
 ```
 
