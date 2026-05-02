@@ -21,31 +21,36 @@ export const RARITIES = [
   "legendary",
 ] as const;
 
+// Rarity colours follow the D&D contract (green/blue/purple/orange) but use
+// deeper, less neon variants that sit better on the leather palette without
+// breaking recognisability.
 export const RARITY_COLORS: Record<string, string> = {
-  common: "#888",
-  uncommon: "#4caf50",
-  rare: "#2196f3",
-  "very rare": "#9c27b0",
-  legendary: "#ff9800",
+  common: "#968259",
+  uncommon: "#7fa844",
+  rare: "#5a93c4",
+  "very rare": "#a87bc8",
+  legendary: "#e6a93f",
 };
 
 export const CURRENCY_COLORS: Record<"pp" | "gp" | "sp" | "cp", string> = {
-  pp: "#d0d0d8",
-  gp: "#ffd700",
-  sp: "#c0c0c0",
-  cp: "#b87333",
+  pp: "#e0e0e8",
+  gp: "#f0c878",
+  sp: "#cfcfcf",
+  cp: "#c47a4a",
 };
 
+// Leather-codex theme: oxblood/umber backgrounds, gilded brass accent,
+// parchment text. Replaces the previous slate/purple palette.
 export const THEME = {
-  bg0: "#15171f",
-  bg1: "#1c2030",
-  bg2: "#252a3e",
-  border: "#2a3046",
-  text: "#e6e8ef",
-  textDim: "#8a8fa3",
-  accent: "#7c4dff",
-  accentSoft: "#a98bff",
-  ok: "#4caf50",
-  warn: "#f0ad4e",
-  bad: "#e95e5e",
+  bg0: "#14100b",   // shell ground (deepest)
+  bg1: "#1c150f",   // panel face
+  bg2: "#261c14",   // raised surface (rows, cells, popovers)
+  border: "#3f2e21",
+  text: "#ece0c2",      // parchment
+  textDim: "#b09a76",   // sepia
+  accent: "#c8a44e",       // gilt
+  accentSoft: "#e8cf86",   // bright gilt for hover/glow
+  ok: "#7fa844",
+  warn: "#d68a2a",
+  bad: "#c4564a",
 } as const;
