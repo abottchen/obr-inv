@@ -53,6 +53,31 @@ function stepZoom(current: number, dir: 1 | -1): number {
   return ZOOM_LEVELS[nextIdx];
 }
 
+/**
+ * Cap the popover's CSS box so (zoom × box) fits inside the iframe
+ * viewport with a small padding on each side.
+ *
+ * The previous CSS-only attempt — `max-height: calc((100vh - 8px) /
+ * var(--popover-zoom, 1))` — relied on viewport units NOT being
+ * pre-scaled by `zoom`, which is browser-specific. Doing the math in
+ * JS against window.innerWidth/innerHeight (always physical viewport
+ * pixels) avoids that ambiguity entirely.
+ *
+ * Combined with `overflow-y: auto` on the popover (set in CSS), the
+ * card stays inside the iframe at every zoom level and scrolls within
+ * itself if a long description still doesn't fit.
+ */
+function applyDimensionsCap(pop: HTMLElement, zoom: number): void {
+  const pad = 4;
+  // Lower bound (120px) keeps the popover usable even on absurdly tiny
+  // iframes; the original 340 max-width remains the upper bound at
+  // zoom 1.0 since (innerWidth - 8) / 1 typically exceeds 340.
+  const maxW = Math.max(120, Math.min(340, Math.floor((window.innerWidth  - 2 * pad) / zoom)));
+  const maxH = Math.max(120, Math.floor((window.innerHeight - 2 * pad) / zoom));
+  pop.style.maxWidth  = `${maxW}px`;
+  pop.style.maxHeight = `${maxH}px`;
+}
+
 export interface DescriptionOpts {
   /** When provided, the popover renders a "Transfer…" button that
    *  closes the popover and invokes this callback. Omit for read-only
@@ -90,6 +115,7 @@ export function showDescription(
   // `zoom: var(--popover-zoom, 1)` on .description-popover.
   let zoom = readZoom();
   pop.style.setProperty("--popover-zoom", String(zoom));
+  applyDimensionsCap(pop, zoom);
 
   const header = document.createElement("div");
   header.className = "desc-header";
@@ -165,6 +191,7 @@ export function showDescription(
     if (next === zoom) return;
     zoom = next;
     pop.style.setProperty("--popover-zoom", String(zoom));
+    applyDimensionsCap(pop, zoom);
     writeZoom(zoom);
     refreshZoomBtns();
     // Re-measure post-zoom and clamp from the popover's current top-left.
