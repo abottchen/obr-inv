@@ -149,10 +149,27 @@ export function mountShell(
         ccyInputs[f].value = String(record.currency[f] ?? 0);
       }
     }
-    weightEl.textContent = `⚖ ${formatWeight(totalWeight(record.items, cat))} lb`;
+
+    // Re-inject [id, 0] rows for any ghost id that pruneZeros stripped from
+    // the stored record (writeRecord drops count=0 entries before write).
+    // Without this the row vanishes the moment metadata round-trips, the
+    // diff reads it as an explicit removal, and the leave animation plays.
+    let working = record;
+    if (ghosts.size > 0) {
+      const present = new Set(record.items.map(([id]) => id));
+      const extras: PlayerInventoryRecord["items"] = [];
+      for (const id of ghosts) {
+        if (!present.has(id)) extras.push([id, 0]);
+      }
+      if (extras.length > 0) {
+        working = { ...record, items: [...record.items, ...extras] };
+      }
+    }
+
+    weightEl.textContent = `⚖ ${formatWeight(totalWeight(working.items, cat))} lb`;
 
     // Diff vs. previous record (if any) and stamp pulses.
-    const marks = tracker.diff(prevRecord, record);
+    const marks = tracker.diff(prevRecord, working);
 
     // Ids removed this render get one frame as phantom rows.
     const phantomRemoves = new Set<string>();
@@ -161,10 +178,10 @@ export function mountShell(
     }
 
     tracker.mark(marks);
-    prevRecord = record;
+    prevRecord = working;
 
     const state: ListState = {
-      items: record.items,
+      items: working.items,
       catalog: cat,
       search: search.value,
       unlocked,

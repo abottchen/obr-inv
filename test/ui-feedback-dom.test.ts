@@ -80,6 +80,50 @@ describe("ui-feedback DOM integration", () => {
     expect(row?.querySelector(".inv-delta")?.textContent).toBe("+2");
   });
 
+  it("keeps the row visible (as ghost) when decrement leaves count at 0", () => {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    const refs = mountShell(root, rec([["h1", 1]]), catalog, makeHandlers());
+
+    // Unlock so the inline handlers (which add to the ghost set) wire up.
+    (root.querySelector(".lock-toggle") as HTMLButtonElement).click();
+
+    // Simulate the click on −, which adds h1 to ghosts via the wrapper.
+    (root.querySelector('[data-action="dec"]') as HTMLButtonElement).click();
+
+    // Metadata round-trip: writeRecord runs pruneZeros, so the returned
+    // record has h1 stripped entirely. The shell must re-inject it from
+    // the ghost set so the row stays visible.
+    refs.rerender(rec([]), catalog);
+
+    const row = rowFor(root, "h1");
+    expect(row).not.toBeNull();
+    expect(row?.dataset.pulse).toBe("dec");
+    expect(row?.querySelector(".inv-count")?.textContent).toContain("×0");
+  });
+
+  it("removes the ghost row when the user clicks the trashcan", () => {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    const refs = mountShell(root, rec([["h1", 1]]), catalog, makeHandlers());
+
+    (root.querySelector(".lock-toggle") as HTMLButtonElement).click();
+    (root.querySelector('[data-action="dec"]') as HTMLButtonElement).click();
+    refs.rerender(rec([]), catalog); // ghost still visible
+
+    expect(rowFor(root, "h1")).not.toBeNull();
+
+    (root.querySelector('[data-action="remove"]') as HTMLButtonElement).click();
+    refs.rerender(rec([]), catalog); // first render: phantom-remove + leave anim
+
+    let row = rowFor(root, "h1");
+    expect(row?.dataset.pulse).toBe("remove");
+
+    refs.rerender(rec([]), catalog); // second render: gone
+    row = rowFor(root, "h1");
+    expect(row).toBeNull();
+  });
+
   it("renders a phantom row with data-pulse=remove for one render after removal", () => {
     const root = document.createElement("div");
     document.body.appendChild(root);

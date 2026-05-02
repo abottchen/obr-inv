@@ -98,6 +98,15 @@ describe("PulseTracker.mark + consume", () => {
     expect(t.consume("a")?.delta).toBe(2);
   });
 
+  it("lets a later user-initiated kind overwrite an earlier one (peer priority)", () => {
+    let now = 1000;
+    const t = createPulseTracker(() => now);
+    t.mark(new Map([["a", { kind: "dec", delta: -1 }]]));
+    now = 1100;
+    t.mark(new Map([["a", { kind: "remove" }]]));
+    expect(t.consume("a")?.kind).toBe("remove");
+  });
+
   it("refreshes the timestamp on same-kind re-mark", () => {
     let now = 1000;
     const t = createPulseTracker(() => now);

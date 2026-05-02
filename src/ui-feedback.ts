@@ -27,11 +27,15 @@ const DURATIONS: Record<PulseKind, number> = {
   received: 1500,
 };
 
+// Only `received` is special: it must not be downgraded by an `inc` from
+// the metadata diff that arrives moments later for the same item. All
+// user-initiated kinds are peers — latest mark wins (so dec → remove
+// correctly overwrites a still-live dec entry within its 700ms window).
 const PRIORITY: Record<PulseKind, number> = {
-  remove: 1,
+  remove: 2,
   dec: 2,
-  add: 3,
-  inc: 3,
+  add: 2,
+  inc: 2,
   received: 4,
 };
 
