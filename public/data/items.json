@@ -836,7 +836,7 @@
     "id": "KDqAOd",
     "name": "Sling Bullets (20)",
     "category": "Ammunition",
-    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/bullets.svg",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/sling.svg",
     "description": "Weight: 1 1/2 lb. Ammunition for slings. Stored in a Pouch. (Ammunition)",
     "rarity": "common",
     "weight": 1.5
@@ -916,7 +916,7 @@
     "id": "khk5n7",
     "name": "Ball Bearings",
     "category": "Adventuring Gear - Utility & Equipment",
-    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/bullets.svg",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite//ball-pyramid.svg",
     "description": "Weight: 2 lb. As a Utilize action, spill to cover a 10-ft-square area within 10 ft. A creature entering for the first time on a turn must succeed on a DC 10 Dex save or fall Prone. Takes 10 minutes to recover.",
     "rarity": "common",
     "weight": 2
@@ -1861,7 +1861,7 @@
     "id": "XXr28K",
     "name": "+1 Wraps of Unarmed Power",
     "category": "Wondrous Item",
-    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/mailed-fist.svg",
     "description": "While wearing these wraps, you have a +1 bonus to attack rolls and damage rolls made with your Unarmed Strikes. Those strikes deal your choice of Force damage or their normal damage type.",
     "rarity": "uncommon"
   },
@@ -1896,7 +1896,7 @@
     "id": "XXfJGK",
     "name": "Bag of Tricks, Gray",
     "category": "Wondrous Item",
-    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/seregacthtuf/pouch-with-beads.svg",
     "description": "This bag made from gray cloth appears empty. Reaching inside the bag, however, reveals the presence of a small, fuzzy object.",
     "rarity": "uncommon",
     "weight": 0.5
@@ -1905,7 +1905,7 @@
     "id": "9DuNOn",
     "name": "Bag of Tricks, Rust",
     "category": "Wondrous Item",
-    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/seregacthtuf/pouch-with-beads.svg",
     "description": "This bag made from rust cloth appears empty. Reaching inside the bag, however, reveals the presence of a small, fuzzy object.",
     "rarity": "uncommon",
     "weight": 0.5
@@ -1914,7 +1914,7 @@
     "id": "F0bJW0",
     "name": "Bag of Tricks, Tan",
     "category": "Wondrous Item",
-    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/seregacthtuf/pouch-with-beads.svg",
     "description": "This bag made from tan cloth appears empty. Reaching inside the bag, however, reveals the presence of a small, fuzzy object.",
     "rarity": "uncommon",
     "weight": 0.5
@@ -2665,7 +2665,7 @@
     "id": "WoHmRu",
     "name": "Hammer",
     "category": "Adventuring Gear - Utility & Equipment",
-    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/flat-hammer.svg",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/flat-hammer.svg",
     "description": "Weight: 3 lb. A common hammer suitable for driving pitons, nails, or stakes.",
     "rarity": "common",
     "weight": 3
@@ -2674,7 +2674,7 @@
     "id": "om0Dtw",
     "name": "Piton",
     "category": "Adventuring Gear - Camping & Travel",
-    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/spike.svg",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/nails.svg",
     "description": "Weight: 1/4 lb. A metal spike that can be hammered into a surface as an anchor point, typically for securing rope while climbing.",
     "rarity": "common",
     "weight": 0.25
@@ -2683,7 +2683,7 @@
     "id": "nuQCso",
     "name": "Ubtao's Ring",
     "category": "Wondrous Item",
-    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/ring.svg",
     "description": "This bejeweled ring is engraved with a tiny, intricate maze. It gives you advantage on Wisdom (Survival) checks and gives you advantage when making Wisdom (Animal Handling) checks with dinosaurs.",
     "rarity": "uncommon"
   },
