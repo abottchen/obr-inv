@@ -37,7 +37,14 @@ describe("transferItem", () => {
         && (b.data as any).type === "transfer-received",
     );
     expect(transferMsg).toBeTruthy();
-    expect((transferMsg?.data as any).toPlayerId).toBe("bob");
+    const data = transferMsg?.data as any;
+    expect(data.fromPlayerId).toBe("alice");
+    expect(data.fromName).toBe("Alice");
+    expect(data.toPlayerId).toBe("bob");
+    expect(data.toName).toBe("Bob");
+    expect(data.itemId).toBe("a1");
+    expect(data.itemName).toBe("Sword");
+    expect(data.quantity).toBe(3);
     expect(transferMsg?.destination).toBe("ALL");
   });
 

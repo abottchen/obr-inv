@@ -81,6 +81,5 @@ function makeNoopHandlers() {
     onCurrencyChange: async () => {},
     onAddClick: () => {},
     onDescription: () => {},
-    onTransfer: () => {},
   };
 }

@@ -77,6 +77,19 @@ export const DIALOG_CSS = `
   overflow-y: auto;
 }
 
+.description-popover .desc-actions {
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-1);
+  display: flex; justify-content: flex-end; gap: 6px;
+}
+.description-popover .desc-transfer {
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 6px;
+  padding: 6px 12px; font-size: 12px; cursor: pointer;
+}
+.description-popover .desc-transfer:hover { filter: brightness(1.1); }
+
 .transfer-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
 .transfer-list button {
   display: flex; align-items: center; gap: 6px;
@@ -139,10 +152,8 @@ export const DIALOG_CSS = `
   background: linear-gradient(90deg, rgba(156,39,176,0.10), var(--bg-1) 60%); }
 .add-row[data-rarity="legendary"] { border-left-color: var(--rarity-legendary);
   background: linear-gradient(90deg, rgba(255,152,0,0.10), var(--bg-1) 60%); }
-.add-row .item-name[data-rarity="uncommon"] { color: var(--rarity-uncommon); }
-.add-row .item-name[data-rarity="rare"] { color: var(--rarity-rare); }
-.add-row .item-name[data-rarity="very rare"] { color: var(--rarity-very-rare); }
-.add-row .item-name[data-rarity="legendary"] { color: var(--rarity-legendary); }
+/* Rarity color/glow on .item-name now comes from the .inv-name rules in
+ * styles-list.ts — the add-dialog row's name carries both classes. */
 .add-qty { width: 56px; }
 .btn-plus {
   background: var(--accent); color: #fff;

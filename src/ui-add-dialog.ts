@@ -50,7 +50,13 @@ export function openAddDialog(opts: AddDialogOpts): void {
 
   document.body.appendChild(overlay);
 
+  // Default to all categories collapsed so the long catalog isn't a wall of
+  // rows on first open. Seeded once on first render from the catalog. User
+  // toggles override; search auto-expands matching groups. Categories that
+  // appear mid-session (e.g. a custom item GM-created while this dialog
+  // stays open) render expanded; closing and reopening reseeds.
   const collapsed = new Set<string>();
+  let collapsedSeeded = false;
   let dragId: string | null = null;
   let dropTimer: number | undefined;
 
@@ -146,6 +152,13 @@ export function openAddDialog(opts: AddDialogOpts): void {
       if (!groups.has(item.category)) groups.set(item.category, []);
       groups.get(item.category)!.push(item);
     }
+
+    if (!collapsedSeeded) {
+      // Seed from the full catalog (not just current matches) so categories
+      // collapsed before searching stay collapsed after the search clears.
+      for (const item of opts.catalog) collapsed.add(item.category);
+      collapsedSeeded = true;
+    }
     if (groups.size === 0) {
       // GM searching with no hit → offer to create a custom item with
       // the query pre-filled as the name. Falls back to the plain
@@ -175,7 +188,9 @@ export function openAddDialog(opts: AddDialogOpts): void {
       ([a], [b]) => a.localeCompare(b),
     );
     for (const [cat, entries] of sortedCats) {
-      const isCollapsed = collapsed.has(cat);
+      // While searching, always expand matching groups so the user can see
+      // the hits. Without a query, honor the user's collapse state.
+      const isCollapsed = q ? false : collapsed.has(cat);
 
       const group = document.createElement("div");
       group.className = "cat-group";
@@ -189,6 +204,9 @@ export function openAddDialog(opts: AddDialogOpts): void {
       ch.onclick = () => {
         const willCollapse = !collapsed.has(cat);
         if (willCollapse) collapsed.add(cat); else collapsed.delete(cat);
+        // Mutate data-collapsed on the persistent .cat-group so the CSS
+        // grid-rows transition animates. A full re-render would replace
+        // the DOM and skip the animation.
         group.dataset.collapsed = willCollapse ? "true" : "false";
       };
       group.appendChild(ch);

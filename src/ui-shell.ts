@@ -1,5 +1,6 @@
 import { renderList, type ListState, type RowHandlers } from "./ui-list";
 import { totalWeight } from "./inventory";
+import { createPulseTracker, type PulseTracker } from "./ui-feedback";
 import type { CatalogItem, PlayerInventoryRecord } from "./types";
 
 export interface ShellHandlers extends Omit<RowHandlers, "onIncrement" | "onDecrement" | "onRemove"> {
@@ -18,6 +19,7 @@ export interface ShellHandlers extends Omit<RowHandlers, "onIncrement" | "onDecr
 
 export interface ShellRefs {
   rerender: (record: PlayerInventoryRecord, catalog: CatalogItem[]) => void;
+  markReceived: (itemId: string, quantity: number) => void;
   destroy: () => void;
 }
 
@@ -125,6 +127,11 @@ export function mountShell(
   let unlocked = false;
   const collapsed = new Set<string>();
   const ghosts = new Set<string>();
+  const tracker: PulseTracker = createPulseTracker();
+  // prevRecord starts null so the very first rerender (from initial mount
+  // below) diffs to an empty mark map — no on-load pulse storm. Subsequent
+  // rerenders diff against the prior render's record.
+  let prevRecord: PlayerInventoryRecord | null = null;
   let currentRecord = initialRecord;
   let currentCatalog = catalog;
 
@@ -142,14 +149,46 @@ export function mountShell(
         ccyInputs[f].value = String(record.currency[f] ?? 0);
       }
     }
-    weightEl.textContent = `⚖ ${formatWeight(totalWeight(record.items, cat))} lb`;
+
+    // Re-inject [id, 0] rows for any ghost id that pruneZeros stripped from
+    // the stored record (writeRecord drops count=0 entries before write).
+    // Without this the row vanishes the moment metadata round-trips, the
+    // diff reads it as an explicit removal, and the leave animation plays.
+    let working = record;
+    if (ghosts.size > 0) {
+      const present = new Set(record.items.map(([id]) => id));
+      const extras: PlayerInventoryRecord["items"] = [];
+      for (const id of ghosts) {
+        if (!present.has(id)) extras.push([id, 0]);
+      }
+      if (extras.length > 0) {
+        working = { ...record, items: [...record.items, ...extras] };
+      }
+    }
+
+    weightEl.textContent = `⚖ ${formatWeight(totalWeight(working.items, cat))} lb`;
+
+    // Diff vs. previous record (if any) and stamp pulses.
+    const marks = tracker.diff(prevRecord, working);
+
+    // Ids removed this render get one frame as phantom rows.
+    const phantomRemoves = new Set<string>();
+    for (const [id, m] of marks) {
+      if (m.kind === "remove") phantomRemoves.add(id);
+    }
+
+    tracker.mark(marks);
+    prevRecord = working;
+
     const state: ListState = {
-      items: record.items,
+      items: working.items,
       catalog: cat,
       search: search.value,
       unlocked,
       collapsed,
       ghosts,
+      tracker,
+      phantomRemoves,
     };
     renderList(body, state, {
       onIncrement: (id) => {
@@ -165,7 +204,6 @@ export function mountShell(
         void handlers.onRemove(id);
       },
       onDescription: handlers.onDescription,
-      onTransfer: handlers.onTransfer,
     });
   };
 
@@ -201,6 +239,15 @@ export function mountShell(
 
   return {
     rerender,
+    markReceived: (itemId, quantity) => {
+      tracker.mark(new Map([[itemId, { kind: "received", delta: quantity }]]));
+      // The diff path never produces "received", so auto-expand has to
+      // happen here. Schedule a render immediately so the pulse is visible
+      // even if the metadata event never lands (broadcast-only path).
+      const item = currentCatalog.find((c) => c.id === itemId);
+      if (item) collapsed.delete(item.category);
+      rerender(currentRecord, currentCatalog);
+    },
     destroy: () => { root.innerHTML = ""; },
   };
 }

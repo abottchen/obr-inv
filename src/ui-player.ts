@@ -31,6 +31,34 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
   let byId = new Map(merged.map((c) => [c.id, c]));
   let current = opts.initialRecord;
 
+  const openTransferFor = async (
+    id: string, anchor: { x: number; y: number },
+  ) => {
+    const all = await listInventoryRecords();
+    const targets = buildTargets(opts.playerId, all);
+    const ci = byId.get(id);
+    const entry = current.items.find(([eid]) => eid === id);
+    showTransfer({
+      anchor,
+      itemId: id,
+      itemName: ci?.name ?? id,
+      itemIcon: ci?.icon,
+      maxQty: entry?.[1] ?? 0, // showTransfer notifies on 0
+      targets,
+      onConfirm: async (toPlayerId, qty) => {
+        try {
+          await transferItem({
+            fromPlayerId: opts.playerId,
+            toPlayerId,
+            itemId: id,
+            itemName: ci?.name ?? id,
+            qty,
+          });
+        } catch (e) { rethrowIfNotCap(e); }
+      },
+    });
+  };
+
   const refs = mountShell(opts.root, current, merged, {
     onIncrement: async (id) => {
       try { await writeRecord(opts.playerId, incrementItem(current, id)); }
@@ -65,32 +93,8 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
       });
     },
     onDescription: (id, anchor) => {
-      showDescription(anchor, byId.get(id) ?? null, id);
-    },
-    onTransfer: async (id, anchor) => {
-      const all = await listInventoryRecords();
-      const targets = buildTargets(opts.playerId, all);
-      const ci = byId.get(id);
-      const entry = current.items.find(([eid]) => eid === id);
-      if (!entry || entry[1] <= 0) return;
-      showTransfer({
-        anchor,
-        itemId: id,
-        itemName: ci?.name ?? id,
-        itemIcon: ci?.icon,
-        maxQty: entry[1],
-        targets,
-        onConfirm: async (toPlayerId, qty) => {
-          try {
-            await transferItem({
-              fromPlayerId: opts.playerId,
-              toPlayerId,
-              itemId: id,
-              itemName: ci?.name ?? id,
-              qty,
-            });
-          } catch (e) { rethrowIfNotCap(e); }
-        },
+      showDescription(anchor, byId.get(id) ?? null, id, {
+        onTransfer: () => { void openTransferFor(id, anchor); },
       });
     },
   });
@@ -112,9 +116,22 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
   const unsubBroadcast = OBR.broadcast.onMessage(
     BROADCAST_CHANNEL, (ev) => {
       const msg = ev.data as BroadcastMessage;
-      if (msg.type === "transfer-received" && msg.toPlayerId === opts.playerId) {
+      if (msg.type !== "transfer-received") return;
+      // Sender already knows; don't echo their own action back at them.
+      if (msg.fromPlayerId === opts.playerId) return;
+
+      if (msg.toPlayerId === opts.playerId) {
+        refs.markReceived(msg.itemId, msg.quantity);
+        // The metadata change that follows will diff to "inc"; precedence keeps "received".
+        // Kick a render in case the broadcast outpaces the metadata event.
+        refs.rerender(current, merged);
         OBR.notification?.show?.(
           `${msg.fromName} gave you ${msg.quantity}× ${msg.itemName}`,
+          "INFO",
+        )?.catch?.(() => console.warn("notification.show unavailable"));
+      } else {
+        OBR.notification?.show?.(
+          `${msg.fromName} just transferred ${msg.quantity}× ${msg.itemName} to ${msg.toName}`,
           "INFO",
         )?.catch?.(() => console.warn("notification.show unavailable"));
       }

@@ -60,7 +60,21 @@ export const LIST_CSS = `
 }
 .inv-name { flex: 1; }
 .inv-name mark { background: rgba(124,77,255,0.25); color: inherit; padding: 0 1px; }
-.inv-count { font-variant-numeric: tabular-nums; min-width: 26px; text-align: right; color: var(--text-dim); }
+/* Rarity-tinted item names. Common stays at default text color so the long
+ * tail of mundane items doesn't add visual noise; uncommon/rare get a flat
+ * tint; very-rare/legendary get a subtle text-shadow glow on top, signalling
+ * "this is special" without competing with the pulse animations. */
+.inv-name[data-rarity="uncommon"]  { color: var(--rarity-uncommon); }
+.inv-name[data-rarity="rare"]      { color: var(--rarity-rare); }
+.inv-name[data-rarity="very rare"] {
+  color: var(--rarity-very-rare);
+  text-shadow: 0 0 6px color-mix(in srgb, var(--rarity-very-rare) 45%, transparent);
+}
+.inv-name[data-rarity="legendary"] {
+  color: var(--rarity-legendary);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--rarity-legendary) 50%, transparent);
+}
+.inv-count { font-variant-numeric: tabular-nums; min-width: 26px; text-align: right; color: var(--text-dim); position: relative; }
 
 .btn-step, .btn-x {
   width: 24px; height: 24px;

@@ -39,8 +39,11 @@ export interface ExtensionConfig {
 
 export interface TransferReceivedMessage {
   type: "transfer-received";
+  fromPlayerId: string;
   fromName: string;
   toPlayerId: string;
+  toName: string;
+  itemId: string;
   itemName: string;
   quantity: number;
 }
