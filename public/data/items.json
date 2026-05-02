@@ -2678,5 +2678,22 @@
     "description": "Weight: 1/4 lb. A metal spike that can be hammered into a surface as an anchor point, typically for securing rope while climbing.",
     "rarity": "common",
     "weight": 0.25
+  },
+  {
+    "id": "nuQCso",
+    "name": "Ubtao's Ring",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/gem-pendant.svg",
+    "description": "This bejeweled ring is engraved with a tiny, intricate maze. It gives you advantage on Wisdom (Survival) checks and gives you advantage when making Wisdom (Animal Handling) checks with dinosaurs.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "vdBMzT",
+    "name": "Volo's Guide to Monsters",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/book-cover.svg",
+    "description": "Weight: 5 lb. A thick monograph by Volothamp Geddarm cataloguing the appearance, habits, and lairs of exotic creatures. Consulting it grants a +5 bonus to Int (Arcana, Nature, or Religion) checks made to recall information about monsters.",
+    "rarity": "common",
+    "weight": 5
   }
 ]
