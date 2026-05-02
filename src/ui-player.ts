@@ -113,6 +113,10 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
     BROADCAST_CHANNEL, (ev) => {
       const msg = ev.data as BroadcastMessage;
       if (msg.type === "transfer-received" && msg.toPlayerId === opts.playerId) {
+        refs.markReceived(msg.itemId, msg.quantity);
+        // The metadata change that follows will diff to "inc"; precedence keeps "received".
+        // Kick a render in case the broadcast outpaces the metadata event.
+        refs.rerender(current, merged);
         OBR.notification?.show?.(
           `${msg.fromName} gave you ${msg.quantity}× ${msg.itemName}`,
           "INFO",
