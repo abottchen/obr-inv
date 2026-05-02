@@ -15,16 +15,22 @@ export const DIALOG_CSS = `
 /* ─── Item card (description popover) ──────────────────────────────── */
 .description-popover {
   padding: 0;
-  overflow: hidden;
+  /* overflow-y: auto lets the popover scroll within itself when zoom or
+   * a long description would push content past the iframe edges.
+   * overflow-x: hidden keeps horizontal corners clean and prevents a
+   * stray horizontal scrollbar at intermediate zoom steps. */
+  overflow-x: hidden;
+  overflow-y: auto;
   min-width: 260px;
   max-width: 340px;
+  /* Per-popover zoom controlled by ui-description.ts via the
+   * --popover-zoom variable. ui-description.ts also computes max-width
+   * and max-height inline (against window.innerWidth/innerHeight) so
+   * the popover stays inside the iframe at every zoom step — viewport
+   * units mixed with the CSS zoom property are too browser-dependent
+   * to rely on for that cap. */
   background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
   border-top: 4px solid var(--rarity-common);
-  /* Per-popover zoom controlled by ui-description.ts. The CSS zoom
-   * property (Baseline 2024 — works in Chromium, Firefox 126+, Safari
-   * 17+) reflows layout based on the scaled box, so getBoundingClientRect
-   * after a change reads the new dimensions and clampToFrame keeps the
-   * popover inside the iframe at every step. */
   zoom: var(--popover-zoom, 1);
 }
 .description-popover[data-rarity="uncommon"]   { border-top-color: var(--rarity-uncommon); }
