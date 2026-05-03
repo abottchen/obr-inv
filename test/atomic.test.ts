@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
-import { parseWriter, randomNonce, __atomicTestHooks, _internal_getLatestWriter, atomicUpdate } from "../src/atomic";
+import { parseWriter, randomNonce, __atomicTestHooks, _internal_getLatestWriter, atomicUpdate, atomicMultiUpdate } from "../src/atomic";
 import type { WriterStamp } from "../src/types";
 import { ConflictError, AbortError } from "../src/types";
 
@@ -177,5 +177,50 @@ describe("atomicUpdate (cancel)", () => {
     await expect(
       atomicUpdate("k1", () => ({ w: "", v: 1 }), { description: "x", signal: ac.signal }),
     ).rejects.toThrow(AbortError);
+  });
+});
+
+describe("atomicMultiUpdate", () => {
+  beforeEach(() => {
+    __testHooks.reset();
+    __atomicTestHooks.reset();
+    __atomicTestHooks.startTracker();
+    __testHooks.setSelf("alice", "Alice", "#fff");
+  });
+
+  it("writes both keys in a single setMetadata call with the same writer", async () => {
+    const sdk = (await import("@owlbear-rodeo/sdk")).default;
+    const setSpy = vi.spyOn(sdk.room, "setMetadata");
+    await atomicMultiUpdate([
+      { key: "k1", mutate: () => ({ w: "", v: 1 }) },
+      { key: "k2", mutate: () => ({ w: "", v: 2 }) },
+    ], { description: "test" });
+    // only one setMetadata call, with both keys
+    expect(setSpy).toHaveBeenCalledTimes(1);
+    const patch = setSpy.mock.calls[0][0] as Record<string, { w: string }>;
+    expect(Object.keys(patch).sort()).toEqual(["k1", "k2"]);
+    expect(patch.k1.w).toBe(patch.k2.w);     // same writer for both
+    expect(patch.k1.w).toMatch(/^alice:[0-9A-Za-z]{8}$/);
+  });
+
+  it("retries if any key's echo doesn't match", async () => {
+    const sdk = (await import("@owlbear-rodeo/sdk")).default;
+    const realSet = sdk.room.setMetadata;
+    let firstCall = true;
+    sdk.room.setMetadata = vi.fn(async (patch: Record<string, unknown>) => {
+      await realSet(patch);
+      if (firstCall) {
+        firstCall = false;
+        // stomp only k2 — k1's echo will be ours, k2's will be different
+        await realSet({ k2: { ...(patch.k2 as object), w: "bob:nonce" } });
+      }
+    }) as typeof sdk.room.setMetadata;
+
+    const onConflict = vi.fn();
+    await atomicMultiUpdate([
+      { key: "k1", mutate: () => ({ w: "", v: 1 }) },
+      { key: "k2", mutate: () => ({ w: "", v: 2 }) },
+    ], { description: "test", onConflict });
+    expect(onConflict).toHaveBeenCalledTimes(1);
   });
 });

@@ -10,20 +10,23 @@ let selfColor = "#888888";
 let players: Array<{ id: string; name: string; color: string; role: "PLAYER" | "GM" }> = [];
 const metadataListeners: Array<(m: Record<string, unknown>) => void> = [];
 
+function baseSetMetadata(patch: Record<string, unknown>): Promise<void> {
+  for (const [k, v] of Object.entries(patch)) {
+    if (v === undefined) store.delete(k);
+    else store.set(k, v);
+  }
+  const snapshot = Object.fromEntries(store);
+  metadataListeners.forEach((l) => l(snapshot));
+  return Promise.resolve();
+}
+
 export const OBR = {
   isAvailable: true,
   ready: vi.fn(async (cb: () => void) => cb()),
   onReady: vi.fn((cb: () => void) => { void cb(); }),
   room: {
     getMetadata: vi.fn(async () => Object.fromEntries(store)),
-    setMetadata: vi.fn(async (patch: Record<string, unknown>) => {
-      for (const [k, v] of Object.entries(patch)) {
-        if (v === undefined) store.delete(k);
-        else store.set(k, v);
-      }
-      const snapshot = Object.fromEntries(store);
-      metadataListeners.forEach((l) => l(snapshot));
-    }),
+    setMetadata: vi.fn(baseSetMetadata),
     onMetadataChange: vi.fn((cb: (m: Record<string, unknown>) => void) => {
       metadataListeners.push(cb);
       return () => {
@@ -72,7 +75,9 @@ export const __testHooks = {
     selfColor = "#888888";
     metadataListeners.length = 0;
     OBR.room.getMetadata.mockClear();
-    OBR.room.setMetadata.mockClear();
+    // Restore setMetadata to the canonical store implementation in case a test
+    // replaced it with a custom vi.fn() (e.g. for conflict simulation).
+    OBR.room.setMetadata = vi.fn(baseSetMetadata);
     OBR.room.onMetadataChange.mockClear();
     OBR.player.getRole.mockClear();
     OBR.player.getName.mockClear();
