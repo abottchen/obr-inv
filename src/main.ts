@@ -9,6 +9,7 @@ import { injectBaseStyles, injectStyles } from "./styles";
 import { LIST_CSS } from "./styles-list";
 import { DIALOG_CSS } from "./styles-dialog";
 import { FEEDBACK_CSS } from "./styles-feedback";
+import { OVERLAY_CSS } from "./styles-overlay";
 import { DEFAULT_CATALOG_URL, CONFIG_KEY } from "./constants";
 import { reconcileCustoms } from "./customs";
 import type { CatalogItem, CustomItemsRecord, ExtensionConfig } from "./types";
@@ -18,6 +19,7 @@ OBR.onReady(async () => {
   injectStyles(LIST_CSS, "obr-inv-list-styles");
   injectStyles(DIALOG_CSS, "obr-inv-dialog-styles");
   injectStyles(FEEDBACK_CSS, "obr-inv-feedback-styles");
+  injectStyles(OVERLAY_CSS, "obr-inv-overlay-styles");
 
   const root = document.getElementById("root");
   if (!root) return;
