@@ -52,31 +52,32 @@ The goal is a system where every inventory mutation is atomic with respect to ot
 
 | Topic | Decision |
 |---|---|
-| Concurrency model | Optimistic concurrency control with versioned records. Each record carries `version` (monotonic) and `writer` (per-write nonce). Writers detect conflicts by comparing the echoed `writer` field with what they stamped. |
+| Concurrency model | Optimistic concurrency control. Each record carries a single `w` (writer) field — `<playerId>:<nonce>`. Writers detect conflicts by comparing the echoed `w` to the value they stamped. No `version` field — OBR's `setMetadata` has no compare-and-swap, so a version number wouldn't participate in any decision; the per-write nonce alone is what makes uniqueness work. |
 | Atomicity across keys | Multi-key `setMetadata({k1, k2})` for transfers, so sender and recipient updates land as one server-side write. No more half-completed transfers needing rollback. |
 | Self-race protection | Single global FIFO queue inside the atomic helpers serializes the entire read-modify-write-echo cycle for every mutation. Replaces the existing per-key queue in `metadata.ts`. |
-| Writer nonce | Fresh `crypto.randomUUID()` per write. No tab-token / counter scheme to maintain. |
+| Writer format | `<OBR.player.id>:<8-char-nonce>`. The player ID prefix gives debug/UI value (we can map it back to a player name); the nonce suffix guarantees per-attempt uniqueness even across two tabs of the same player. |
+| Blocker reporting | When a retry fires because the echo carried a different writer, the atomic helper surfaces the conflicting writer to the UI via an `onConflict` callback. The overlay parses the player ID, looks up the player's name, and updates its message to "Waiting on update from `<name>`…". On final failure, the toast names the last blocker. |
 | Toast surface | `OBR.notification.show(text, level)` — same primitive `ui-transfer.ts` already uses. |
 | Retry budget | 3 attempts max, 1s echo timeout per attempt, 50ms / 200ms backoff between attempts. Worst-case wall time ~3.5s. |
 | Hard cap | 5s overlay timeout. If the operation hasn't resolved by then, force-close with "Update conflict — please try again" and trigger an inventory re-read. |
 | Cancel | Every operation accepts an `AbortSignal` checked at every `await` point. UI cancel button calls `AbortController.abort()`. |
 | UI affordance | Single in-app overlay with spinner, descriptive text, and Cancel button. Inventory UI behind it is pointer-events disabled. |
-| Migration | Legacy records (no `version` field) read as `version: 0`, get stamped on first write. No explicit migration step. |
-| `CustomItemsRecord` shape | Wrap in `{version, writer, items}` envelope. Reads of legacy array shape return `version: 0`. |
+| Migration | Legacy records (no `w` field) read as `w: ""`. The first write stamps the new envelope. No explicit data backfill. |
+| `CustomItemsRecord` shape | Wrap in `{ w, items }` envelope. Reads of legacy bare-array shape are tolerated for one release. |
 
 ## 4. Data model
 
 ### 4.1 Wire format — before and after
 
-The extension owns three keys in `OBR.room.metadata`. Two of them gain a versioning envelope; the third is unchanged.
+The extension owns three keys in `OBR.room.metadata`. Two of them gain a writer envelope; the third is unchanged.
 
 | Key | Shape today | Touched by | Change |
 |---|---|---|---|
-| `com.abottchen.obr-inv/v1/<playerId>` | `PlayerInventoryRecord` (object) | `writeRecord`, `ensureRecord`, `deleteRecord`, `transferItem` | + envelope |
-| `com.abottchen.obr-inv/v1/customs` | `CustomItem[]` (bare array) | `writeCustoms` | wrapped in envelope |
+| `com.abottchen.obr-inv/v1/<playerId>` | `PlayerInventoryRecord` (object) | `writeRecord`, `ensureRecord`, `deleteRecord`, `transferItem` | + `w` field |
+| `com.abottchen.obr-inv/v1/customs` | `CustomItem[]` (bare array) | `writeCustoms` | wrapped in `{ w, items }` envelope |
 | `com.abottchen.obr-inv/config` | `ExtensionConfig` `{ catalogUrl: string }` | read-only at boot, set out-of-band by GM | unchanged — not on a mutation path |
 
-Two storage-cost profiles for the envelope are documented below; a final pick is needed before implementation. The lighter option drops the `version` field (the writer nonce alone powers conflict detection — OBR's metadata is a snapshot stream, not a delta stream, so monotonic ordering isn't load-bearing) and shortens the field name.
+The `w` value is `<OBR.player.id>:<8-char-nonce>`. Player ID prefix is for debug/UI value (we can map back to a player name); the nonce suffix guarantees per-attempt uniqueness even across two tabs of the same player.
 
 #### Player inventory record — `com.abottchen.obr-inv/v1/<playerId>`
 
@@ -91,30 +92,17 @@ Two storage-cost profiles for the envelope are documented below; a final pick is
 ```
 Size: **123 bytes**.
 
-**Option A (spec baseline) — `version` + UUID `writer`:**
+**After:**
 ```json
 {
-  "version": 7,
-  "writer": "550e8400-e29b-41d4-a716-446655440000",
+  "w": "aBc123dEf456gHi7:V1StGXR8",
   "name": "Alice",
   "color": "#ff5577",
   "items": [["abc123", 3], ["def456", 1]],
   "currency": { "pp": 0, "gp": 12, "sp": 4, "cp": 0 }
 }
 ```
-Size: **184 bytes** (+61).
-
-**Option B (lighter) — short field, 16-char nanoid, no version:**
-```json
-{
-  "w": "V1StGXR8_Z5jdHi6",
-  "name": "Alice",
-  "color": "#ff5577",
-  "items": [["abc123", 3], ["def456", 1]],
-  "currency": { "pp": 0, "gp": 12, "sp": 4, "cp": 0 }
-}
-```
-Size: **146 bytes** (+23).
+Size: **155 bytes** (+32).
 
 #### Customs — `com.abottchen.obr-inv/v1/customs`
 
@@ -126,28 +114,16 @@ Size: **146 bytes** (+23).
 ```
 Size: **121 bytes**.
 
-**Option A:**
+**After:**
 ```json
 {
-  "version": 2,
-  "writer": "550e8400-e29b-41d4-a716-446655440000",
+  "w": "aBc123dEf456gHi7:V1StGXR8",
   "items": [
     { "id": "custom-flower", "name": "Wildflower", "category": "Misc", "icon": "🌸", "description": "A small purple flower." }
   ]
 }
 ```
-Size: **193 bytes** (+72).
-
-**Option B:**
-```json
-{
-  "w": "V1StGXR8_Z5jdHi6",
-  "items": [
-    { "id": "custom-flower", "name": "Wildflower", "category": "Misc", "icon": "🌸", "description": "A small purple flower." }
-  ]
-}
-```
-Size: **156 bytes** (+35).
+Size: **164 bytes** (+43).
 
 #### Config — `com.abottchen.obr-inv/config`
 
@@ -155,48 +131,60 @@ Unchanged. Stays as `{ "catalogUrl": "..." }`. Read once at boot in `main.ts`; n
 
 #### Cap impact for a typical room (6 players + customs)
 
-| Profile | Total overhead | % of 5120-byte cap |
+| | Overhead | % of 5120-byte cap |
 |---|---|---|
-| Option A (baseline) | 6 × 61 + 72 = **438 B** | 8.6% |
-| Option B (lighter) | 6 × 23 + 35 = **173 B** | 3.4% |
+| 6 player records + 1 customs envelope | 6 × 32 + 43 = **235 B** | 4.6% |
+
+(Player ID length assumed ~16 chars based on OBR's typical IDs. ±a few bytes per record if real IDs differ.)
 
 ### 4.2 TypeScript types
 
-For Option A:
 ```ts
-export interface VersionStamp {
-  version: number;     // monotonic per record, starts at 0 for legacy reads
-  writer: string;      // crypto.randomUUID() per write
+export interface WriterStamp {
+  w: string;     // "<playerId>:<8-char-nonce>" — empty string for legacy reads
 }
 
-export interface PlayerInventoryRecord extends VersionStamp {
+export interface PlayerInventoryRecord extends WriterStamp {
   name: string;
   color: string;
   items: InventoryEntry[];
   currency: Currency;
 }
 
-export interface CustomItemsEnvelope extends VersionStamp {
+export interface CustomItemsEnvelope extends WriterStamp {
   items: CustomItem[];
 }
 ```
 
-For Option B, drop `version` from `VersionStamp` and rename `writer` → `w` on the wire (with a TS field alias if desired). `CustomItemsRecord` (the existing top-level array alias) is kept as `CustomItem[]` for in-memory use; only the persisted shape becomes the envelope.
+`CustomItemsRecord` (the existing top-level array alias) is kept as `CustomItem[]` for in-memory use; only the persisted shape becomes the envelope.
 
 ### 4.3 Read-side compatibility
 
-`getRecord` and `getCustoms` accept the legacy shape and synthesize a missing writer as `""` (and, in Option A, `version: 0`). Once any client writes, the shape is canonical going forward.
+`getRecord` and `getCustoms` accept the legacy shape and synthesize a missing `w` as `""`. The empty string can never collide with a real writer (which always contains a `:`), so the conflict-detection check still works for legacy → new transitions. Once any client writes, the shape is canonical going forward.
+
+### 4.4 Writer parsing helper
+
+```ts
+export function parseWriter(w: string): { playerId: string | null; nonce: string } {
+  const colon = w.indexOf(":");
+  if (colon < 0) return { playerId: null, nonce: w };
+  return { playerId: w.slice(0, colon), nonce: w.slice(colon + 1) };
+}
+```
+
+Used by the UI to map a conflicting writer back to a player name when displaying retry/failure messages.
 
 ## 5. Components
 
 ### 5.1 New module: `src/atomic.ts`
 
-The only place that knows about versioning, retries, echoes, and cancellation. Pure I/O coordination — no business logic about what an inventory contains.
+The only place that knows about writer-stamping, retries, echoes, and cancellation. Pure I/O coordination — no business logic about what an inventory contains.
 
 ```ts
 export interface AtomicUpdateOptions {
   signal?: AbortSignal;
-  description: string;          // for the overlay
+  description: string;                                       // for the overlay
+  onConflict?: (info: { blockerWriter: string; attempt: number }) => void;
 }
 
 export type Mutator<T> = (current: T | null) => T | null;
@@ -216,6 +204,8 @@ export async function atomicMultiUpdate(
 
 Both helpers route through a **single module-level FIFO queue** so only one mutation runs at a time per client. The queue itself respects `signal` — a cancelled operation is removed from the queue without running.
 
+The writer nonce is generated once per attempt: `${OBR.player.id}:${randomNonce()}` where `randomNonce()` returns 8 random base62 characters.
+
 ```mermaid
 flowchart TD
     Start([call from caller]) --> Queue{queue empty?}
@@ -224,17 +214,18 @@ flowchart TD
     Queue -- yes --> Attempt[attempt = 1]
     Attempt --> Abort1{signal aborted?}
     Abort1 -- yes --> ThrowAbort([throw AbortError])
-    Abort1 -- no --> Read[read getMetadata<br/>capture version + writer per key]
-    Read --> Mutate[run mutators against current<br/>stamp version+1, writer = randomUUID]
+    Abort1 -- no --> Read[read getMetadata<br/>capture w per key]
+    Read --> Mutate[run mutators against current<br/>stamp w = playerId:nonce]
     Mutate --> CapCheck{projected size<br/>≤ STORAGE_CAP_BYTES?}
     CapCheck -- no --> ThrowCap([throw OverCapError])
     CapCheck -- yes --> Abort2{signal aborted?}
     Abort2 -- yes --> ThrowAbort
     Abort2 -- no --> Write[setMetadata with all keys]
-    Write --> Echo{echo with our writer<br/>on every key within 1s?}
+    Write --> Echo{echo with our w<br/>on every key within 1s?}
     Echo -- yes --> Success([resolve])
-    Echo -- timeout / different writer --> Retry{attempt &lt; 3?}
-    Retry -- no --> ThrowConflict([throw ConflictError])
+    Echo -- timeout / different w --> ConflictCb[onConflict blockerWriter, attempt]
+    ConflictCb --> Retry{attempt &lt; 3?}
+    Retry -- no --> ThrowConflict([throw ConflictError lastBlockerWriter])
     Retry -- yes --> Backoff[sleep 50ms / 200ms<br/>respects signal]
     Backoff --> AttemptInc[attempt += 1]
     AttemptInc --> Abort1
@@ -242,14 +233,14 @@ flowchart TD
 
 Internal flow per attempt:
 1. `throwIfAborted(signal)`
-2. Read current state via `OBR.room.getMetadata()`, capture each key's `version` and `writer`
-3. Run mutators against current payloads; stamp `version + 1` and `writer = crypto.randomUUID()` on each result
+2. Read current state via `OBR.room.getMetadata()`, capture each key's `w`
+3. Run mutators against current payloads; stamp `w = ${OBR.player.id}:${randomNonce()}` on each result (same writer for all keys in a multi-key update — that's how we tell "all our writes landed together")
 4. **Storage cap check** — project the full owned-metadata footprint with the new payloads, throw `OverCapError` if it would exceed `STORAGE_CAP_BYTES`. (Replaces the projection logic currently in `metadata.ts:writeRecord`.)
 5. `throwIfAborted(signal)`
 6. Single `setMetadata` call with all updated keys
-7. Wait for `onMetadataChange` event(s) to echo each key with our `writer` nonce — `Promise.race` against 1s timeout and `signal`
-8. If all keys echoed our writer → success. Otherwise → conflict, increment attempt counter, sleep backoff, retry from step 1
-9. After 3 attempts without success → throw `ConflictError`
+7. Wait for `onMetadataChange` event(s) to echo each key with our `w` — `Promise.race` against 1s timeout and `signal`
+8. If all keys echoed our `w` → success. Otherwise → call `opts.onConflict({ blockerWriter, attempt })` with the conflicting writer (pick the first key whose echoed `w` doesn't match ours), then retry from step 1
+9. After 3 attempts without success → throw `ConflictError(attempts, lastBlockerWriter)`
 
 Constants exported for testability:
 ```ts
@@ -264,12 +255,12 @@ export const HARD_CAP_MS = 5000;
 A module-level subscription captures the latest writer seen for every key. Waiters are predicate functions evaluated on every metadata change:
 
 ```ts
-const latestWriters = new Map<string, string>();  // key → most recent writer seen
+const latestWriters = new Map<string, string>();  // key → most recent w field seen
 const waiters = new Set<() => boolean>();          // predicate; returns true when satisfied
 
 OBR.room.onMetadataChange((md) => {
   for (const [k, v] of Object.entries(md)) {
-    latestWriters.set(k, (v as VersionStamp | null)?.writer ?? "");
+    latestWriters.set(k, (v as WriterStamp | null)?.w ?? "");
   }
   for (const w of [...waiters]) {
     if (w()) waiters.delete(w);
@@ -313,13 +304,13 @@ sequenceDiagram
     UI->>T: transferItem({from, to, itemId, qty}, {signal})
     T->>A: updates = [outMutator, inMutator]
     A->>OBR: getMetadata()
-    OBR-->>A: {sender@v3, recipient@v7}
-    Note over A: outMutator(sender@v3) → sender'@v4<br/>inMutator(recipient@v7) → recipient'@v8<br/>both stamped writer = UUID-X
+    OBR-->>A: {sender@w=prev1, recipient@w=prev2}
+    Note over A: outMutator(sender) → sender'<br/>inMutator(recipient) → recipient'<br/>both stamped w = "alice-id:nonceX"
     A->>A: cap check on projection
-    A->>OBR: setMetadata({sender: v4, recipient: v8})
+    A->>OBR: setMetadata({sender, recipient})
     OBR-->>R: onMetadataChange (single event)
     OBR-->>A: onMetadataChange (single event)
-    Note over A: latestWriters[sender] === UUID-X ✓<br/>latestWriters[recipient] === UUID-X ✓
+    Note over A: latestWriters[sender] === "alice-id:nonceX" ✓<br/>latestWriters[recipient] === "alice-id:nonceX" ✓
     A-->>T: resolved
     T->>OBR: broadcast transfer-received
     OBR-->>R: notification
@@ -368,6 +359,7 @@ export interface ShowOverlayOpts {
 
 export function showOverlay(opts: ShowOverlayOpts): void;
 export function setOverlayState(state: "working" | "cancelling"): void;
+export function setOverlayDescription(text: string): void;   // for retry messages
 export function closeOverlay(): void;
 ```
 
@@ -375,27 +367,52 @@ DOM: a fixed-position `<div>` over the inventory pane (not full-viewport — OBR
 
 Hard cap: `showOverlay` starts a 5s timer; on fire, calls `onCancel` if still open and shows a transient toast "Update conflict — please try again."
 
+`setOverlayDescription` lets callers swap the visible message during retries (e.g., from "Transferring…" to "Waiting on update from Bob…") without rebuilding the overlay.
+
 ### 5.6 Wiring in callers
 
 Every UI call site that mutates inventory follows this shape:
 
 ```ts
 const ac = new AbortController();
-showOverlay({
-  description: `Transferring ${qty}× ${itemName} to ${recipient.name}`,
-  onCancel: () => ac.abort(),
-});
+const baseDescription = `Transferring ${qty}× ${itemName} to ${recipient.name}`;
+showOverlay({ description: baseDescription, onCancel: () => ac.abort() });
+
 try {
-  await transferItem(req, { signal: ac.signal, description: "..." });
+  await transferItem(req, {
+    signal: ac.signal,
+    description: baseDescription,
+    onConflict: ({ blockerWriter }) => {
+      const { playerId } = parseWriter(blockerWriter);
+      const blockerName = playerId ? records[playerId]?.name : null;
+      setOverlayDescription(blockerName
+        ? `Waiting on update from ${blockerName}…`
+        : `Update conflict — retrying…`);
+    },
+  });
   closeOverlay();
 } catch (err) {
   closeOverlay();
-  if (err instanceof AbortError) showToast("Cancelled");
-  else if (err instanceof ConflictError) showToast("Update conflict — please try again");
-  else if (err instanceof OverCapError) { /* existing handling */ }
-  else throw err;
+  if (err instanceof AbortError) {
+    showToast("Cancelled");
+  } else if (err instanceof ConflictError) {
+    const { playerId } = parseWriter(err.lastBlockerWriter ?? "");
+    const blockerName = playerId ? records[playerId]?.name : null;
+    showToast(blockerName
+      ? `Couldn't apply your change — kept conflicting with ${blockerName}'s updates. Please try again.`
+      : `Update conflict — please try again.`);
+  } else if (err instanceof OverCapError) {
+    /* existing handling */
+  } else {
+    throw err;
+  }
 }
 ```
+
+Two cosmetic notes:
+
+- The overlay description rolls forward only — once we've shown "Waiting on Bob…" we don't revert to the original description if a later attempt has a different blocker. We do update if the blocker changes (e.g., "Waiting on Carol…").
+- If the blocker is the local player (their own other tab), display "Waiting on your other session…" so the message reads naturally.
 
 Call sites: `ui-player.ts` (transfer, currency adjust), `ui-gm.ts` (add, remove, edit), `ui-add-dialog.ts`, `ui-customs-dialog.ts`, `ui-customs-panel.ts`.
 
@@ -441,7 +458,10 @@ Worst case: user waits ≤1s after pressing Cancel before the overlay closes. UI
 
 ```ts
 export class ConflictError extends Error {
-  constructor(public readonly attempts: number) {
+  constructor(
+    public readonly attempts: number,
+    public readonly lastBlockerWriter: string | null,
+  ) {
     super(`Could not commit after ${attempts} attempts`);
     this.name = "ConflictError";
   }
@@ -452,18 +472,20 @@ export class AbortError extends Error {
 }
 ```
 
+`lastBlockerWriter` is the `w` value of the conflicting echo on the *last* failed attempt. May be `null` when the failure was an echo timeout (no conflicting writer was observed) — UI falls back to a generic message in that case.
+
 | Error | Source | UI |
 |---|---|---|
 | `OverCapError` | Storage cap exceeded | Existing GM broadcast; toast on player |
-| `ConflictError` | 3 attempts exhausted, or hard-cap fired | Toast "Update conflict — please try again" |
+| `ConflictError` | 3 attempts exhausted, or hard-cap fired | Toast names the last blocker if known: "Couldn't apply — kept conflicting with `<name>`'s updates. Please try again." Falls back to generic message if blocker can't be resolved. |
 | `AbortError` | User cancelled | Toast "Cancelled" |
-| Network/echo timeout (single attempt) | Internal — counts as conflict, retried |  — |
+| Network/echo timeout (single attempt) | Internal — counts as conflict, retried | — |
 | Mutator threw (e.g., "Sender has no inventory record") | Programmer error / data inconsistency | Toast with the error message; surfaces real bugs |
 
 ## 8. Migration
 
-- **Player records**: legacy reads return `version: 0, writer: ""`. The first write stamps `version: 1, writer: <nonce>`. Other clients see the new shape via `onMetadataChange` and adopt it. No data backfill needed.
-- **Customs**: legacy array reads as `{version: 0, writer: "", items: <array>}`. First write produces the envelope. Reading code is updated to handle both shapes for one release; the dual-read can be removed in a follow-up once we're confident no legacy rooms remain.
+- **Player records**: legacy reads (no `w` field) synthesize `w: ""`. The first write stamps `w: "<playerId>:<nonce>"`. Empty string can never collide with a real writer (real writers always contain a `:`), so conflict detection still works through the transition. Other clients see the new shape via `onMetadataChange` and adopt it. No data backfill needed.
+- **Customs**: legacy bare-array reads are wrapped on the read side as `{ w: "", items: <array> }`. First write produces the canonical envelope. Reading code is updated to handle both shapes for one release; the dual-read can be removed in a follow-up once we're confident no legacy rooms remain.
 - **Tombstones**: existing OBR null-tombstone handling is preserved.
 
 ## 9. Test plan
@@ -472,13 +494,15 @@ export class AbortError extends Error {
 
 - Read-modify-write happy path: writes once, echo arrives, returns success
 - Conflict on first attempt: echo shows different writer, retries, succeeds on attempt 2
-- Conflict exhausting retries: throws `ConflictError(3)` after 3 attempts
-- Echo timeout: counts as conflict, retries
+- Conflict exhausting retries: throws `ConflictError(3, lastBlockerWriter)` carrying the conflicting writer from the final attempt
+- Echo timeout: counts as conflict, retries; `lastBlockerWriter` is `null` when no conflicting writer was observed
 - Abort signal at each await point: throws `AbortError`, no further attempts
 - Multi-key update: both keys must echo our writer for success; one mismatch = retry
 - Mutator returning null: deletes the key
 - Mutator receiving null on initial read: writes a fresh record
-- Legacy record (no version): treated as `version: 0`, write stamps `version: 1`
+- Legacy record (empty `w`): treated as `w: ""`, write stamps `<playerId>:<nonce>`
+- `onConflict` callback fires once per failed attempt with the blocker writer; not called on success
+- `parseWriter` correctly splits `<playerId>:<nonce>` and returns `{ playerId: null }` for legacy/empty values
 
 ### Unit (`metadata.ts`)
 
@@ -497,6 +521,7 @@ export class AbortError extends Error {
 - Cancel button works during a real transfer
 - Overlay closes within budget on each terminal state
 - 5s hard cap fires when echo legitimately doesn't arrive (simulate by suppressing `onMetadataChange` for one key)
+- During a forced retry against a known-blocking second client, the overlay text updates to "Waiting on update from `<other-player>`…" and the final failure toast (if it exhausts retries) names that player
 
 ## 10. Out of scope follow-ups
 
