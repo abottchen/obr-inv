@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
+import { __atomicTestHooks } from "../src/atomic";
 import {
   deleteRecord, ensureRecord, getCustoms, getRecord, listInventoryRecords,
   onRoomMetadataChange, recordKey, roomDataByteSize, writeCustoms, writeRecord,
@@ -8,17 +9,17 @@ import { OverCapError } from "../src/types";
 import { CUSTOMS_KEY, STORAGE_CAP_BYTES } from "../src/constants";
 
 describe("metadata", () => {
-  beforeEach(() => __testHooks.reset());
+  beforeEach(() => { __testHooks.reset(); __atomicTestHooks.reset(); });
 
   it("recordKey is namespaced", () => {
     expect(recordKey("p1")).toBe("com.abottchen.obr-inv/v1/p1");
   });
 
   it("roomDataByteSize counts owned (prefixed) keys verbatim", async () => {
-    await writeRecord("p1", {
-      name: "A", color: "#fff",
-      items: [["a1", 2]], currency: { pp: 0, gp: 5, sp: 0, cp: 0 },
-    });
+    await writeRecord("p1",
+      () => ({ w: "", name: "A", color: "#fff", items: [["a1", 2]], currency: { pp: 0, gp: 5, sp: 0, cp: 0 } }),
+      { description: "seed p1" },
+    );
     const md = await __testHooks.store;
     const owned: Record<string, unknown> = {};
     for (const [k, v] of md) {
@@ -29,10 +30,10 @@ describe("metadata", () => {
   });
 
   it("roomDataByteSize includes the customs key alongside inventories", async () => {
-    await writeRecord("p1", {
-      name: "A", color: "#fff",
-      items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-    });
+    await writeRecord("p1",
+      () => ({ w: "", name: "A", color: "#fff", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
+      { description: "seed p1" },
+    );
     const baseline = await roomDataByteSize();
     await writeCustoms([
       { id: "qZx91A", name: "Flower", category: "Misc", icon: "",
@@ -43,20 +44,20 @@ describe("metadata", () => {
   });
 
   it("listInventoryRecords filters to inventory keys only", async () => {
-    await writeRecord("p1", {
-      name: "A", color: "#fff",
-      items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-    });
+    await writeRecord("p1",
+      () => ({ w: "", name: "A", color: "#fff", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
+      { description: "seed p1" },
+    );
     __testHooks.store.set("other.extension/key", { junk: true });
     const recs = await listInventoryRecords();
     expect(Object.keys(recs)).toEqual(["p1"]);
   });
 
   it("listInventoryRecords skips null tombstones (OBR can persist nulls)", async () => {
-    await writeRecord("p1", {
-      name: "A", color: "#fff",
-      items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-    });
+    await writeRecord("p1",
+      () => ({ w: "", name: "A", color: "#fff", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
+      { description: "seed p1" },
+    );
     __testHooks.store.set("com.abottchen.obr-inv/v1/ghost", null);
     const recs = await listInventoryRecords();
     expect(Object.keys(recs)).toEqual(["p1"]);
@@ -66,10 +67,10 @@ describe("metadata", () => {
     const seen: Array<Record<string, unknown>> = [];
     const unsub = onRoomMetadataChange((r) => seen.push(r));
     __testHooks.store.set("com.abottchen.obr-inv/v1/ghost", null);
-    await writeRecord("p1", {
-      name: "A", color: "#fff",
-      items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-    });
+    await writeRecord("p1",
+      () => ({ w: "", name: "A", color: "#fff", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
+      { description: "seed p1" },
+    );
     unsub();
     const last = seen[seen.length - 1];
     expect(Object.keys(last)).toEqual(["p1"]);
@@ -83,52 +84,51 @@ describe("metadata", () => {
   });
 
   it("ensureRecord updates name/color, leaves items/currency", async () => {
-    await writeRecord("p1", {
-      name: "Old", color: "#000",
-      items: [["a1", 3]], currency: { pp: 1, gp: 2, sp: 3, cp: 4 },
-    });
+    await writeRecord("p1",
+      () => ({ w: "", name: "Old", color: "#000", items: [["a1", 3]], currency: { pp: 1, gp: 2, sp: 3, cp: 4 } }),
+      { description: "seed p1" },
+    );
     await ensureRecord("p1", "New", "#fff");
     const r = await getRecord("p1");
-    expect(r).toEqual({
-      name: "New", color: "#fff",
-      items: [["a1", 3]], currency: { pp: 1, gp: 2, sp: 3, cp: 4 },
-    });
+    expect(r?.name).toBe("New");
+    expect(r?.color).toBe("#fff");
+    expect(r?.items).toEqual([["a1", 3]]);
+    expect(r?.currency).toEqual({ pp: 1, gp: 2, sp: 3, cp: 4 });
   });
 
   it("writeRecord prunes zero-count entries before persisting", async () => {
-    await writeRecord("p1", {
-      name: "A", color: "#fff",
-      items: [["a1", 0], ["b2", 2]],
-      currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-    });
+    await writeRecord("p1",
+      () => ({ w: "", name: "A", color: "#fff", items: [["a1", 0], ["b2", 2]], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
+      { description: "test fixture" },
+    );
     const r = await getRecord("p1");
     expect(r?.items).toEqual([["b2", 2]]);
   });
 
   it("writeRecord rejects when projected size > cap", async () => {
     const big = "x".repeat(STORAGE_CAP_BYTES + 100);
-    await expect(writeRecord("p1", {
-      name: big, color: "#fff",
-      items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-    })).rejects.toThrow(OverCapError);
+    await expect(writeRecord("p1",
+      () => ({ w: "", name: big, color: "#fff", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
+      { description: "test fixture" },
+    )).rejects.toThrow(OverCapError);
     expect(await getRecord("p1")).toBeNull();
   });
 
   it("deleteRecord removes the key", async () => {
-    await writeRecord("p1", {
-      name: "A", color: "#fff",
-      items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-    });
+    await writeRecord("p1",
+      () => ({ w: "", name: "A", color: "#fff", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
+      { description: "seed p1" },
+    );
     await deleteRecord("p1");
     expect(await getRecord("p1")).toBeNull();
   });
 
   it("serializes concurrent writes to the same key", async () => {
     const writes = Array.from({ length: 5 }, (_, i) =>
-      writeRecord("p1", {
-        name: `n${i}`, color: "#fff",
-        items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-      })
+      writeRecord("p1",
+        () => ({ w: "", name: `n${i}`, color: "#fff", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
+        { description: `write n${i}` },
+      )
     );
     await Promise.all(writes);
     const r = await getRecord("p1");
@@ -189,15 +189,15 @@ describe("metadata", () => {
     __testHooks.store.set(CUSTOMS_KEY, [
       { id: "qZx91A", name: padding, category: "Misc", icon: "", description: "" },
     ]);
-    await expect(writeRecord("p1", {
-      name: "A".repeat(500), color: "#fff",
-      items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-    })).rejects.toThrow(OverCapError);
+    await expect(writeRecord("p1",
+      () => ({ w: "", name: "A".repeat(500), color: "#fff", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
+      { description: "test fixture" },
+    )).rejects.toThrow(OverCapError);
   });
 });
 
 describe("legacy shape tolerance", () => {
-  beforeEach(() => __testHooks.reset());
+  beforeEach(() => { __testHooks.reset(); __atomicTestHooks.reset(); });
 
   it("reads pre-versioning records and synthesizes w: ''", async () => {
     __testHooks.store.set("com.abottchen.obr-inv/v1/legacy", {

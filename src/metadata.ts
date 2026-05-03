@@ -5,6 +5,7 @@ import {
 import type { CustomItemsEnvelope, CustomItemsRecord, PlayerInventoryRecord } from "./types";
 import { OverCapError } from "./types";
 import { pruneZeros } from "./inventory";
+import { atomicUpdate, type AtomicUpdateOptions, type Mutator } from "./atomic";
 
 export function recordKey(playerId: string): string {
   return `${METADATA_KEY_PREFIX}${playerId}`;
@@ -62,28 +63,14 @@ function enqueue<T>(key: string, op: () => Promise<T>): Promise<T> {
 }
 
 export function writeRecord(
-  playerId: string, record: PlayerInventoryRecord,
-): Promise<void> {
-  return enqueue(recordKey(playerId), async () => {
-    const pruned = pruneZeros(record);
-    const md = await OBR.room.getMetadata();
-    const projected: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(md)) {
-      if (k.startsWith(METADATA_KEY_PREFIX)) projected[k] = v;
-    }
-    projected[recordKey(playerId)] = pruned;
-    const projectedBytes = new TextEncoder()
-      .encode(JSON.stringify(projected)).byteLength;
-    if (projectedBytes > STORAGE_CAP_BYTES) {
-      const currentBytes = await roomDataByteSize();
-      throw new OverCapError(
-        currentBytes,
-        STORAGE_CAP_BYTES,
-        `write record ${playerId}`,
-      );
-    }
-    await OBR.room.setMetadata({ [recordKey(playerId)]: pruned });
-  });
+  playerId: string,
+  mutate: Mutator<PlayerInventoryRecord>,
+  opts: AtomicUpdateOptions,
+): Promise<PlayerInventoryRecord | null> {
+  return atomicUpdate(recordKey(playerId), (current) => {
+    const next = mutate(current);
+    return next === null ? null : pruneZeros(next);
+  }, opts);
 }
 
 export async function deleteRecord(playerId: string): Promise<void> {
@@ -139,16 +126,16 @@ export async function ensureRecord(
   const existing = await getRecord(playerId);
   if (!existing) {
     const fresh: PlayerInventoryRecord = {
-      name, color, items: [],
+      w: "", name, color, items: [],
       currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
     };
-    await writeRecord(playerId, fresh);
-    return fresh;
+    const written = await writeRecord(playerId, () => fresh, { description: `ensureRecord create ${playerId}` });
+    return written ?? fresh;
   }
   if (existing.name !== name || existing.color !== color) {
     const updated: PlayerInventoryRecord = { ...existing, name, color };
-    await writeRecord(playerId, updated);
-    return updated;
+    const written = await writeRecord(playerId, () => updated, { description: `ensureRecord update ${playerId}` });
+    return written ?? updated;
   }
   return existing;
 }

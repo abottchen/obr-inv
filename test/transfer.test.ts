@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
+import { __atomicTestHooks } from "../src/atomic";
 import * as metadata from "../src/metadata";
 import { writeRecord, getRecord } from "../src/metadata";
 import { transferItem } from "../src/transfer";
@@ -8,14 +9,14 @@ import { BROADCAST_CHANNEL, STORAGE_CAP_BYTES } from "../src/constants";
 const seedRecord = async (
   pid: string, name: string, items: [string, number][] = [],
 ) => {
-  await writeRecord(pid, {
-    name, color: "#fff", items,
-    currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-  });
+  await writeRecord(pid,
+    () => ({ w: "", name, color: "#fff", items, currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
+    { description: `seed ${pid}` },
+  );
 };
 
 describe("transferItem", () => {
-  beforeEach(() => __testHooks.reset());
+  beforeEach(() => { __testHooks.reset(); __atomicTestHooks.reset(); });
 
   it("moves qty from sender to recipient and emits a transfer-received broadcast", async () => {
     await seedRecord("alice", "Alice", [["a1", 5]]);
@@ -100,10 +101,10 @@ describe("transferItem", () => {
     const real = metadata.writeRecord;
     let calls = 0;
     const spy = vi.spyOn(metadata, "writeRecord").mockImplementation(
-      async (pid, rec) => {
+      async (pid, mutate, opts) => {
         calls++;
         if (calls === 2) throw new Error("simulated sender-write failure");
-        return real(pid, rec);
+        return real(pid, mutate, opts);
       },
     );
     // Suppress the rollback-failure console.error path; we expect rollback
