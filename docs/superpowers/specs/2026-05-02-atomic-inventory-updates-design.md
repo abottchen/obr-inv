@@ -252,7 +252,7 @@ export const HARD_CAP_MS = 5000;
 
 ### 5.2 Echo tracker (singleton inside `atomic.ts`)
 
-A module-level subscription captures the latest writer seen for every key. Waiters are predicate functions evaluated on every metadata change:
+A module-level subscription captures the latest writer seen for every key the extension owns. `onMetadataChange` fires on every room metadata change — including writes by OBR itself and other extensions — so the tracker filters to keys under our namespace before storing them. Waiters are predicate functions evaluated on every metadata change:
 
 ```ts
 const latestWriters = new Map<string, string>();  // key → most recent w field seen
@@ -260,6 +260,7 @@ const waiters = new Set<() => boolean>();          // predicate; returns true wh
 
 OBR.room.onMetadataChange((md) => {
   for (const [k, v] of Object.entries(md)) {
+    if (k !== CUSTOMS_KEY && !k.startsWith(METADATA_KEY_PREFIX)) continue;
     latestWriters.set(k, (v as WriterStamp | null)?.w ?? "");
   }
   for (const w of [...waiters]) {
@@ -267,6 +268,8 @@ OBR.room.onMetadataChange((md) => {
   }
 });
 ```
+
+The filter is cosmetic — waiter predicates only check the keys we wrote in our atomic call, so unrelated changes are already ignored. But filtering at ingest time makes intent explicit and avoids storing writer values for keys we don't own.
 
 `atomicUpdate` after `setMetadata`:
 1. First check `latestWriters` synchronously — handles the case where the echo lands before we register (rare but possible).

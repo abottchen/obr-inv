@@ -288,6 +288,7 @@ Append to `src/atomic.ts`:
 
 ```ts
 import OBR from "@owlbear-rodeo/sdk";
+import { CUSTOMS_KEY, METADATA_KEY_PREFIX } from "./constants";
 import type { WriterStamp } from "./types";
 
 const latestWriters = new Map<string, string>();
@@ -295,7 +296,11 @@ const waiters = new Set<() => boolean>();
 let unsubscribe: (() => void) | null = null;
 
 function ingest(md: Record<string, unknown>): void {
+  // OBR fires onMetadataChange on every room metadata change, including
+  // OBR's own keys and other extensions'. Filter to keys we own so the
+  // tracker doesn't accumulate writer values for keys we never wait on.
   for (const [k, v] of Object.entries(md)) {
+    if (k !== CUSTOMS_KEY && !k.startsWith(METADATA_KEY_PREFIX)) continue;
     latestWriters.set(k, (v as WriterStamp | null)?.w ?? "");
   }
   for (const w of [...waiters]) {
