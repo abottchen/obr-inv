@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { parseWriter } from "../src/atomic";
+import { randomNonce } from "../src/atomic";
 
 describe("parseWriter", () => {
   it("splits playerId and nonce on the first colon", () => {
@@ -22,5 +23,18 @@ describe("parseWriter", () => {
       playerId: "alice",
       nonce: "abc:def",
     });
+  });
+});
+
+describe("randomNonce", () => {
+  it("returns 8 base62 characters", () => {
+    const n = randomNonce();
+    expect(n).toMatch(/^[0-9A-Za-z]{8}$/);
+  });
+
+  it("returns different values across calls (probabilistic)", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 100; i++) seen.add(randomNonce());
+    expect(seen.size).toBe(100);
   });
 });
