@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
 import { parseWriter, randomNonce, __atomicTestHooks, _internal_getLatestWriter, atomicUpdate } from "../src/atomic";
 import type { WriterStamp } from "../src/types";
-import { ConflictError } from "../src/types";
+import { ConflictError, AbortError } from "../src/types";
 
 describe("parseWriter", () => {
   it("splits playerId and nonce on the first colon", () => {
@@ -143,5 +143,39 @@ describe("atomicUpdate (conflict + retry)", () => {
     await expect(
       atomicUpdate(key, () => ({ w: "", count: 1 }), { description: "test" }),
     ).rejects.toThrow(ConflictError);
+  });
+});
+
+describe("atomicUpdate (cancel)", () => {
+  beforeEach(() => {
+    __testHooks.reset();
+    __atomicTestHooks.reset();
+    __atomicTestHooks.startTracker();
+    __testHooks.setSelf("alice", "Alice", "#fff");
+  });
+
+  it("throws AbortError when signal is aborted before start", async () => {
+    const ac = new AbortController();
+    ac.abort();
+    await expect(
+      atomicUpdate("k1", () => ({ w: "", v: 1 }), { description: "x", signal: ac.signal }),
+    ).rejects.toThrow(AbortError);
+  });
+
+  it("throws AbortError if signal aborts during backoff", async () => {
+    const sdk = (await import("@owlbear-rodeo/sdk")).default;
+    const realSet = sdk.room.setMetadata;
+    sdk.room.setMetadata = vi.fn(async (patch: Record<string, unknown>) => {
+      await realSet(patch);
+      // always stomp so we go to backoff
+      const k = Object.keys(patch)[0];
+      await realSet({ [k]: { ...(patch[k] as object), w: "bob:nonce" } });
+    }) as typeof sdk.room.setMetadata;
+
+    const ac = new AbortController();
+    setTimeout(() => ac.abort(), 10);
+    await expect(
+      atomicUpdate("k1", () => ({ w: "", v: 1 }), { description: "x", signal: ac.signal }),
+    ).rejects.toThrow(AbortError);
   });
 });
