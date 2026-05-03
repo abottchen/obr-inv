@@ -66,12 +66,107 @@ The goal is a system where every inventory mutation is atomic with respect to ot
 
 ## 4. Data model
 
-### 4.1 Versioned envelope
+### 4.1 Wire format — before and after
 
+The extension owns three keys in `OBR.room.metadata`. Two of them gain a versioning envelope; the third is unchanged.
+
+| Key | Shape today | Touched by | Change |
+|---|---|---|---|
+| `com.abottchen.obr-inv/v1/<playerId>` | `PlayerInventoryRecord` (object) | `writeRecord`, `ensureRecord`, `deleteRecord`, `transferItem` | + envelope |
+| `com.abottchen.obr-inv/v1/customs` | `CustomItem[]` (bare array) | `writeCustoms` | wrapped in envelope |
+| `com.abottchen.obr-inv/config` | `ExtensionConfig` `{ catalogUrl: string }` | read-only at boot, set out-of-band by GM | unchanged — not on a mutation path |
+
+Two storage-cost profiles for the envelope are documented below; a final pick is needed before implementation. The lighter option drops the `version` field (the writer nonce alone powers conflict detection — OBR's metadata is a snapshot stream, not a delta stream, so monotonic ordering isn't load-bearing) and shortens the field name.
+
+#### Player inventory record — `com.abottchen.obr-inv/v1/<playerId>`
+
+**Today:**
+```json
+{
+  "name": "Alice",
+  "color": "#ff5577",
+  "items": [["abc123", 3], ["def456", 1]],
+  "currency": { "pp": 0, "gp": 12, "sp": 4, "cp": 0 }
+}
+```
+Size: **123 bytes**.
+
+**Option A (spec baseline) — `version` + UUID `writer`:**
+```json
+{
+  "version": 7,
+  "writer": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Alice",
+  "color": "#ff5577",
+  "items": [["abc123", 3], ["def456", 1]],
+  "currency": { "pp": 0, "gp": 12, "sp": 4, "cp": 0 }
+}
+```
+Size: **184 bytes** (+61).
+
+**Option B (lighter) — short field, 16-char nanoid, no version:**
+```json
+{
+  "w": "V1StGXR8_Z5jdHi6",
+  "name": "Alice",
+  "color": "#ff5577",
+  "items": [["abc123", 3], ["def456", 1]],
+  "currency": { "pp": 0, "gp": 12, "sp": 4, "cp": 0 }
+}
+```
+Size: **146 bytes** (+23).
+
+#### Customs — `com.abottchen.obr-inv/v1/customs`
+
+**Today** (the legacy bare-array shape):
+```json
+[
+  { "id": "custom-flower", "name": "Wildflower", "category": "Misc", "icon": "🌸", "description": "A small purple flower." }
+]
+```
+Size: **121 bytes**.
+
+**Option A:**
+```json
+{
+  "version": 2,
+  "writer": "550e8400-e29b-41d4-a716-446655440000",
+  "items": [
+    { "id": "custom-flower", "name": "Wildflower", "category": "Misc", "icon": "🌸", "description": "A small purple flower." }
+  ]
+}
+```
+Size: **193 bytes** (+72).
+
+**Option B:**
+```json
+{
+  "w": "V1StGXR8_Z5jdHi6",
+  "items": [
+    { "id": "custom-flower", "name": "Wildflower", "category": "Misc", "icon": "🌸", "description": "A small purple flower." }
+  ]
+}
+```
+Size: **156 bytes** (+35).
+
+#### Config — `com.abottchen.obr-inv/config`
+
+Unchanged. Stays as `{ "catalogUrl": "..." }`. Read once at boot in `main.ts`; never mutated by the extension's write paths, so it doesn't need versioning.
+
+#### Cap impact for a typical room (6 players + customs)
+
+| Profile | Total overhead | % of 5120-byte cap |
+|---|---|---|
+| Option A (baseline) | 6 × 61 + 72 = **438 B** | 8.6% |
+| Option B (lighter) | 6 × 23 + 35 = **173 B** | 3.4% |
+
+### 4.2 TypeScript types
+
+For Option A:
 ```ts
 export interface VersionStamp {
   version: number;     // monotonic per record, starts at 0 for legacy reads
-  writer: string;      // unique per write: `${clientId}:${counter}`
+  writer: string;      // crypto.randomUUID() per write
 }
 
 export interface PlayerInventoryRecord extends VersionStamp {
@@ -86,11 +181,11 @@ export interface CustomItemsEnvelope extends VersionStamp {
 }
 ```
 
-`CustomItemsRecord` (the existing top-level array alias) is kept as `CustomItem[]` for in-memory use; only the persisted shape becomes the envelope.
+For Option B, drop `version` from `VersionStamp` and rename `writer` → `w` on the wire (with a TS field alias if desired). `CustomItemsRecord` (the existing top-level array alias) is kept as `CustomItem[]` for in-memory use; only the persisted shape becomes the envelope.
 
-### 4.2 Read-side compatibility
+### 4.3 Read-side compatibility
 
-`getRecord` and `getCustoms` accept the legacy shape and synthesize `version: 0, writer: ""`. Once any client writes, the shape is canonical going forward.
+`getRecord` and `getCustoms` accept the legacy shape and synthesize a missing writer as `""` (and, in Option A, `version: 0`). Once any client writes, the shape is canonical going forward.
 
 ## 5. Components
 
