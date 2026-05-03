@@ -245,3 +245,35 @@ describe("atomicUpdate (cap check)", () => {
     ).rejects.toThrow(OverCapError);
   });
 });
+
+describe("atomicUpdate (global queue)", () => {
+  beforeEach(() => {
+    __testHooks.reset();
+    __atomicTestHooks.reset();
+    __atomicTestHooks.startTracker();
+    __testHooks.setSelf("alice", "Alice", "#fff");
+  });
+
+  it("serializes concurrent calls — second sees first's write", async () => {
+    const key = "com.abottchen.obr-inv/v1/alice";
+    const observed: Array<number | null> = [];
+    const p1 = atomicUpdate<{ count: number } & WriterStamp>(
+      key,
+      (current) => {
+        observed.push(current?.count ?? null);
+        return { w: "", count: 1 };
+      },
+      { description: "first" },
+    );
+    const p2 = atomicUpdate<{ count: number } & WriterStamp>(
+      key,
+      (current) => {
+        observed.push(current?.count ?? null);
+        return { w: "", count: (current?.count ?? 0) + 1 };
+      },
+      { description: "second" },
+    );
+    await Promise.all([p1, p2]);
+    expect(observed).toEqual([null, 1]);  // second saw first's count
+  });
+});

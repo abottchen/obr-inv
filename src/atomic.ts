@@ -5,6 +5,14 @@ import { AbortError, ConflictError, OverCapError } from "./types";
 
 const latestWriters = new Map<string, string>();
 const waiters = new Set<() => boolean>();
+
+let queueTail: Promise<void> = Promise.resolve();
+
+function enqueue<T>(op: () => Promise<T>): Promise<T> {
+  const result = queueTail.then(op, op);
+  queueTail = result.then(() => {}, () => {});
+  return result;
+}
 // Keys currently being waited on — ingest tracks these regardless of prefix,
 // so that callers using arbitrary keys (e.g. tests, future features) still get
 // echo notifications without relaxing the global filter.
@@ -39,7 +47,10 @@ export function stopEchoTracker(): void {
 }
 
 export const __atomicTestHooks = {
-  reset(): void { stopEchoTracker(); },
+  reset(): void {
+    stopEchoTracker();
+    queueTail = Promise.resolve();
+  },
   startTracker(): void { startEchoTracker(); },
 };
 
@@ -132,64 +143,67 @@ export async function atomicMultiUpdate(
   updates: Array<{ key: string; mutate: Mutator<WriterStamp> }>,
   opts: AtomicUpdateOptions,
 ): Promise<void> {
-  startEchoTracker();
-  let lastBlocker: string | null = null;
-
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+  return enqueue(async () => {
     if (opts.signal?.aborted) throw new AbortError();
-    const md = await OBR.room.getMetadata();
-    const ourWriter = makeWriter();
-    const patch: Record<string, unknown> = {};
-    const stampedKeys: string[] = [];
-    for (const { key, mutate } of updates) {
-      const current = (md[key] as WriterStamp | undefined) ?? null;
-      const next = mutate(current);
-      patch[key] = next === null ? undefined : { ...next, w: ourWriter };
-      if (next !== null) stampedKeys.push(key);
-    }
-    // Cap check: project all owned metadata with our pending writes applied,
-    // throw OverCapError if projection exceeds the cap.
-    const owned: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(md)) {
-      if (k === CUSTOMS_KEY || k.startsWith(METADATA_KEY_PREFIX)) owned[k] = v;
-    }
-    for (const [k, v] of Object.entries(patch)) {
-      if (k === CUSTOMS_KEY || k.startsWith(METADATA_KEY_PREFIX)) {
-        if (v === undefined) delete owned[k];
-        else owned[k] = v;
+    startEchoTracker();
+    let lastBlocker: string | null = null;
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      if (opts.signal?.aborted) throw new AbortError();
+      const md = await OBR.room.getMetadata();
+      const ourWriter = makeWriter();
+      const patch: Record<string, unknown> = {};
+      const stampedKeys: string[] = [];
+      for (const { key, mutate } of updates) {
+        const current = (md[key] as WriterStamp | undefined) ?? null;
+        const next = mutate(current);
+        patch[key] = next === null ? undefined : { ...next, w: ourWriter };
+        if (next !== null) stampedKeys.push(key);
       }
-    }
-    const projectedBytes = new TextEncoder()
-      .encode(JSON.stringify(owned)).byteLength;
-    if (projectedBytes > STORAGE_CAP_BYTES) {
-      const currentBytes = new TextEncoder()
-        .encode(JSON.stringify(
-          Object.fromEntries(
-            Object.entries(md).filter(([k]) =>
-              k === CUSTOMS_KEY || k.startsWith(METADATA_KEY_PREFIX),
+      // Cap check: project all owned metadata with our pending writes applied,
+      // throw OverCapError if projection exceeds the cap.
+      const owned: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(md)) {
+        if (k === CUSTOMS_KEY || k.startsWith(METADATA_KEY_PREFIX)) owned[k] = v;
+      }
+      for (const [k, v] of Object.entries(patch)) {
+        if (k === CUSTOMS_KEY || k.startsWith(METADATA_KEY_PREFIX)) {
+          if (v === undefined) delete owned[k];
+          else owned[k] = v;
+        }
+      }
+      const projectedBytes = new TextEncoder()
+        .encode(JSON.stringify(owned)).byteLength;
+      if (projectedBytes > STORAGE_CAP_BYTES) {
+        const currentBytes = new TextEncoder()
+          .encode(JSON.stringify(
+            Object.fromEntries(
+              Object.entries(md).filter(([k]) =>
+                k === CUSTOMS_KEY || k.startsWith(METADATA_KEY_PREFIX),
+              ),
             ),
-          ),
-        )).byteLength;
-      throw new OverCapError(currentBytes, STORAGE_CAP_BYTES, opts.description);
-    }
-    if (opts.signal?.aborted) throw new AbortError();
-    if (stampedKeys.length === 0) {
+          )).byteLength;
+        throw new OverCapError(currentBytes, STORAGE_CAP_BYTES, opts.description);
+      }
+      if (opts.signal?.aborted) throw new AbortError();
+      if (stampedKeys.length === 0) {
+        await OBR.room.setMetadata(patch);
+        return;
+      }
+      // Register pending keys BEFORE writing so ingest() tracks the echo even
+      // when the metadata event fires synchronously (e.g. in tests).
+      for (const k of stampedKeys) pendingKeys.add(k);
       await OBR.room.setMetadata(patch);
-      return;
+      const echo = await waitForEcho(stampedKeys, ourWriter, ECHO_TIMEOUT_MS, opts.signal);
+      if (echo.ok) return;
+
+      lastBlocker = echo.blockerWriter;
+      opts.onConflict?.({ blockerWriter: echo.blockerWriter ?? "", attempt });
+      if (attempt < MAX_ATTEMPTS) await sleep(BACKOFF_MS[attempt - 1], opts.signal);
     }
-    // Register pending keys BEFORE writing so ingest() tracks the echo even
-    // when the metadata event fires synchronously (e.g. in tests).
-    for (const k of stampedKeys) pendingKeys.add(k);
-    await OBR.room.setMetadata(patch);
-    const echo = await waitForEcho(stampedKeys, ourWriter, ECHO_TIMEOUT_MS, opts.signal);
-    if (echo.ok) return;
 
-    lastBlocker = echo.blockerWriter;
-    opts.onConflict?.({ blockerWriter: echo.blockerWriter ?? "", attempt });
-    if (attempt < MAX_ATTEMPTS) await sleep(BACKOFF_MS[attempt - 1], opts.signal);
-  }
-
-  throw new ConflictError(MAX_ATTEMPTS, lastBlocker);
+    throw new ConflictError(MAX_ATTEMPTS, lastBlocker);
+  });
 }
 
 export async function atomicUpdate<T extends WriterStamp>(
