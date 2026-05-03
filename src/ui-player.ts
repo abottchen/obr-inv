@@ -10,12 +10,14 @@ import {
   addItem, incrementItem, decrementItem, removeItem,
 } from "./inventory";
 import { transferItem } from "./transfer";
+import { showOverlay, closeOverlay, setOverlayDescription, setOverlayState } from "./ui-overlay";
+import { parseWriter } from "./atomic";
 import { resolvedCatalog } from "./catalog";
 import { BROADCAST_CHANNEL } from "./constants";
 import type {
   CatalogItem, CustomItemsRecord, PlayerInventoryRecord, BroadcastMessage,
 } from "./types";
-import { OverCapError } from "./types";
+import { OverCapError, ConflictError, AbortError } from "./types";
 
 export interface PlayerViewOpts {
   root: HTMLElement;
@@ -46,15 +48,58 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
       maxQty: entry?.[1] ?? 0, // showTransfer notifies on 0
       targets,
       onConfirm: async (toPlayerId, qty) => {
+        const ac = new AbortController();
+        const recipientName = all[toPlayerId]?.name ?? "player";
+        const itemName = ci?.name ?? id;
+        const baseDescription = `Transferring ${qty}× ${itemName} to ${recipientName}…`;
+        showOverlay({
+          description: baseDescription,
+          onCancel: () => {
+            setOverlayState("cancelling");
+            ac.abort();
+          },
+        });
         try {
-          await transferItem({
-            fromPlayerId: opts.playerId,
-            toPlayerId,
-            itemId: id,
-            itemName: ci?.name ?? id,
-            qty,
-          });
-        } catch (e) { rethrowIfNotCap(e); }
+          await transferItem(
+            {
+              fromPlayerId: opts.playerId,
+              toPlayerId,
+              itemId: id,
+              itemName,
+              qty,
+            },
+            {
+              signal: ac.signal,
+              description: baseDescription,
+              onConflict: ({ blockerWriter }) => {
+                const { playerId } = parseWriter(blockerWriter);
+                if (playerId === OBR.player.id) {
+                  setOverlayDescription("Waiting on your other session…");
+                } else {
+                  const name = playerId ? all[playerId]?.name : null;
+                  setOverlayDescription(name
+                    ? `Waiting on update from ${name}…`
+                    : "Update conflict — retrying…");
+                }
+              },
+            },
+          );
+          closeOverlay();
+        } catch (e) {
+          closeOverlay();
+          if (e instanceof AbortError) {
+            OBR.notification?.show?.("Cancelled", "INFO")?.catch?.(() => {});
+          } else if (e instanceof ConflictError) {
+            const { playerId } = parseWriter(e.lastBlockerWriter ?? "");
+            const name = playerId ? all[playerId]?.name : null;
+            const msg = name
+              ? `Couldn't apply your change — kept conflicting with ${name}'s updates. Please try again.`
+              : `Update conflict — please try again.`;
+            OBR.notification?.show?.(msg, "ERROR")?.catch?.(() => {});
+          } else {
+            rethrowIfNotCap(e);
+          }
+        }
       },
     });
   };
