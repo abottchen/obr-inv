@@ -226,7 +226,7 @@ export async function atomicUpdate<T extends WriterStamp>(
   // from the echo tracker so callers see the fully-stamped record.
   if (result !== null) {
     const w = latestWriters.get(key);
-    if (w !== undefined) result = { ...result, w };
+    if (w !== undefined) result = { ...(result as object), w } as T;
   }
   return result;
 }

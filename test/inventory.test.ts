@@ -10,7 +10,7 @@ const cat = (overrides: Partial<CatalogItem> = {}): CatalogItem => ({
 });
 
 const rec = (items: [string, number][] = []): PlayerInventoryRecord => ({
-  name: "Alice", color: "#fff", items,
+  name: "Alice", color: "#fff", w: "", items,
   currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
 });
 

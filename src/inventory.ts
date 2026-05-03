@@ -3,7 +3,7 @@ import type {
 } from "./types";
 
 export function emptyRecord(name: string, color: string): PlayerInventoryRecord {
-  return { name, color, items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } };
+  return { name, color, w: "", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } };
 }
 
 function withItems(r: PlayerInventoryRecord, items: InventoryEntry[]): PlayerInventoryRecord {

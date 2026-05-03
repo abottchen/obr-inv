@@ -11,7 +11,7 @@ const catalog: CatalogItem[] = [
 ];
 
 const record: PlayerInventoryRecord = {
-  name: "Alice", color: "#fff",
+  name: "Alice", color: "#fff", w: "",
   items: [["h1", 3], ["a1", 20]],
   currency: { pp: 0, gp: 142, sp: 7, cp: 3 },
 };
@@ -47,7 +47,7 @@ describe("ui-shell smoke", () => {
         icon: "u", description: "drink" },
     ];
     const r: PlayerInventoryRecord = {
-      name: "A", color: "#fff",
+      name: "A", color: "#fff", w: "",
       items: [["x1", 1], ["x2", 1]],
       currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
     };

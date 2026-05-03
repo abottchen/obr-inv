@@ -4,7 +4,7 @@ import type { PlayerInventoryRecord } from "../src/types";
 
 function rec(items: Array<[string, number]>): PlayerInventoryRecord {
   return {
-    name: "T", color: "#000",
+    name: "T", color: "#000", w: "",
     items,
     currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
   };
