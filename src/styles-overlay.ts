@@ -6,6 +6,9 @@ export const OVERLAY_CSS = `
   z-index: 9000;
   pointer-events: all;
 }
+.atomic-overlay-backdrop--invisible {
+  background: transparent;
+}
 .atomic-overlay {
   position: fixed;
   top: 50%;
