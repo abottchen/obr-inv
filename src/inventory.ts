@@ -83,22 +83,3 @@ export function applyTransferIn(
   return addItem(recipient, id, qty);
 }
 
-export function applyTransfer(
-  sender: PlayerInventoryRecord,
-  recipient: PlayerInventoryRecord,
-  id: string,
-  qty: number,
-): [PlayerInventoryRecord, PlayerInventoryRecord] {
-  if (qty <= 0) throw new Error(`applyTransfer: qty must be > 0 (got ${qty})`);
-  const senderItems = sender.items.map((e) => [...e] as InventoryEntry);
-  const i = findIndex(senderItems, id);
-  if (i < 0) throw new Error(`applyTransfer: sender has no item ${id}`);
-  if (senderItems[i][1] < qty) {
-    throw new Error(`applyTransfer: qty ${qty} exceeds sender count ${senderItems[i][1]}`);
-  }
-  senderItems[i][1] -= qty;
-  const newSender = withItems(sender, senderItems);
-
-  const newRecipient = addItem(recipient, id, qty);
-  return [newSender, newRecipient];
-}

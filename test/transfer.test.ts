@@ -1,7 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
 import { __atomicTestHooks } from "../src/atomic";
-import * as metadata from "../src/metadata";
 import { writeRecord, getRecord } from "../src/metadata";
 import { transferItem } from "../src/transfer";
 import { BROADCAST_CHANNEL, STORAGE_CAP_BYTES } from "../src/constants";
@@ -29,7 +28,7 @@ describe("transferItem", () => {
     await transferItem({
       fromPlayerId: "alice", toPlayerId: "bob",
       itemId: "a1", itemName: "Sword", qty: 3,
-    });
+    }, { description: "transfer test" });
 
     expect((await getRecord("alice"))?.items).toEqual([["a1", 2]]);
     expect((await getRecord("bob"))?.items).toEqual([["a1", 3]]);
@@ -69,7 +68,7 @@ describe("transferItem", () => {
     await expect(transferItem({
       fromPlayerId: "alice", toPlayerId: "bob",
       itemId: "a1", itemName: "Sword", qty: 3,
-    })).rejects.toThrow();
+    }, { description: "transfer test" })).rejects.toThrow();
 
     expect((await getRecord("alice"))?.items).toEqual([["a1", 5]]);
     const overCapMsg = __testHooks.broadcasts.find(
@@ -85,50 +84,26 @@ describe("transferItem", () => {
     await expect(transferItem({
       fromPlayerId: "alice", toPlayerId: "ghost",
       itemId: "a1", itemName: "X", qty: 1,
-    })).rejects.toThrow(/no inventory record/i);
+    }, { description: "transfer test" })).rejects.toThrow(/no inventory record/i);
   });
 
-  it("reverts recipient credit when the sender write fails after recipient succeeded", async () => {
-    await seedRecord("alice", "Alice", [["a1", 5]]);
+  it("retries on conflict and converges (rapid-fire from one client)", async () => {
+    await seedRecord("alice", "Alice", [["a1", 10]]);
     await seedRecord("bob", "Bob");
-    __testHooks.setParty([
-      { id: "alice", name: "Alice", color: "#fff", role: "PLAYER" },
-      { id: "bob", name: "Bob", color: "#fff", role: "PLAYER" },
-    ]);
+    __testHooks.setSelf("alice", "Alice", "#fff");
 
-    // Force the second writeRecord call (sender debit) to throw, while
-    // letting the recipient credit and the rollback write succeed.
-    const real = metadata.writeRecord;
-    let calls = 0;
-    const spy = vi.spyOn(metadata, "writeRecord").mockImplementation(
-      async (pid, mutate, opts) => {
-        calls++;
-        if (calls === 2) throw new Error("simulated sender-write failure");
-        return real(pid, mutate, opts);
-      },
-    );
-    // Suppress the rollback-failure console.error path; we expect rollback
-    // to succeed so it shouldn't fire, but we want a clean test output.
-    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-    try {
-      await expect(transferItem({
+    // Fire 5 transfers without awaiting between
+    const transfers = Array.from({ length: 5 }, () =>
+      transferItem({
         fromPlayerId: "alice", toPlayerId: "bob",
-        itemId: "a1", itemName: "Sword", qty: 3,
-      })).rejects.toThrow(/simulated sender-write failure/);
+        itemId: "a1", itemName: "Sword", qty: 1,
+      }, { description: "rapid fire" }),
+    );
+    await Promise.all(transfers);
 
-      // alice never had her debit persisted (write 2 threw before commit)
-      expect((await getRecord("alice"))?.items).toEqual([["a1", 5]]);
-      // bob was credited (write 1) then rolled back (write 3): back to empty
-      expect((await getRecord("bob"))?.items).toEqual([]);
-      // No transfer-received broadcast — the transfer ultimately failed
-      const tx = __testHooks.broadcasts.find(
-        (b) => (b.data as any).type === "transfer-received",
-      );
-      expect(tx).toBeUndefined();
-    } finally {
-      spy.mockRestore();
-      errSpy.mockRestore();
-    }
+    const a = await getRecord("alice");
+    const b = await getRecord("bob");
+    expect(a?.items).toEqual([["a1", 5]]);
+    expect(b?.items).toEqual([["a1", 5]]);
   });
 });
