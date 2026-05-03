@@ -40,6 +40,83 @@ export function _internal_getLatestWriter(key: string): string | undefined {
   return latestWriters.get(key);
 }
 
+export interface AtomicUpdateOptions {
+  signal?: AbortSignal;
+  description: string;
+  onConflict?: (info: { blockerWriter: string; attempt: number }) => void;
+}
+
+export type Mutator<T> = (current: T | null) => T | null;
+
+export const ECHO_TIMEOUT_MS = 1000;
+
+function makeWriter(): string {
+  return `${OBR.player.id}:${randomNonce()}`;
+}
+
+async function waitForEcho(
+  keys: string[],
+  ourWriter: string,
+  timeoutMs: number,
+  signal: AbortSignal | undefined,
+): Promise<{ ok: true } | { ok: false; blockerWriter: string | null }> {
+  const allMatch = () => keys.every((k) => latestWriters.get(k) === ourWriter);
+  if (allMatch()) return { ok: true };
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const predicate = () => {
+      if (allMatch()) {
+        if (!settled) { settled = true; resolve({ ok: true }); }
+        return true;
+      }
+      return false;
+    };
+    waiters.add(predicate);
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      waiters.delete(predicate);
+      const blocker = keys.map((k) => latestWriters.get(k) ?? "")
+        .find((w) => w !== ourWriter) ?? null;
+      resolve({ ok: false, blockerWriter: blocker });
+    }, timeoutMs);
+    if (signal) {
+      const onAbort = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        waiters.delete(predicate);
+        resolve({ ok: false, blockerWriter: null });
+      };
+      if (signal.aborted) onAbort();
+      else signal.addEventListener("abort", onAbort, { once: true });
+    }
+  });
+}
+
+export async function atomicUpdate<T extends WriterStamp>(
+  key: string,
+  mutate: Mutator<T>,
+  opts: AtomicUpdateOptions,
+): Promise<T | null> {
+  startEchoTracker();
+  const md = await OBR.room.getMetadata();
+  const current = (md[key] as T | undefined) ?? null;
+  const next = mutate(current);
+  const ourWriter = makeWriter();
+
+  if (next === null) {
+    await OBR.room.setMetadata({ [key]: undefined });
+    return null;
+  }
+
+  const stamped = { ...next, w: ourWriter };
+  await OBR.room.setMetadata({ [key]: stamped });
+  await waitForEcho([key], ourWriter, ECHO_TIMEOUT_MS, opts.signal);
+  return stamped;
+}
+
 export function parseWriter(w: string): { playerId: string | null; nonce: string } {
   const colon = w.indexOf(":");
   if (colon < 0) return { playerId: null, nonce: w };

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
-import { parseWriter, randomNonce, __atomicTestHooks, _internal_getLatestWriter } from "../src/atomic";
+import { parseWriter, randomNonce, __atomicTestHooks, _internal_getLatestWriter, atomicUpdate } from "../src/atomic";
+import type { WriterStamp } from "../src/types";
 
 describe("parseWriter", () => {
   it("splits playerId and nonce on the first colon", () => {
@@ -62,5 +63,35 @@ describe("echo tracker", () => {
       [key]: { name: "L", color: "#fff", items: [], currency: { pp:0, gp:0, sp:0, cp:0 } },
     });
     expect(_internal_getLatestWriter(key)).toBe("");
+  });
+});
+
+describe("atomicUpdate (happy path)", () => {
+  beforeEach(() => {
+    __testHooks.reset();
+    __atomicTestHooks.reset();
+    __atomicTestHooks.startTracker();
+    __testHooks.setSelf("alice", "Alice", "#fff");
+  });
+
+  it("writes a fresh record when key is empty", async () => {
+    const result = await atomicUpdate<{ name: string } & WriterStamp>(
+      "com.abottchen.obr-inv/v1/alice",
+      () => ({ w: "", name: "Alice" }),
+      { description: "test" },
+    );
+    expect(result?.name).toBe("Alice");
+    expect(result?.w).toMatch(/^alice:[0-9A-Za-z]{8}$/);
+  });
+
+  it("calls mutator with current value on subsequent writes", async () => {
+    const key = "com.abottchen.obr-inv/v1/alice";
+    await atomicUpdate(key, () => ({ w: "", count: 1 }), { description: "first" });
+    const result = await atomicUpdate<{ count: number } & WriterStamp>(
+      key,
+      (current) => ({ ...current!, count: current!.count + 1 }),
+      { description: "increment" },
+    );
+    expect(result?.count).toBe(2);
   });
 });
