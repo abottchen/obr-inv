@@ -6,6 +6,7 @@ import {
   getCustoms, listInventoryRecords, roomDataByteSize, writeCustoms,
 } from "./metadata";
 import { openCustomsDialog } from "./ui-customs-dialog";
+import { withOverlay } from "./ui-mutate";
 import { resolvedCatalog } from "./catalog";
 import { appendIconImage } from "./ui-icon";
 import type {
@@ -136,15 +137,14 @@ export function openCustomsPanel(opts: CustomsPanelOpts): void {
           // the dialog can show its inline cap-full banner. Anything else
           // gets surfaced via the GM's error channel; we still rethrow so
           // the dialog stays open for the user to retry.
-          try {
-            const next = updateCustom(customs, updated);
-            await writeCustoms(next);
-            customs = next;
-            render();
-          } catch (err) {
-            if (!(err instanceof OverCapError)) opts.onError?.(err);
-            throw err;
-          }
+          const next = updateCustom(customs, updated);
+          const result = await withOverlay(
+            `Saving "${updated.name}"…`, records, (wopts) =>
+              writeCustoms(() => ({ w: "", items: next }), wopts),
+          ).catch((err) => { if (!(err instanceof OverCapError)) opts.onError?.(err); throw err; });
+          if (result === null) return;
+          customs = next;
+          render();
         },
       });
     };
@@ -157,14 +157,14 @@ export function openCustomsPanel(opts: CustomsPanelOpts): void {
     deleteBtn.textContent = "🗑";
     deleteBtn.onclick = () => {
       confirmDelete(c, refs, async () => {
-        try {
-          const next = removeCustom(customs, c.id);
-          await writeCustoms(next);
-          customs = next;
-          render();
-        } catch (err) {
-          opts.onError?.(err);
-        }
+        const next = removeCustom(customs, c.id);
+        const result = await withOverlay(
+          `Deleting "${c.name}"…`, records, (wopts) =>
+            writeCustoms(() => ({ w: "", items: next }), wopts),
+        ).catch((err) => { opts.onError?.(err); return null; });
+        if (result === null) return;
+        customs = next;
+        render();
       });
     };
     actions.appendChild(deleteBtn);

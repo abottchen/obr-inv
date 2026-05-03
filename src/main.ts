@@ -54,7 +54,11 @@ OBR.onReady(async () => {
     const { survivors, removed } = reconcileCustoms(catalog, customs);
     if (removed.length > 0) {
       try {
-        await writeCustoms(survivors);
+        // Boot-time automatic reconciliation — no user interaction, so no overlay.
+        await writeCustoms(
+          () => ({ w: "", items: survivors }),
+          { description: "reconcile promoted customs" },
+        );
         customs = survivors;
         console.info(
           `[obr-inv] Removed ${removed.length} promoted custom item${removed.length === 1 ? "" : "s"}: ${removed.map((c) => c.name).join(", ")}`,

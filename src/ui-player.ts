@@ -12,6 +12,7 @@ import {
 import { transferItem } from "./transfer";
 import { showOverlay, closeOverlay, setOverlayDescription, setOverlayState } from "./ui-overlay";
 import { parseWriter } from "./atomic";
+import { withOverlay } from "./ui-mutate";
 import { resolvedCatalog } from "./catalog";
 import { BROADCAST_CHANNEL } from "./constants";
 import type {
@@ -104,36 +105,43 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
     });
   };
 
+  // records snapshot for overlay conflict-name lookup. Updated by onRoomMetadataChange.
+  let records: Record<string, PlayerInventoryRecord> = {};
+
   const refs = mountShell(opts.root, current, merged, {
     onIncrement: async (id) => {
-      try { await writeRecord(opts.playerId, incrementItem(current, id)); }
-      catch (e) { revertOptimistic(); rethrowIfNotCap(e); }
+      const snap = current;
+      await withOverlay(`Updating ${byId.get(id)?.name ?? id}…`, records, (wopts) =>
+        writeRecord(opts.playerId, () => incrementItem(snap, id), wopts),
+      );
     },
     onDecrement: async (id) => {
-      try { await writeRecord(opts.playerId, decrementItem(current, id)); }
-      catch (e) { revertOptimistic(); rethrowIfNotCap(e); }
+      const snap = current;
+      await withOverlay(`Updating ${byId.get(id)?.name ?? id}…`, records, (wopts) =>
+        writeRecord(opts.playerId, () => decrementItem(snap, id), wopts),
+      );
     },
     onRemove: async (id) => {
-      try { await writeRecord(opts.playerId, removeItem(current, id)); }
-      catch (e) { revertOptimistic(); rethrowIfNotCap(e); }
+      const snap = current;
+      await withOverlay(`Removing ${byId.get(id)?.name ?? id}…`, records, (wopts) =>
+        writeRecord(opts.playerId, () => removeItem(snap, id), wopts),
+      );
     },
     onCurrencyChange: async (f, v) => {
-      const updated: PlayerInventoryRecord = {
-        ...current, currency: { ...current.currency, [f]: v },
-      };
-      try { await writeRecord(opts.playerId, updated); }
-      catch (e) { revertOptimistic(); rethrowIfNotCap(e); }
+      const snap = current;
+      await withOverlay("Saving currency…", records, (wopts) =>
+        writeRecord(opts.playerId, () => ({ ...snap, currency: { ...snap.currency, [f]: v } }), wopts),
+      );
     },
     onAddClick: () => {
       openAddDialog({
         catalog: merged,
         onAdd: async (id, qty) => {
-          try {
-            await writeRecord(opts.playerId, addItem(current, id, qty));
-            closeAddDialog();
-          } catch (e) {
-            rethrowIfNotCap(e);
-          }
+          const snap = current;
+          const result = await withOverlay(`Adding ${byId.get(id)?.name ?? id}…`, records, (wopts) =>
+            writeRecord(opts.playerId, () => addItem(snap, id, qty), wopts),
+          );
+          if (result !== null) closeAddDialog();
         },
       });
     },
@@ -150,8 +158,9 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
     },
   });
 
-  const unsubMeta = onRoomMetadataChange((records) => {
-    const me = records[opts.playerId];
+  const unsubMeta = onRoomMetadataChange((incoming) => {
+    records = incoming;
+    const me = incoming[opts.playerId];
     if (!me) return;
     current = me;
     refs.rerender(current, merged);
@@ -189,9 +198,6 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
     },
   );
 
-  function revertOptimistic() {
-    refs.rerender(current, merged);
-  }
   function rethrowIfNotCap(e: unknown) {
     if (!(e instanceof OverCapError)) throw e;
   }
