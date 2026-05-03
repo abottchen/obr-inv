@@ -71,14 +71,17 @@ export function deleteRecord(playerId: string): Promise<PlayerInventoryRecord | 
   );
 }
 
-export async function getCustoms(): Promise<CustomItemsRecord> {
-  const md = await OBR.room.getMetadata();
-  const v = md[CUSTOMS_KEY];
+function parseCustomsValue(v: unknown): CustomItemsRecord {
   if (Array.isArray(v)) return v as CustomItemsRecord;
   if (v && typeof v === "object" && Array.isArray((v as { items?: unknown }).items)) {
     return ((v as CustomItemsEnvelope).items) as CustomItemsRecord;
   }
   return [];
+}
+
+export async function getCustoms(): Promise<CustomItemsRecord> {
+  const md = await OBR.room.getMetadata();
+  return parseCustomsValue(md[CUSTOMS_KEY]);
 }
 
 export function writeCustoms(
@@ -92,8 +95,7 @@ export function onCustomsChange(
   cb: (customs: CustomItemsRecord) => void,
 ): () => void {
   return OBR.room.onMetadataChange((md) => {
-    const v = md[CUSTOMS_KEY];
-    cb(Array.isArray(v) ? (v as CustomItemsRecord) : []);
+    cb(parseCustomsValue(md[CUSTOMS_KEY]));
   });
 }
 

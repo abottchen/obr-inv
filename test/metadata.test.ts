@@ -3,7 +3,8 @@ import { __testHooks } from "./_mocks/obr-sdk";
 import { __atomicTestHooks } from "../src/atomic";
 import {
   deleteRecord, ensureRecord, getCustoms, getRecord, listInventoryRecords,
-  onRoomMetadataChange, recordKey, roomDataByteSize, writeCustoms, writeRecord,
+  onCustomsChange, onRoomMetadataChange, recordKey, roomDataByteSize,
+  writeCustoms, writeRecord,
 } from "../src/metadata";
 import { OverCapError } from "../src/types";
 import { CUSTOMS_KEY, STORAGE_CAP_BYTES } from "../src/constants";
@@ -222,5 +223,32 @@ describe("legacy shape tolerance", () => {
     const items = await getCustoms();
     expect(items).toHaveLength(1);
     expect(items[0].id).toBe("x");
+  });
+
+  it("onCustomsChange reports customs from the envelope shape", async () => {
+    const seen: Array<Array<{ id: string }>> = [];
+    const unsub = onCustomsChange((c) => seen.push(c.map((i) => ({ id: i.id }))));
+    try {
+      await writeCustoms(
+        () => ({ w: "", items: [{
+          id: "DIAxyz", name: "Diamond", category: "Treasure",
+          icon: "", description: "Sparkly",
+        }] }),
+        { description: "create Diamond" },
+      );
+      // A subsequent unrelated write must still surface the envelope's items,
+      // not collapse customs to [] just because the value isn't a bare array.
+      await writeRecord("p1",
+        () => ({ w: "", name: "P1", color: "#fff", items: [["DIAxyz", 1]],
+          currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
+        { description: "give Diamond to p1" },
+      );
+    } finally {
+      unsub();
+    }
+    expect(seen.length).toBeGreaterThanOrEqual(2);
+    for (const snapshot of seen) {
+      expect(snapshot).toEqual([{ id: "DIAxyz" }]);
+    }
   });
 });
