@@ -16,7 +16,7 @@ const cust = (overrides: Partial<CustomItem> = {}): CustomItem => ({
 const player = (
   name: string, items: [string, number][] = [],
 ): PlayerInventoryRecord => ({
-  name, color: "#fff", items,
+  name, color: "#fff", w: "", items,
   currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
 });
 

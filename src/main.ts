@@ -9,6 +9,7 @@ import { injectBaseStyles, injectStyles } from "./styles";
 import { LIST_CSS } from "./styles-list";
 import { DIALOG_CSS } from "./styles-dialog";
 import { FEEDBACK_CSS } from "./styles-feedback";
+import { OVERLAY_CSS } from "./styles-overlay";
 import { DEFAULT_CATALOG_URL, CONFIG_KEY } from "./constants";
 import { reconcileCustoms } from "./customs";
 import type { CatalogItem, CustomItemsRecord, ExtensionConfig } from "./types";
@@ -18,6 +19,7 @@ OBR.onReady(async () => {
   injectStyles(LIST_CSS, "obr-inv-list-styles");
   injectStyles(DIALOG_CSS, "obr-inv-dialog-styles");
   injectStyles(FEEDBACK_CSS, "obr-inv-feedback-styles");
+  injectStyles(OVERLAY_CSS, "obr-inv-overlay-styles");
 
   const root = document.getElementById("root");
   if (!root) return;
@@ -52,7 +54,11 @@ OBR.onReady(async () => {
     const { survivors, removed } = reconcileCustoms(catalog, customs);
     if (removed.length > 0) {
       try {
-        await writeCustoms(survivors);
+        // Boot-time automatic reconciliation — no user interaction, so no overlay.
+        await writeCustoms(
+          () => ({ w: "", items: survivors }),
+          { description: "reconcile promoted customs" },
+        );
         customs = survivors;
         console.info(
           `[obr-inv] Removed ${removed.length} promoted custom item${removed.length === 1 ? "" : "s"}: ${removed.map((c) => c.name).join(", ")}`,

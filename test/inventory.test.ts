@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   emptyRecord, addItem, incrementItem, decrementItem, removeItem,
-  pruneZeros, totalWeight, applyTransfer,
+  pruneZeros, totalWeight, applyTransferOut, applyTransferIn,
 } from "../src/inventory";
 import type { CatalogItem, PlayerInventoryRecord } from "../src/types";
 
@@ -10,7 +10,7 @@ const cat = (overrides: Partial<CatalogItem> = {}): CatalogItem => ({
 });
 
 const rec = (items: [string, number][] = []): PlayerInventoryRecord => ({
-  name: "Alice", color: "#fff", items,
+  name: "Alice", color: "#fff", w: "", items,
   currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
 });
 
@@ -72,31 +72,66 @@ describe("inventory", () => {
     expect(totalWeight(items, [])).toBe(0);
   });
 
-  it("applyTransfer moves qty from sender to recipient", () => {
+  it("applyTransferOut+In moves qty from sender to recipient", () => {
     const sender = rec([["a1", 5]]);
     const recipient = rec();
-    const [s2, r2] = applyTransfer(sender, recipient, "a1", 3);
+    const s2 = applyTransferOut(sender, "a1", 3);
+    const r2 = applyTransferIn(recipient, "a1", 3);
     expect(s2.items).toEqual([["a1", 2]]);
     expect(r2.items).toEqual([["a1", 3]]);
   });
 
-  it("applyTransfer merges into recipient's existing entry", () => {
+  it("applyTransferOut+In merges into recipient's existing entry", () => {
     const sender = rec([["a1", 5]]);
     const recipient = rec([["a1", 2]]);
-    const [s2, r2] = applyTransfer(sender, recipient, "a1", 3);
+    const s2 = applyTransferOut(sender, "a1", 3);
+    const r2 = applyTransferIn(recipient, "a1", 3);
     expect(s2.items).toEqual([["a1", 2]]);
     expect(r2.items).toEqual([["a1", 5]]);
   });
 
-  it("applyTransfer rejects qty > sender count", () => {
-    expect(() => applyTransfer(rec([["a1", 2]]), rec(), "a1", 3)).toThrow();
+  it("applyTransferOut rejects qty > sender count", () => {
+    expect(() => applyTransferOut(rec([["a1", 2]]), "a1", 3)).toThrow();
   });
 
-  it("applyTransfer rejects qty <= 0", () => {
-    expect(() => applyTransfer(rec([["a1", 2]]), rec(), "a1", 0)).toThrow();
+  it("applyTransferOut rejects qty <= 0", () => {
+    expect(() => applyTransferOut(rec([["a1", 2]]), "a1", 0)).toThrow();
   });
 
-  it("applyTransfer rejects when sender doesn't have the item", () => {
-    expect(() => applyTransfer(rec(), rec(), "a1", 1)).toThrow();
+  it("applyTransferOut rejects when sender doesn't have the item", () => {
+    expect(() => applyTransferOut(rec(), "a1", 1)).toThrow();
+  });
+});
+
+describe("applyTransferOut", () => {
+  it("subtracts qty from sender", () => {
+    const sender = {
+      w: "", name: "A", color: "#fff",
+      items: [["a1", 5]] as [string, number][],
+      currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
+    };
+    const out = applyTransferOut(sender, "a1", 3);
+    expect(out.items).toEqual([["a1", 2]]);
+  });
+
+  it("throws when sender lacks the item", () => {
+    const sender = {
+      w: "", name: "A", color: "#fff",
+      items: [] as [string, number][],
+      currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
+    };
+    expect(() => applyTransferOut(sender, "missing", 1)).toThrow();
+  });
+});
+
+describe("applyTransferIn", () => {
+  it("adds qty to recipient", () => {
+    const recipient = {
+      w: "", name: "B", color: "#fff",
+      items: [["a1", 1]] as [string, number][],
+      currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
+    };
+    const out = applyTransferIn(recipient, "a1", 2);
+    expect(out.items).toEqual([["a1", 3]]);
   });
 });

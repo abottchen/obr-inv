@@ -1,15 +1,10 @@
 import OBR from "@owlbear-rodeo/sdk";
 import { BROADCAST_CHANNEL } from "./constants";
-import { applyTransfer } from "./inventory";
-import {
-  getRecord, writeRecord,
-} from "./metadata";
-import {
-  OverCapError,
-} from "./types";
-import type {
-  OverCapMessage, TransferReceivedMessage,
-} from "./types";
+import { atomicMultiUpdate, type AtomicUpdateOptions, type Mutator } from "./atomic";
+import { applyTransferIn, applyTransferOut } from "./inventory";
+import { getRecord, recordKey } from "./metadata";
+import { OverCapError } from "./types";
+import type { OverCapMessage, PlayerInventoryRecord, TransferReceivedMessage, WriterStamp } from "./types";
 
 interface TransferRequest {
   fromPlayerId: string;
@@ -19,18 +14,32 @@ interface TransferRequest {
   qty: number;
 }
 
-export async function transferItem(req: TransferRequest): Promise<void> {
+export async function transferItem(
+  req: TransferRequest,
+  opts: AtomicUpdateOptions,
+): Promise<void> {
+  // Read names up-front for the broadcast notification — this read isn't
+  // load-bearing for the transfer itself; the mutators below re-read fresh
+  // state each attempt.
   const sender = await getRecord(req.fromPlayerId);
   const recipient = await getRecord(req.toPlayerId);
   if (!sender) throw new Error(`Sender ${req.fromPlayerId} has no inventory record`);
   if (!recipient) throw new Error(`Recipient ${req.toPlayerId} has no inventory record`);
 
-  const [newSender, newRecipient] = applyTransfer(
-    sender, recipient, req.itemId, req.qty,
-  );
+  const outMutator: Mutator<PlayerInventoryRecord> = (current) => {
+    if (!current) throw new Error(`Sender ${req.fromPlayerId} has no inventory record`);
+    return applyTransferOut(current, req.itemId, req.qty);
+  };
+  const inMutator: Mutator<PlayerInventoryRecord> = (current) => {
+    if (!current) throw new Error(`Recipient ${req.toPlayerId} has no inventory record`);
+    return applyTransferIn(current, req.itemId, req.qty);
+  };
 
   try {
-    await writeRecord(req.toPlayerId, newRecipient);
+    await atomicMultiUpdate([
+      { key: recordKey(req.fromPlayerId), mutate: outMutator as unknown as Mutator<WriterStamp> },
+      { key: recordKey(req.toPlayerId), mutate: inMutator as unknown as Mutator<WriterStamp> },
+    ], opts);
   } catch (err) {
     if (err instanceof OverCapError) {
       const msg: OverCapMessage = {
@@ -41,36 +50,7 @@ export async function transferItem(req: TransferRequest): Promise<void> {
         currentBytes: err.currentBytes,
         cap: err.cap,
       };
-      // Broadcast to all clients; GM listeners filter by role.
       await OBR.broadcast.sendMessage(BROADCAST_CHANNEL, msg, { destination: "ALL" });
-    }
-    throw err;
-  }
-
-  try {
-    await writeRecord(req.fromPlayerId, newSender);
-  } catch (err) {
-    // Sender write failed *after* recipient was already credited.
-    // Re-read recipient (could have changed concurrently) and back out
-    // the qty we just added; if that fails, surface a loud error so
-    // operators can reconcile manually rather than silently double-crediting.
-    try {
-      const fresh = await getRecord(req.toPlayerId);
-      if (fresh) {
-        const reverted = {
-          ...fresh,
-          items: fresh.items
-            .map(([id, c]) =>
-              id === req.itemId ? ([id, c - req.qty] as [string, number]) : ([id, c] as [string, number]),
-            )
-            .filter(([, c]) => c > 0),
-        };
-        await writeRecord(req.toPlayerId, reverted);
-      }
-    } catch (rollbackErr) {
-      console.error("[transfer] rollback failed; recipient may be double-credited", {
-        req, rollbackErr,
-      });
     }
     throw err;
   }
@@ -85,6 +65,5 @@ export async function transferItem(req: TransferRequest): Promise<void> {
     itemName: req.itemName,
     quantity: req.qty,
   };
-  // Broadcast to all clients; recipient listener filters by toPlayerId.
   await OBR.broadcast.sendMessage(BROADCAST_CHANNEL, note, { destination: "ALL" });
 }

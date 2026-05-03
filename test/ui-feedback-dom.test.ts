@@ -14,7 +14,7 @@ const catalog: CatalogItem[] = [
 
 function rec(items: Array<[string, number]>): PlayerInventoryRecord {
   return {
-    name: "Alice", color: "#fff",
+    name: "Alice", color: "#fff", w: "",
     items,
     currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
   };

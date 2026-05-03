@@ -19,6 +19,7 @@ import { resolvedCatalog } from "./catalog";
 import { escapeHtml } from "./escape";
 import { totalWeight } from "./inventory";
 import { mountIconSprite, icon as svgIcon } from "./ui-icons";
+import { withOverlay } from "./ui-mutate";
 import {
   BROADCAST_CHANNEL, STORAGE_CAP_BYTES,
   METER_YELLOW_RATIO, METER_RED_RATIO,
@@ -194,7 +195,10 @@ export function mountGmView(opts: GmViewOpts): () => void {
       prefillName,
       onSave: async (item) => {
         const next = addCustom(customs, item);
-        await writeCustoms(next);
+        const result = await withOverlay(`Saving custom item "${item.name}"…`, records, (wopts) =>
+          writeCustoms(() => ({ w: "", items: next }), wopts),
+        );
+        if (result === null) return;
         // Local state will refresh via onCustomsChange, but pre-update
         // so the next render after Save reflects it immediately.
         customs = next;
@@ -221,12 +225,12 @@ export function mountGmView(opts: GmViewOpts): () => void {
       maxQty: entry?.[1] ?? 0,
       targets,
       onConfirm: async (toPlayerId, qty) => {
-        try {
-          await transferItem({
-            fromPlayerId: activePid, toPlayerId,
-            itemId: id, itemName: ci?.name ?? id, qty,
-          });
-        } catch (e) { gmHandleErr(e); }
+        const recipientName = all[toPlayerId]?.name ?? "player";
+        const itemName = ci?.name ?? id;
+        await withOverlay(
+          `Transferring ${qty}× ${itemName} to ${recipientName}…`, all, (wopts) =>
+            transferItem({ fromPlayerId: activePid, toPlayerId, itemId: id, itemName, qty }, wopts),
+        ).catch(gmHandleErr);
       },
     });
   };
@@ -246,34 +250,37 @@ export function mountGmView(opts: GmViewOpts): () => void {
     shellRefs = mountShell(shellRoot, rec, merged, {
       onIncrement: async (id) => {
         const r = records[activePid]; if (!r) return;
-        try { await writeRecord(activePid, incrementItem(r, id)); }
-        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, merged); }
+        await withOverlay(`Updating ${byId.get(id)?.name ?? id}…`, records, (wopts) =>
+          writeRecord(activePid, () => incrementItem(r, id), wopts),
+        ).catch(gmHandleErr);
       },
       onDecrement: async (id) => {
         const r = records[activePid]; if (!r) return;
-        try { await writeRecord(activePid, decrementItem(r, id)); }
-        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, merged); }
+        await withOverlay(`Updating ${byId.get(id)?.name ?? id}…`, records, (wopts) =>
+          writeRecord(activePid, () => decrementItem(r, id), wopts),
+        ).catch(gmHandleErr);
       },
       onRemove: async (id) => {
         const r = records[activePid]; if (!r) return;
-        try { await writeRecord(activePid, removeItem(r, id)); }
-        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, merged); }
+        await withOverlay(`Removing ${byId.get(id)?.name ?? id}…`, records, (wopts) =>
+          writeRecord(activePid, () => removeItem(r, id), wopts),
+        ).catch(gmHandleErr);
       },
       onCurrencyChange: async (f, v) => {
         const r = records[activePid]; if (!r) return;
-        const u = { ...r, currency: { ...r.currency, [f]: v } };
-        try { await writeRecord(activePid, u); }
-        catch (e) { gmHandleErr(e); shellRefs?.rerender(r, merged); }
+        await withOverlay("Saving currency…", records, (wopts) =>
+          writeRecord(activePid, () => ({ ...r, currency: { ...r.currency, [f]: v } }), wopts),
+        ).catch(gmHandleErr);
       },
       onAddClick: () => {
         openAddDialog({
           catalog: merged,
           onAdd: async (id, qty) => {
             const r = records[activePid]; if (!r) return;
-            try {
-              await writeRecord(activePid, addItem(r, id, qty));
-              closeAddDialog();
-            } catch (e) { gmHandleErr(e); }
+            const result = await withOverlay(`Adding ${byId.get(id)?.name ?? id}…`, records, (wopts) =>
+              writeRecord(activePid, () => addItem(r, id, qty), wopts),
+            ).catch((e) => { gmHandleErr(e); return null; });
+            if (result !== null) closeAddDialog();
           },
           onCreateCustom: (prefill) => {
             // Close the add-dialog so the customs dialog has full focus;

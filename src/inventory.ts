@@ -3,7 +3,7 @@ import type {
 } from "./types";
 
 export function emptyRecord(name: string, color: string): PlayerInventoryRecord {
-  return { name, color, items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } };
+  return { name, color, w: "", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } };
 }
 
 function withItems(r: PlayerInventoryRecord, items: InventoryEntry[]): PlayerInventoryRecord {
@@ -58,22 +58,28 @@ export function totalWeight(
   return total;
 }
 
-export function applyTransfer(
+export function applyTransferOut(
   sender: PlayerInventoryRecord,
+  id: string,
+  qty: number,
+): PlayerInventoryRecord {
+  if (qty <= 0) throw new Error(`applyTransferOut: qty must be > 0 (got ${qty})`);
+  const senderItems = sender.items.map((e) => [...e] as InventoryEntry);
+  const i = findIndex(senderItems, id);
+  if (i < 0) throw new Error(`applyTransferOut: sender has no item ${id}`);
+  if (senderItems[i][1] < qty) {
+    throw new Error(`applyTransferOut: qty ${qty} exceeds sender count ${senderItems[i][1]}`);
+  }
+  senderItems[i][1] -= qty;
+  return withItems(sender, senderItems);
+}
+
+export function applyTransferIn(
   recipient: PlayerInventoryRecord,
   id: string,
   qty: number,
-): [PlayerInventoryRecord, PlayerInventoryRecord] {
-  if (qty <= 0) throw new Error(`applyTransfer: qty must be > 0 (got ${qty})`);
-  const senderItems = sender.items.map((e) => [...e] as InventoryEntry);
-  const i = findIndex(senderItems, id);
-  if (i < 0) throw new Error(`applyTransfer: sender has no item ${id}`);
-  if (senderItems[i][1] < qty) {
-    throw new Error(`applyTransfer: qty ${qty} exceeds sender count ${senderItems[i][1]}`);
-  }
-  senderItems[i][1] -= qty;
-  const newSender = withItems(sender, senderItems);
-
-  const newRecipient = addItem(recipient, id, qty);
-  return [newSender, newRecipient];
+): PlayerInventoryRecord {
+  if (qty <= 0) throw new Error(`applyTransferIn: qty must be > 0 (got ${qty})`);
+  return addItem(recipient, id, qty);
 }
+

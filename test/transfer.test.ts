@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
-import * as metadata from "../src/metadata";
+import { __atomicTestHooks } from "../src/atomic";
 import { writeRecord, getRecord } from "../src/metadata";
 import { transferItem } from "../src/transfer";
 import { BROADCAST_CHANNEL, STORAGE_CAP_BYTES } from "../src/constants";
@@ -8,14 +8,14 @@ import { BROADCAST_CHANNEL, STORAGE_CAP_BYTES } from "../src/constants";
 const seedRecord = async (
   pid: string, name: string, items: [string, number][] = [],
 ) => {
-  await writeRecord(pid, {
-    name, color: "#fff", items,
-    currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-  });
+  await writeRecord(pid,
+    () => ({ w: "", name, color: "#fff", items, currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
+    { description: `seed ${pid}` },
+  );
 };
 
 describe("transferItem", () => {
-  beforeEach(() => __testHooks.reset());
+  beforeEach(() => { __testHooks.reset(); __atomicTestHooks.reset(); });
 
   it("moves qty from sender to recipient and emits a transfer-received broadcast", async () => {
     await seedRecord("alice", "Alice", [["a1", 5]]);
@@ -28,7 +28,7 @@ describe("transferItem", () => {
     await transferItem({
       fromPlayerId: "alice", toPlayerId: "bob",
       itemId: "a1", itemName: "Sword", qty: 3,
-    });
+    }, { description: "transfer test" });
 
     expect((await getRecord("alice"))?.items).toEqual([["a1", 2]]);
     expect((await getRecord("bob"))?.items).toEqual([["a1", 3]]);
@@ -68,7 +68,7 @@ describe("transferItem", () => {
     await expect(transferItem({
       fromPlayerId: "alice", toPlayerId: "bob",
       itemId: "a1", itemName: "Sword", qty: 3,
-    })).rejects.toThrow();
+    }, { description: "transfer test" })).rejects.toThrow();
 
     expect((await getRecord("alice"))?.items).toEqual([["a1", 5]]);
     const overCapMsg = __testHooks.broadcasts.find(
@@ -84,50 +84,64 @@ describe("transferItem", () => {
     await expect(transferItem({
       fromPlayerId: "alice", toPlayerId: "ghost",
       itemId: "a1", itemName: "X", qty: 1,
-    })).rejects.toThrow(/no inventory record/i);
+    }, { description: "transfer test" })).rejects.toThrow(/no inventory record/i);
   });
 
-  it("reverts recipient credit when the sender write fails after recipient succeeded", async () => {
+  it("converges when two clients write the same record concurrently", async () => {
     await seedRecord("alice", "Alice", [["a1", 5]]);
     await seedRecord("bob", "Bob");
-    __testHooks.setParty([
-      { id: "alice", name: "Alice", color: "#fff", role: "PLAYER" },
-      { id: "bob", name: "Bob", color: "#fff", role: "PLAYER" },
-    ]);
+    __testHooks.setSelf("alice", "Alice", "#fff");
 
-    // Force the second writeRecord call (sender debit) to throw, while
-    // letting the recipient credit and the rollback write succeed.
-    const real = metadata.writeRecord;
-    let calls = 0;
-    const spy = vi.spyOn(metadata, "writeRecord").mockImplementation(
-      async (pid, rec) => {
-        calls++;
-        if (calls === 2) throw new Error("simulated sender-write failure");
-        return real(pid, rec);
-      },
-    );
-    // Suppress the rollback-failure console.error path; we expect rollback
-    // to succeed so it shouldn't fire, but we want a clean test output.
-    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    // Simulate a second client (bob's tab) overwriting both records mid-flight,
+    // effectively rolling back alice's first-attempt writes. This forces a retry
+    // from the seed state so the transfer is applied exactly once.
+    const sdk = (await import("@owlbear-rodeo/sdk")).default;
+    const realSet = sdk.room.setMetadata;
+    let stomped = false;
+    sdk.room.setMetadata = vi.fn(async (patch: Record<string, unknown>) => {
+      await realSet(patch);
+      if (!stomped) {
+        stomped = true;
+        // "Bob's tab" races alice and overwrites both records back to seed state,
+        // forcing alice's atomic engine to detect conflict (wrong writer) and retry.
+        const aliceKey = "com.abottchen.obr-inv/v1/alice";
+        const bobKey = "com.abottchen.obr-inv/v1/bob";
+        await realSet({
+          [aliceKey]: { w: "bob-id:other", name: "Alice", color: "#fff", items: [["a1", 5]], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } },
+          [bobKey]: { w: "bob-id:other", name: "Bob", color: "#fff", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } },
+        });
+      }
+    }) as typeof sdk.room.setMetadata;
 
-    try {
-      await expect(transferItem({
+    await transferItem({
+      fromPlayerId: "alice", toPlayerId: "bob",
+      itemId: "a1", itemName: "Sword", qty: 2,
+    }, { description: "test" });
+
+    const a = await getRecord("alice");
+    const b = await getRecord("bob");
+    // Retry reads the stomped-back seed state; transfer is applied exactly once.
+    expect(a?.items).toEqual([["a1", 3]]);
+    expect(b?.items).toEqual([["a1", 2]]);
+  });
+
+  it("retries on conflict and converges (rapid-fire from one client)", async () => {
+    await seedRecord("alice", "Alice", [["a1", 10]]);
+    await seedRecord("bob", "Bob");
+    __testHooks.setSelf("alice", "Alice", "#fff");
+
+    // Fire 5 transfers without awaiting between
+    const transfers = Array.from({ length: 5 }, () =>
+      transferItem({
         fromPlayerId: "alice", toPlayerId: "bob",
-        itemId: "a1", itemName: "Sword", qty: 3,
-      })).rejects.toThrow(/simulated sender-write failure/);
+        itemId: "a1", itemName: "Sword", qty: 1,
+      }, { description: "rapid fire" }),
+    );
+    await Promise.all(transfers);
 
-      // alice never had her debit persisted (write 2 threw before commit)
-      expect((await getRecord("alice"))?.items).toEqual([["a1", 5]]);
-      // bob was credited (write 1) then rolled back (write 3): back to empty
-      expect((await getRecord("bob"))?.items).toEqual([]);
-      // No transfer-received broadcast — the transfer ultimately failed
-      const tx = __testHooks.broadcasts.find(
-        (b) => (b.data as any).type === "transfer-received",
-      );
-      expect(tx).toBeUndefined();
-    } finally {
-      spy.mockRestore();
-      errSpy.mockRestore();
-    }
+    const a = await getRecord("alice");
+    const b = await getRecord("bob");
+    expect(a?.items).toEqual([["a1", 5]]);
+    expect(b?.items).toEqual([["a1", 5]]);
   });
 });

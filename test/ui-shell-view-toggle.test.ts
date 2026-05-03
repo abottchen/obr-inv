@@ -11,7 +11,7 @@ const catalog: CatalogItem[] = [
 ];
 
 const record: PlayerInventoryRecord = {
-  name: "Alice", color: "#fff",
+  name: "Alice", color: "#fff", w: "",
   items: [["h1", 3], ["a1", 5]],
   currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
 };

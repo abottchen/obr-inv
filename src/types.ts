@@ -26,11 +26,23 @@ export type InventoryEntry = [itemId: string, count: number];
 
 export interface Currency { pp: number; gp: number; sp: number; cp: number; }
 
-export interface PlayerInventoryRecord {
+export interface WriterStamp {
+  /**
+   * "<playerId>:<nonce>" stamped by the atomic helper on every write.
+   * Empty string for legacy records (synthesized on read).
+   */
+  w: string;
+}
+
+export interface PlayerInventoryRecord extends WriterStamp {
   name: string;
   color: string;
   items: InventoryEntry[];
   currency: Currency;
+}
+
+export interface CustomItemsEnvelope extends WriterStamp {
+  items: CustomItem[];
 }
 
 export interface ExtensionConfig {
@@ -67,5 +79,22 @@ export class OverCapError extends Error {
   ) {
     super(`Inventory write would exceed cap (${currentBytes}/${cap}): ${attempted}`);
     this.name = "OverCapError";
+  }
+}
+
+export class ConflictError extends Error {
+  constructor(
+    public readonly attempts: number,
+    public readonly lastBlockerWriter: string | null,
+  ) {
+    super(`Could not commit after ${attempts} attempts`);
+    this.name = "ConflictError";
+  }
+}
+
+export class AbortError extends Error {
+  constructor(message = "Operation cancelled") {
+    super(message);
+    this.name = "AbortError";
   }
 }
