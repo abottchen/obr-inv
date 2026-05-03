@@ -16,14 +16,14 @@ sequenceDiagram
     participant OBR as OBR.room metadata
 
     T1->>OBR: getMetadata() — sender, recipient
-    OBR-->>T1: snapshot v0
+    OBR-->>T1: state S
     T2->>OBR: getMetadata() — sender, recipient
-    OBR-->>T2: snapshot v0  ← same stale base
-    T1->>OBR: setMetadata(recipient = v0 + itemA)
-    T2->>OBR: setMetadata(recipient = v0 + itemB)
-    Note over OBR: T2's write overwrites T1's<br/>(last-writer-wins, no version check)
-    T1->>OBR: setMetadata(sender = v0 − itemA)
-    T2->>OBR: setMetadata(sender = v0 − itemB)
+    OBR-->>T2: state S  ← same stale base
+    T1->>OBR: setMetadata(recipient = S + itemA)
+    T2->>OBR: setMetadata(recipient = S + itemB)
+    Note over OBR: T2's write overwrites T1's<br/>(last-writer-wins, no conflict detection)
+    T1->>OBR: setMetadata(sender = S − itemA)
+    T2->>OBR: setMetadata(sender = S − itemB)
     Note over OBR: itemA "pops back" on sender,<br/>recipient never sees itemA
 ```
 
