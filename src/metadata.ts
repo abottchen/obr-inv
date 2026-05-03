@@ -2,7 +2,7 @@ import OBR from "@owlbear-rodeo/sdk";
 import {
   CUSTOMS_KEY, METADATA_KEY_PREFIX, STORAGE_CAP_BYTES,
 } from "./constants";
-import type { CustomItemsRecord, PlayerInventoryRecord } from "./types";
+import type { CustomItemsEnvelope, CustomItemsRecord, PlayerInventoryRecord } from "./types";
 import { OverCapError } from "./types";
 import { pruneZeros } from "./inventory";
 
@@ -23,10 +23,9 @@ export async function listInventoryRecords(): Promise<Record<string, PlayerInven
   const md = await OBR.room.getMetadata();
   const out: Record<string, PlayerInventoryRecord> = {};
   for (const [k, v] of Object.entries(md)) {
-    if (!isRecordKey(k)) continue;
-    // OBR persists deleted keys as null tombstones — skip them.
-    if (v == null) continue;
-    out[playerIdFromKey(k)] = v as PlayerInventoryRecord;
+    if (!isRecordKey(k) || v == null) continue;
+    const rec = v as PlayerInventoryRecord;
+    out[playerIdFromKey(k)] = rec.w === undefined ? { ...rec, w: "" } : rec;
   }
   return out;
 }
@@ -34,7 +33,9 @@ export async function listInventoryRecords(): Promise<Record<string, PlayerInven
 export async function getRecord(playerId: string): Promise<PlayerInventoryRecord | null> {
   const md = await OBR.room.getMetadata();
   const v = md[recordKey(playerId)];
-  return (v as PlayerInventoryRecord | undefined) ?? null;
+  if (v == null) return null;
+  const rec = v as PlayerInventoryRecord;
+  return rec.w === undefined ? { ...rec, w: "" } : rec;
 }
 
 /**
@@ -94,8 +95,11 @@ export async function deleteRecord(playerId: string): Promise<void> {
 export async function getCustoms(): Promise<CustomItemsRecord> {
   const md = await OBR.room.getMetadata();
   const v = md[CUSTOMS_KEY];
-  if (!Array.isArray(v)) return [];
-  return v as CustomItemsRecord;
+  if (Array.isArray(v)) return v as CustomItemsRecord;
+  if (v && typeof v === "object" && Array.isArray((v as { items?: unknown }).items)) {
+    return ((v as CustomItemsEnvelope).items) as CustomItemsRecord;
+  }
+  return [];
 }
 
 export function writeCustoms(items: CustomItemsRecord): Promise<void> {

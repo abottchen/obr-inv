@@ -195,3 +195,27 @@ describe("metadata", () => {
     })).rejects.toThrow(OverCapError);
   });
 });
+
+describe("legacy shape tolerance", () => {
+  beforeEach(() => __testHooks.reset());
+
+  it("reads pre-versioning records and synthesizes w: ''", async () => {
+    __testHooks.store.set("com.abottchen.obr-inv/v1/legacy", {
+      name: "Old", color: "#fff",
+      items: [["a1", 1]],
+      currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
+    });
+    const r = await getRecord("legacy");
+    expect(r?.name).toBe("Old");
+    expect(r?.w).toBe("");
+  });
+
+  it("reads pre-envelope customs (bare array) and wraps it", async () => {
+    __testHooks.store.set("com.abottchen.obr-inv/v1/customs", [
+      { id: "x", name: "X", category: "Misc", icon: "🌸", description: "" },
+    ]);
+    const items = await getCustoms();
+    expect(items).toHaveLength(1);
+    expect(items[0].id).toBe("x");
+  });
+});
