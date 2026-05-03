@@ -9,6 +9,24 @@
 
 Eliminate the data-loss bug where rapid back-to-back transfers (and concurrent edits from multiple clients) silently overwrite each other. Today, `transferItem` reads sender and recipient outside any critical section, so two transfers started in quick succession both base their writes on the same stale snapshot — the second write clobbers the first, items "pop back" on the sender, and the recipient never sees them despite a successful broadcast.
 
+```mermaid
+sequenceDiagram
+    participant T1 as transferItem #1
+    participant T2 as transferItem #2
+    participant OBR as OBR.room metadata
+
+    T1->>OBR: getMetadata() — sender, recipient
+    OBR-->>T1: snapshot v0
+    T2->>OBR: getMetadata() — sender, recipient
+    OBR-->>T2: snapshot v0  ← same stale base
+    T1->>OBR: setMetadata(recipient = v0 + itemA)
+    T2->>OBR: setMetadata(recipient = v0 + itemB)
+    Note over OBR: T2's write overwrites T1's<br/>(last-writer-wins, no version check)
+    T1->>OBR: setMetadata(sender = v0 − itemA)
+    T2->>OBR: setMetadata(sender = v0 − itemB)
+    Note over OBR: itemA "pops back" on sender,<br/>recipient never sees itemA
+```
+
 The goal is a system where every inventory mutation is atomic with respect to other mutations on the same records, regardless of which client initiated them, with a deterministic user-facing endpoint for every action.
 
 ## 2. Goals and non-goals
@@ -103,6 +121,30 @@ export async function atomicMultiUpdate(
 
 Both helpers route through a **single module-level FIFO queue** so only one mutation runs at a time per client. The queue itself respects `signal` — a cancelled operation is removed from the queue without running.
 
+```mermaid
+flowchart TD
+    Start([call from caller]) --> Queue{queue empty?}
+    Queue -- no --> Wait[wait for prior op]
+    Wait --> Queue
+    Queue -- yes --> Attempt[attempt = 1]
+    Attempt --> Abort1{signal aborted?}
+    Abort1 -- yes --> ThrowAbort([throw AbortError])
+    Abort1 -- no --> Read[read getMetadata<br/>capture version + writer per key]
+    Read --> Mutate[run mutators against current<br/>stamp version+1, writer = randomUUID]
+    Mutate --> CapCheck{projected size<br/>≤ STORAGE_CAP_BYTES?}
+    CapCheck -- no --> ThrowCap([throw OverCapError])
+    CapCheck -- yes --> Abort2{signal aborted?}
+    Abort2 -- yes --> ThrowAbort
+    Abort2 -- no --> Write[setMetadata with all keys]
+    Write --> Echo{echo with our writer<br/>on every key within 1s?}
+    Echo -- yes --> Success([resolve])
+    Echo -- timeout / different writer --> Retry{attempt &lt; 3?}
+    Retry -- no --> ThrowConflict([throw ConflictError])
+    Retry -- yes --> Backoff[sleep 50ms / 200ms<br/>respects signal]
+    Backoff --> AttemptInc[attempt += 1]
+    AttemptInc --> Abort1
+```
+
 Internal flow per attempt:
 1. `throwIfAborted(signal)`
 2. Read current state via `OBR.room.getMetadata()`, capture each key's `version` and `writer`
@@ -164,6 +206,29 @@ Note the API shift: `writeRecord` now takes a **mutator function**, not a finish
 `writeCustoms`, `ensureRecord`, and `deleteRecord` follow the same pattern. `deleteRecord` returns `null` from its mutator.
 
 ### 5.4 `src/transfer.ts` — refactored
+
+```mermaid
+sequenceDiagram
+    participant UI as UI (sender)
+    participant T as transferItem
+    participant A as atomicMultiUpdate
+    participant OBR as OBR.room
+    participant R as recipient client
+
+    UI->>T: transferItem({from, to, itemId, qty}, {signal})
+    T->>A: updates = [outMutator, inMutator]
+    A->>OBR: getMetadata()
+    OBR-->>A: {sender@v3, recipient@v7}
+    Note over A: outMutator(sender@v3) → sender'@v4<br/>inMutator(recipient@v7) → recipient'@v8<br/>both stamped writer = UUID-X
+    A->>A: cap check on projection
+    A->>OBR: setMetadata({sender: v4, recipient: v8})
+    OBR-->>R: onMetadataChange (single event)
+    OBR-->>A: onMetadataChange (single event)
+    Note over A: latestWriters[sender] === UUID-X ✓<br/>latestWriters[recipient] === UUID-X ✓
+    A-->>T: resolved
+    T->>OBR: broadcast transfer-received
+    OBR-->>R: notification
+```
 
 ```ts
 export async function transferItem(
@@ -240,6 +305,29 @@ try {
 Call sites: `ui-player.ts` (transfer, currency adjust), `ui-gm.ts` (add, remove, edit), `ui-add-dialog.ts`, `ui-customs-dialog.ts`, `ui-customs-panel.ts`.
 
 ## 6. Cancel semantics
+
+```mermaid
+stateDiagram-v2
+    [*] --> Queued: caller invokes
+    Queued --> Reading: queue head, attempt starts
+    Reading --> Writing: state captured, mutators run, cap check passes
+    Writing --> AwaitingEcho: setMetadata returned
+    AwaitingEcho --> Success: our writer echoed (all keys)
+    AwaitingEcho --> Backoff: timeout / different writer, attempt &lt; 3
+    Backoff --> Reading: next attempt
+    AwaitingEcho --> Failed: attempts exhausted
+    Reading --> Failed: OverCapError
+    Success --> [*]
+    Failed --> [*]
+
+    Queued --> Cancelled: signal.abort()
+    Reading --> Cancelled: signal.abort()
+    Backoff --> Cancelled: signal.abort()
+    Writing --> CancelPending: signal.abort()<br/>(setMetadata uninterruptible)
+    AwaitingEcho --> Cancelled: signal.abort()<br/>(stop waiting; echo may still land)
+    CancelPending --> Cancelled: echo or 1s timeout
+    Cancelled --> [*]
+```
 
 The deterministic-endpoint contract:
 
