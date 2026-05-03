@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
 import { __atomicTestHooks } from "../src/atomic";
 import { writeRecord, getRecord } from "../src/metadata";
@@ -85,6 +85,44 @@ describe("transferItem", () => {
       fromPlayerId: "alice", toPlayerId: "ghost",
       itemId: "a1", itemName: "X", qty: 1,
     }, { description: "transfer test" })).rejects.toThrow(/no inventory record/i);
+  });
+
+  it("converges when two clients write the same record concurrently", async () => {
+    await seedRecord("alice", "Alice", [["a1", 5]]);
+    await seedRecord("bob", "Bob");
+    __testHooks.setSelf("alice", "Alice", "#fff");
+
+    // Simulate a second client (bob's tab) overwriting both records mid-flight,
+    // effectively rolling back alice's first-attempt writes. This forces a retry
+    // from the seed state so the transfer is applied exactly once.
+    const sdk = (await import("@owlbear-rodeo/sdk")).default;
+    const realSet = sdk.room.setMetadata;
+    let stomped = false;
+    sdk.room.setMetadata = vi.fn(async (patch: Record<string, unknown>) => {
+      await realSet(patch);
+      if (!stomped) {
+        stomped = true;
+        // "Bob's tab" races alice and overwrites both records back to seed state,
+        // forcing alice's atomic engine to detect conflict (wrong writer) and retry.
+        const aliceKey = "com.abottchen.obr-inv/v1/alice";
+        const bobKey = "com.abottchen.obr-inv/v1/bob";
+        await realSet({
+          [aliceKey]: { w: "bob-id:other", name: "Alice", color: "#fff", items: [["a1", 5]], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } },
+          [bobKey]: { w: "bob-id:other", name: "Bob", color: "#fff", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } },
+        });
+      }
+    }) as typeof sdk.room.setMetadata;
+
+    await transferItem({
+      fromPlayerId: "alice", toPlayerId: "bob",
+      itemId: "a1", itemName: "Sword", qty: 2,
+    }, { description: "test" });
+
+    const a = await getRecord("alice");
+    const b = await getRecord("bob");
+    // Retry reads the stomped-back seed state; transfer is applied exactly once.
+    expect(a?.items).toEqual([["a1", 3]]);
+    expect(b?.items).toEqual([["a1", 2]]);
   });
 
   it("retries on conflict and converges (rapid-fire from one client)", async () => {
