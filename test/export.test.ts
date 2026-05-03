@@ -33,10 +33,11 @@ describe("buildExport", () => {
   });
 
   it("includes customItems and hydrates inventory entries against the merged catalog", async () => {
-    await writeCustoms([
-      { id: "qZx91A", name: "Flower", category: "Misc", icon: "",
-        description: "A small bloom", rarity: null, weight: null },
-    ]);
+    await writeCustoms(
+      () => ({ w: "", items: [{ id: "qZx91A", name: "Flower", category: "Misc", icon: "",
+        description: "A small bloom", rarity: null, weight: null }] }),
+      { description: "test fixture" },
+    );
     await writeRecord("p1",
       () => ({ w: "", name: "Alice", color: "#fff", items: [["a1", 1], ["qZx91A", 2]], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
       { description: "seed p1" },
@@ -57,10 +58,11 @@ describe("buildExport", () => {
   });
 
   it("catalog wins on id collision (custom shadowed in hydration)", async () => {
-    await writeCustoms([
-      { id: "a1", name: "Stale name", category: "Misc",
-        icon: "", description: "stale" },
-    ]);
+    await writeCustoms(
+      () => ({ w: "", items: [{ id: "a1", name: "Stale name", category: "Misc",
+        icon: "", description: "stale" }] }),
+      { description: "test fixture" },
+    );
     await writeRecord("p1",
       () => ({ w: "", name: "Alice", color: "#fff", items: [["a1", 1]], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
       { description: "seed p1" },
@@ -73,15 +75,16 @@ describe("buildExport", () => {
   it("inventory entry referencing a deleted custom serializes as _unresolved", async () => {
     // Player has a custom; GM deletes it; export still includes the row
     // marked unresolved (count preserved, no catalog row to hydrate against).
-    await writeCustoms([
-      { id: "ghost1", name: "Soon Gone", category: "Misc",
-        icon: "", description: "..." },
-    ]);
+    await writeCustoms(
+      () => ({ w: "", items: [{ id: "ghost1", name: "Soon Gone", category: "Misc",
+        icon: "", description: "..." }] }),
+      { description: "test fixture" },
+    );
     await writeRecord("p1",
       () => ({ w: "", name: "Alice", color: "#fff", items: [["ghost1", 4]], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } }),
       { description: "seed p1" },
     );
-    await writeCustoms([]); // GM deletes the custom
+    await writeCustoms(() => ({ w: "", items: [] }), { description: "GM deletes the custom" }); // GM deletes the custom
 
     const exp = await buildExport(cat, "https://example.test/items.json");
     expect(exp.customItems).toEqual([]);

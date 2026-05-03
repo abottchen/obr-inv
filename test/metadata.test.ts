@@ -35,10 +35,11 @@ describe("metadata", () => {
       { description: "seed p1" },
     );
     const baseline = await roomDataByteSize();
-    await writeCustoms([
-      { id: "qZx91A", name: "Flower", category: "Misc", icon: "",
-        description: "A small bloom" },
-    ]);
+    await writeCustoms(
+      () => ({ w: "", items: [{ id: "qZx91A", name: "Flower", category: "Misc", icon: "",
+        description: "A small bloom" }] }),
+      { description: "test fixture" },
+    );
     const after = await roomDataByteSize();
     expect(after).toBeGreaterThan(baseline);
   });
@@ -136,19 +137,21 @@ describe("metadata", () => {
   });
 
   it("listInventoryRecords ignores the customs key", async () => {
-    await writeCustoms([
-      { id: "qZx91A", name: "Flower", category: "Misc", icon: "",
-        description: "A bloom" },
-    ]);
+    await writeCustoms(
+      () => ({ w: "", items: [{ id: "qZx91A", name: "Flower", category: "Misc", icon: "",
+        description: "A bloom" }] }),
+      { description: "test fixture" },
+    );
     const recs = await listInventoryRecords();
     expect(Object.keys(recs)).toEqual([]);
   });
 
   it("writeCustoms persists then getCustoms reads back", async () => {
-    await writeCustoms([
-      { id: "qZx91A", name: "Flower", category: "Misc", icon: "",
-        description: "A bloom" },
-    ]);
+    await writeCustoms(
+      () => ({ w: "", items: [{ id: "qZx91A", name: "Flower", category: "Misc", icon: "",
+        description: "A bloom" }] }),
+      { description: "test fixture" },
+    );
     const got = await getCustoms();
     expect(got).toHaveLength(1);
     expect(got[0].name).toBe("Flower");
@@ -160,10 +163,11 @@ describe("metadata", () => {
 
   it("writeCustoms is cap-guarded same as writeRecord", async () => {
     const huge = "x".repeat(STORAGE_CAP_BYTES + 100);
-    await expect(writeCustoms([
-      { id: "qZx91A", name: huge, category: "Misc", icon: "",
-        description: "d" },
-    ])).rejects.toThrow(OverCapError);
+    await expect(writeCustoms(
+      () => ({ w: "", items: [{ id: "qZx91A", name: huge, category: "Misc", icon: "",
+        description: "d" }] }),
+      { description: "test fixture" },
+    )).rejects.toThrow(OverCapError);
     expect(__testHooks.store.has(CUSTOMS_KEY)).toBe(false);
   });
 
@@ -176,10 +180,11 @@ describe("metadata", () => {
       "com.abottchen.obr-inv/v1/p1",
       { name: big, color: "#fff", items: [], currency: { pp: 0, gp: 0, sp: 0, cp: 0 } },
     );
-    await expect(writeCustoms([
-      { id: "qZx91A", name: "Padding".repeat(50), category: "Misc",
-        icon: "", description: "x".repeat(500) },
-    ])).rejects.toThrow(OverCapError);
+    await expect(writeCustoms(
+      () => ({ w: "", items: [{ id: "qZx91A", name: "Padding".repeat(50), category: "Misc",
+        icon: "", description: "x".repeat(500) }] }),
+      { description: "test fixture" },
+    )).rejects.toThrow(OverCapError);
   });
 
   it("writeRecord factors customs into the projected size", async () => {

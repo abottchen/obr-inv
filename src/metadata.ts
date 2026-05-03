@@ -1,9 +1,8 @@
 import OBR from "@owlbear-rodeo/sdk";
 import {
-  CUSTOMS_KEY, METADATA_KEY_PREFIX, STORAGE_CAP_BYTES,
+  CUSTOMS_KEY, METADATA_KEY_PREFIX,
 } from "./constants";
 import type { CustomItemsEnvelope, CustomItemsRecord, PlayerInventoryRecord } from "./types";
-import { OverCapError } from "./types";
 import { pruneZeros } from "./inventory";
 import { atomicUpdate, type AtomicUpdateOptions, type Mutator } from "./atomic";
 
@@ -53,15 +52,6 @@ export async function roomDataByteSize(): Promise<number> {
   return new TextEncoder().encode(JSON.stringify(owned)).byteLength;
 }
 
-const queues = new Map<string, Promise<unknown>>();
-
-function enqueue<T>(key: string, op: () => Promise<T>): Promise<T> {
-  const prev = queues.get(key) ?? Promise.resolve();
-  const next = prev.then(op, op);
-  queues.set(key, next.catch(() => {}));
-  return next;
-}
-
 export function writeRecord(
   playerId: string,
   mutate: Mutator<PlayerInventoryRecord>,
@@ -73,10 +63,12 @@ export function writeRecord(
   }, opts);
 }
 
-export async function deleteRecord(playerId: string): Promise<void> {
-  return enqueue(recordKey(playerId), async () => {
-    await OBR.room.setMetadata({ [recordKey(playerId)]: undefined });
-  });
+export function deleteRecord(playerId: string): Promise<PlayerInventoryRecord | null> {
+  return atomicUpdate<PlayerInventoryRecord>(
+    recordKey(playerId),
+    () => null,
+    { description: `delete ${playerId} record` },
+  );
 }
 
 export async function getCustoms(): Promise<CustomItemsRecord> {
@@ -89,26 +81,11 @@ export async function getCustoms(): Promise<CustomItemsRecord> {
   return [];
 }
 
-export function writeCustoms(items: CustomItemsRecord): Promise<void> {
-  return enqueue(CUSTOMS_KEY, async () => {
-    const md = await OBR.room.getMetadata();
-    const projected: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(md)) {
-      if (k.startsWith(METADATA_KEY_PREFIX)) projected[k] = v;
-    }
-    projected[CUSTOMS_KEY] = items;
-    const projectedBytes = new TextEncoder()
-      .encode(JSON.stringify(projected)).byteLength;
-    if (projectedBytes > STORAGE_CAP_BYTES) {
-      const currentBytes = await roomDataByteSize();
-      throw new OverCapError(
-        currentBytes,
-        STORAGE_CAP_BYTES,
-        `write customs (${items.length} items)`,
-      );
-    }
-    await OBR.room.setMetadata({ [CUSTOMS_KEY]: items });
-  });
+export function writeCustoms(
+  mutate: Mutator<CustomItemsEnvelope>,
+  opts: AtomicUpdateOptions,
+): Promise<CustomItemsEnvelope | null> {
+  return atomicUpdate(CUSTOMS_KEY, mutate, opts);
 }
 
 export function onCustomsChange(
@@ -123,21 +100,24 @@ export function onCustomsChange(
 export async function ensureRecord(
   playerId: string, name: string, color: string,
 ): Promise<PlayerInventoryRecord> {
-  const existing = await getRecord(playerId);
-  if (!existing) {
-    const fresh: PlayerInventoryRecord = {
-      w: "", name, color, items: [],
-      currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
-    };
-    const written = await writeRecord(playerId, () => fresh, { description: `ensureRecord create ${playerId}` });
-    return written ?? fresh;
-  }
-  if (existing.name !== name || existing.color !== color) {
-    const updated: PlayerInventoryRecord = { ...existing, name, color };
-    const written = await writeRecord(playerId, () => updated, { description: `ensureRecord update ${playerId}` });
-    return written ?? updated;
-  }
-  return existing;
+  const result = await atomicUpdate<PlayerInventoryRecord>(
+    recordKey(playerId),
+    (current) => {
+      if (!current) {
+        return {
+          w: "",
+          name, color, items: [],
+          currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
+        };
+      }
+      if (current.name !== name || current.color !== color) {
+        return { ...current, name, color };
+      }
+      return current;
+    },
+    { description: `ensure ${playerId} record` },
+  );
+  return result!;
 }
 
 export function onRoomMetadataChange(
