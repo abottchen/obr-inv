@@ -1,7 +1,7 @@
 import OBR from "@owlbear-rodeo/sdk";
-import { CUSTOMS_KEY, METADATA_KEY_PREFIX } from "./constants";
+import { CUSTOMS_KEY, METADATA_KEY_PREFIX, STORAGE_CAP_BYTES } from "./constants";
 import type { WriterStamp } from "./types";
-import { AbortError, ConflictError } from "./types";
+import { AbortError, ConflictError, OverCapError } from "./types";
 
 const latestWriters = new Map<string, string>();
 const waiters = new Set<() => boolean>();
@@ -146,6 +146,31 @@ export async function atomicMultiUpdate(
       const next = mutate(current);
       patch[key] = next === null ? undefined : { ...next, w: ourWriter };
       if (next !== null) stampedKeys.push(key);
+    }
+    // Cap check: project all owned metadata with our pending writes applied,
+    // throw OverCapError if projection exceeds the cap.
+    const owned: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(md)) {
+      if (k === CUSTOMS_KEY || k.startsWith(METADATA_KEY_PREFIX)) owned[k] = v;
+    }
+    for (const [k, v] of Object.entries(patch)) {
+      if (k === CUSTOMS_KEY || k.startsWith(METADATA_KEY_PREFIX)) {
+        if (v === undefined) delete owned[k];
+        else owned[k] = v;
+      }
+    }
+    const projectedBytes = new TextEncoder()
+      .encode(JSON.stringify(owned)).byteLength;
+    if (projectedBytes > STORAGE_CAP_BYTES) {
+      const currentBytes = new TextEncoder()
+        .encode(JSON.stringify(
+          Object.fromEntries(
+            Object.entries(md).filter(([k]) =>
+              k === CUSTOMS_KEY || k.startsWith(METADATA_KEY_PREFIX),
+            ),
+          ),
+        )).byteLength;
+      throw new OverCapError(currentBytes, STORAGE_CAP_BYTES, opts.description);
     }
     if (opts.signal?.aborted) throw new AbortError();
     if (stampedKeys.length === 0) {

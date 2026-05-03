@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
 import { parseWriter, randomNonce, __atomicTestHooks, _internal_getLatestWriter, atomicUpdate, atomicMultiUpdate } from "../src/atomic";
 import type { WriterStamp } from "../src/types";
-import { ConflictError, AbortError } from "../src/types";
+import { ConflictError, AbortError, OverCapError } from "../src/types";
+import { STORAGE_CAP_BYTES } from "../src/constants";
 
 describe("parseWriter", () => {
   it("splits playerId and nonce on the first colon", () => {
@@ -222,5 +223,25 @@ describe("atomicMultiUpdate", () => {
       { key: "k2", mutate: () => ({ w: "", v: 2 }) },
     ], { description: "test", onConflict });
     expect(onConflict).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("atomicUpdate (cap check)", () => {
+  beforeEach(() => {
+    __testHooks.reset();
+    __atomicTestHooks.reset();
+    __atomicTestHooks.startTracker();
+    __testHooks.setSelf("alice", "Alice", "#fff");
+  });
+
+  it("throws OverCapError when projected size exceeds the cap", async () => {
+    const huge = "x".repeat(STORAGE_CAP_BYTES);
+    await expect(
+      atomicUpdate(
+        "com.abottchen.obr-inv/v1/alice",
+        () => ({ w: "", payload: huge }),
+        { description: "test" },
+      ),
+    ).rejects.toThrow(OverCapError);
   });
 });
