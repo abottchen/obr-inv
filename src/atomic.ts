@@ -1,6 +1,7 @@
 import OBR from "@owlbear-rodeo/sdk";
 import { CUSTOMS_KEY, METADATA_KEY_PREFIX } from "./constants";
 import type { WriterStamp } from "./types";
+import { AbortError, ConflictError } from "./types";
 
 const latestWriters = new Map<string, string>();
 const waiters = new Set<() => boolean>();
@@ -49,9 +50,22 @@ export interface AtomicUpdateOptions {
 export type Mutator<T> = (current: T | null) => T | null;
 
 export const ECHO_TIMEOUT_MS = 1000;
+export const MAX_ATTEMPTS = 3;
+export const BACKOFF_MS = [50, 200];
 
 function makeWriter(): string {
   return `${OBR.player.id}:${randomNonce()}`;
+}
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(resolve, ms);
+    if (signal) {
+      const onAbort = () => { clearTimeout(t); reject(new AbortError()); };
+      if (signal.aborted) onAbort();
+      else signal.addEventListener("abort", onAbort, { once: true });
+    }
+  });
 }
 
 async function waitForEcho(
@@ -65,15 +79,20 @@ async function waitForEcho(
 
   return new Promise((resolve) => {
     let settled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const predicate = () => {
       if (allMatch()) {
-        if (!settled) { settled = true; resolve({ ok: true }); }
+        if (!settled) {
+          settled = true;
+          clearTimeout(timer);
+          resolve({ ok: true });
+        }
         return true;
       }
       return false;
     };
     waiters.add(predicate);
-    const timer = setTimeout(() => {
+    timer = setTimeout(() => {
       if (settled) return;
       settled = true;
       waiters.delete(predicate);
@@ -101,20 +120,34 @@ export async function atomicUpdate<T extends WriterStamp>(
   opts: AtomicUpdateOptions,
 ): Promise<T | null> {
   startEchoTracker();
-  const md = await OBR.room.getMetadata();
-  const current = (md[key] as T | undefined) ?? null;
-  const next = mutate(current);
-  const ourWriter = makeWriter();
+  let lastBlocker: string | null = null;
 
-  if (next === null) {
-    await OBR.room.setMetadata({ [key]: undefined });
-    return null;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    if (opts.signal?.aborted) throw new AbortError();
+    const md = await OBR.room.getMetadata();
+    const current = (md[key] as T | undefined) ?? null;
+    const next = mutate(current);
+    const ourWriter = makeWriter();
+
+    if (next === null) {
+      await OBR.room.setMetadata({ [key]: undefined });
+      return null;
+    }
+
+    const stamped = { ...next, w: ourWriter };
+    if (opts.signal?.aborted) throw new AbortError();
+    await OBR.room.setMetadata({ [key]: stamped });
+    const echo = await waitForEcho([key], ourWriter, ECHO_TIMEOUT_MS, opts.signal);
+    if (echo.ok) return stamped;
+
+    lastBlocker = echo.blockerWriter;
+    opts.onConflict?.({ blockerWriter: echo.blockerWriter ?? "", attempt });
+    if (attempt < MAX_ATTEMPTS) {
+      await sleep(BACKOFF_MS[attempt - 1], opts.signal);
+    }
   }
 
-  const stamped = { ...next, w: ourWriter };
-  await OBR.room.setMetadata({ [key]: stamped });
-  await waitForEcho([key], ourWriter, ECHO_TIMEOUT_MS, opts.signal);
-  return stamped;
+  throw new ConflictError(MAX_ATTEMPTS, lastBlocker);
 }
 
 export function parseWriter(w: string): { playerId: string | null; nonce: string } {

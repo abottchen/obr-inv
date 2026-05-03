@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { __testHooks } from "./_mocks/obr-sdk";
 import { parseWriter, randomNonce, __atomicTestHooks, _internal_getLatestWriter, atomicUpdate } from "../src/atomic";
 import type { WriterStamp } from "../src/types";
+import { ConflictError } from "../src/types";
 
 describe("parseWriter", () => {
   it("splits playerId and nonce on the first colon", () => {
@@ -93,5 +94,54 @@ describe("atomicUpdate (happy path)", () => {
       { description: "increment" },
     );
     expect(result?.count).toBe(2);
+  });
+});
+
+describe("atomicUpdate (conflict + retry)", () => {
+  beforeEach(() => {
+    __testHooks.reset();
+    __atomicTestHooks.reset();
+    __atomicTestHooks.startTracker();
+    __testHooks.setSelf("alice", "Alice", "#fff");
+  });
+
+  it("retries when echo carries a different writer and succeeds", async () => {
+    const key = "com.abottchen.obr-inv/v1/alice";
+    const sdk = (await import("@owlbear-rodeo/sdk")).default;
+    const realSet = sdk.room.setMetadata;
+    let firstCall = true;
+    sdk.room.setMetadata = vi.fn(async (patch: Record<string, unknown>) => {
+      await realSet(patch);
+      // simulate concurrent overwrite by another writer on the first call only
+      if (firstCall) {
+        firstCall = false;
+        await realSet({ [key]: { ...(patch[key] as object), w: "bob:nonce123" } });
+      }
+    }) as typeof sdk.room.setMetadata;
+
+    const onConflict = vi.fn();
+    const result = await atomicUpdate<{ count: number } & WriterStamp>(
+      key,
+      (current) => ({ w: "", count: (current?.count ?? 0) + 1 }),
+      { description: "test", onConflict },
+    );
+    expect(result?.count).toBeGreaterThanOrEqual(1);
+    expect(onConflict).toHaveBeenCalledTimes(1);
+    expect(onConflict.mock.calls[0][0].blockerWriter).toBe("bob:nonce123");
+  });
+
+  it("throws ConflictError after MAX_ATTEMPTS conflicts", async () => {
+    const key = "com.abottchen.obr-inv/v1/alice";
+    const sdk = (await import("@owlbear-rodeo/sdk")).default;
+    const realSet = sdk.room.setMetadata;
+    sdk.room.setMetadata = vi.fn(async (patch: Record<string, unknown>) => {
+      await realSet(patch);
+      // every call gets stomped by bob
+      await realSet({ [key]: { ...(patch[key] as object), w: "bob:nonce" } });
+    }) as typeof sdk.room.setMetadata;
+
+    await expect(
+      atomicUpdate(key, () => ({ w: "", count: 1 }), { description: "test" }),
+    ).rejects.toThrow(ConflictError);
   });
 });
