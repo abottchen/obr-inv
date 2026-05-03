@@ -58,6 +58,31 @@ export function totalWeight(
   return total;
 }
 
+export function applyTransferOut(
+  sender: PlayerInventoryRecord,
+  id: string,
+  qty: number,
+): PlayerInventoryRecord {
+  if (qty <= 0) throw new Error(`applyTransferOut: qty must be > 0 (got ${qty})`);
+  const senderItems = sender.items.map((e) => [...e] as InventoryEntry);
+  const i = findIndex(senderItems, id);
+  if (i < 0) throw new Error(`applyTransferOut: sender has no item ${id}`);
+  if (senderItems[i][1] < qty) {
+    throw new Error(`applyTransferOut: qty ${qty} exceeds sender count ${senderItems[i][1]}`);
+  }
+  senderItems[i][1] -= qty;
+  return withItems(sender, senderItems);
+}
+
+export function applyTransferIn(
+  recipient: PlayerInventoryRecord,
+  id: string,
+  qty: number,
+): PlayerInventoryRecord {
+  if (qty <= 0) throw new Error(`applyTransferIn: qty must be > 0 (got ${qty})`);
+  return addItem(recipient, id, qty);
+}
+
 export function applyTransfer(
   sender: PlayerInventoryRecord,
   recipient: PlayerInventoryRecord,

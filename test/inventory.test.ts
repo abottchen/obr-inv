@@ -3,6 +3,7 @@ import {
   emptyRecord, addItem, incrementItem, decrementItem, removeItem,
   pruneZeros, totalWeight, applyTransfer,
 } from "../src/inventory";
+import { applyTransferOut, applyTransferIn } from "../src/inventory";
 import type { CatalogItem, PlayerInventoryRecord } from "../src/types";
 
 const cat = (overrides: Partial<CatalogItem> = {}): CatalogItem => ({
@@ -98,5 +99,38 @@ describe("inventory", () => {
 
   it("applyTransfer rejects when sender doesn't have the item", () => {
     expect(() => applyTransfer(rec(), rec(), "a1", 1)).toThrow();
+  });
+});
+
+describe("applyTransferOut", () => {
+  it("subtracts qty from sender", () => {
+    const sender = {
+      w: "", name: "A", color: "#fff",
+      items: [["a1", 5]] as [string, number][],
+      currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
+    };
+    const out = applyTransferOut(sender, "a1", 3);
+    expect(out.items).toEqual([["a1", 2]]);
+  });
+
+  it("throws when sender lacks the item", () => {
+    const sender = {
+      w: "", name: "A", color: "#fff",
+      items: [] as [string, number][],
+      currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
+    };
+    expect(() => applyTransferOut(sender, "missing", 1)).toThrow();
+  });
+});
+
+describe("applyTransferIn", () => {
+  it("adds qty to recipient", () => {
+    const recipient = {
+      w: "", name: "B", color: "#fff",
+      items: [["a1", 1]] as [string, number][],
+      currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
+    };
+    const out = applyTransferIn(recipient, "a1", 2);
+    expect(out.items).toEqual([["a1", 3]]);
   });
 });
