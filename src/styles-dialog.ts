@@ -813,4 +813,192 @@ export const DIALOG_CSS = `
   padding: 6px 14px; cursor: pointer;
 }
 .btn-danger:hover { filter: brightness(1.05); }
+
+/* ─── Claim banner (auto-detect orphaned records) ────────────────── */
+.claim-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 18%, var(--bg-1)),
+    var(--bg-1));
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5),
+              0 1px 0 rgba(255,255,255,0.04) inset;
+  animation: claim-slide-in 280ms ease-out;
+}
+.claim-text {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.4;
+}
+.claim-text strong {
+  color: var(--accent-soft);
+}
+.claim-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.claim-btn-dismiss {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 100ms;
+}
+.claim-btn-dismiss:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+.claim-btn-claim {
+  background: linear-gradient(180deg, var(--accent),
+    color-mix(in srgb, var(--accent) 75%, #000));
+  color: var(--bg-0);
+  border: 1px solid var(--accent-soft);
+  border-radius: 4px;
+  padding: 5px 12px;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "wght" 600;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset,
+              0 -1px 0 rgba(0,0,0,0.25) inset;
+  transition: filter 100ms;
+}
+.claim-btn-claim:hover { filter: brightness(1.08); }
+@keyframes claim-slide-in {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+/* ─── GM merge dialog ────────────────────────────────────────────── */
+.merge-dialog {
+  width: 380px;
+  max-width: calc(100vw - 24px);
+  padding: 0;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.merge-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.merge-dialog-header h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "wght" 500, "WONK" 1;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+.merge-dialog-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+.merge-section {
+  padding: 10px 14px 6px;
+}
+.merge-section-target {
+  border-top: 1px solid var(--border);
+}
+.merge-section-label {
+  font: 700 9.5px var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent-soft);
+  margin-bottom: 6px;
+}
+.merge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.merge-list button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: var(--bg-1);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 8px 12px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: all 110ms ease;
+}
+.merge-list button:hover {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 22%, var(--bg-2)),
+    color-mix(in srgb, var(--accent) 8%, var(--bg-1)));
+  border-color: var(--accent-soft);
+}
+.merge-list button.selected {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 28%, var(--bg-2)),
+    color-mix(in srgb, var(--accent) 10%, var(--bg-1)));
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.merge-pip {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "wght" 600;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.merge-who {
+  display: flex; flex-direction: column; gap: 1px;
+  min-width: 0;
+}
+.merge-name {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "wght" 500;
+  font-size: 13px;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.merge-stats {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.merge-preview {
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.22);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.merge-preview strong {
+  color: var(--text);
+}
+.merge-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+}
 `;

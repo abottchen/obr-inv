@@ -4,7 +4,7 @@ export const CONFIG_KEY = `${EXTENSION_ID}/config`;
 export const BROADCAST_CHANNEL = `${EXTENSION_ID}/events`;
 export const CUSTOMS_KEY = `${METADATA_KEY_PREFIX}customs`;
 
-export const STORAGE_CAP_BYTES = 5120;
+export const STORAGE_CAP_BYTES = 8192;
 export const METER_YELLOW_RATIO = 0.75;
 export const METER_RED_RATIO = 0.90;
 
