@@ -20,6 +20,7 @@ import { escapeHtml } from "./escape";
 import { totalWeight } from "./inventory";
 import { mountIconSprite, icon as svgIcon } from "./ui-icons";
 import { withOverlay } from "./ui-mutate";
+import { openMergeDialog } from "./ui-merge";
 import {
   BROADCAST_CHANNEL, STORAGE_CAP_BYTES,
   METER_YELLOW_RATIO, METER_RED_RATIO,
@@ -93,12 +94,18 @@ export function mountGmView(opts: GmViewOpts): () => void {
   customsBtn.title = "Manage custom items";
   customsBtn.appendChild(svgIcon("i-star"));
   customsBtn.appendChild(document.createTextNode("Customs"));
+  const mergeBtn = document.createElement("button");
+  mergeBtn.className = "rail-action";
+  mergeBtn.title = "Merge two player records";
+  mergeBtn.appendChild(svgIcon("i-merge"));
+  mergeBtn.appendChild(document.createTextNode("Merge"));
   const dlBtn = document.createElement("button");
   dlBtn.className = "rail-action";
   dlBtn.title = "Download backup JSON";
   dlBtn.appendChild(svgIcon("i-download"));
   dlBtn.appendChild(document.createTextNode("Export"));
   railActions.appendChild(customsBtn);
+  railActions.appendChild(mergeBtn);
   railActions.appendChild(dlBtn);
   railFoot.appendChild(railActions);
   rail.appendChild(railFoot);
@@ -170,6 +177,13 @@ export function mountGmView(opts: GmViewOpts): () => void {
       catalog: opts.catalog,
       initialCustoms: customs,
       records,
+      onError: gmHandleErr,
+    });
+  };
+  mergeBtn.onclick = () => {
+    openMergeDialog({
+      records,
+      selfId: opts.selfId,
       onError: gmHandleErr,
     });
   };

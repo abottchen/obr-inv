@@ -12,6 +12,9 @@ import { FEEDBACK_CSS } from "./styles-feedback";
 import { OVERLAY_CSS } from "./styles-overlay";
 import { DEFAULT_CATALOG_URL, CONFIG_KEY } from "./constants";
 import { reconcileCustoms } from "./customs";
+import { listInventoryRecords } from "./metadata";
+import { findOrphans } from "./merge";
+import { showClaimBanner } from "./ui-merge";
 import type { CatalogItem, CustomItemsRecord, ExtensionConfig } from "./types";
 
 OBR.onReady(async () => {
@@ -83,5 +86,17 @@ OBR.onReady(async () => {
       initialCustoms: customs,
       playerId: selfId, initialRecord: initial,
     });
+  }
+
+  // Auto-detect orphaned records with the same name (player reconnected
+  // with a new ID). Offer to merge them into the current record.
+  try {
+    const allRecords = await listInventoryRecords();
+    const orphans = findOrphans(selfId, selfName, allRecords);
+    if (orphans.length > 0) {
+      showClaimBanner({ orphans, selfId, records: allRecords });
+    }
+  } catch (e) {
+    console.warn("[obr-inv] orphan detection failed", e);
   }
 });
