@@ -1,7 +1,6 @@
-import { escapeHtml } from "./escape";
 import type { CatalogItem, InventoryEntry, Rarity } from "./types";
 import { appendIconImage } from "./ui-icon";
-import { groupByCategory } from "./ui-items-data";
+import { flatSorted } from "./ui-items-data";
 import type { PulseTracker } from "./ui-feedback";
 
 export interface GridHandlers {
@@ -12,7 +11,6 @@ export interface GridState {
   items: InventoryEntry[];
   catalog: CatalogItem[];
   search: string;
-  collapsed: Set<string>;
   ghosts: Set<string>;
   tracker: PulseTracker;
   phantomRemoves: Set<string>;
@@ -23,7 +21,7 @@ export function renderGrid(
 ): void {
   container.innerHTML = "";
   const search = state.search.trim().toLowerCase();
-  const sortedCats = groupByCategory({
+  const entries = flatSorted({
     items: state.items,
     catalog: state.catalog,
     search: state.search,
@@ -31,15 +29,12 @@ export function renderGrid(
     phantomRemoves: state.phantomRemoves,
   });
 
-  if (sortedCats.length === 0) {
+  if (entries.length === 0) {
     const empty = document.createElement("div");
     empty.className = "empty-state";
     if (search) {
       empty.textContent = `No items match "${state.search}"`;
     } else {
-      // Same evocative empty state shape as the list view; a single
-      // markup variant keeps both views consistent when a player flips
-      // between them on an empty inventory.
       empty.classList.add("empty-pack");
       empty.innerHTML = `
         <svg class="empty-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -60,45 +55,17 @@ export function renderGrid(
     typeof window !== "undefined" &&
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
+  const grid = document.createElement("div");
+  grid.className = "grid-cells";
+
   const receivedCells: HTMLElement[] = [];
-
-  for (const [cat, entries] of sortedCats) {
-    const collapsed = state.collapsed.has(cat);
-
-    const group = document.createElement("div");
-    group.className = "cat-group";
-    group.dataset.category = cat;
-    group.dataset.collapsed = collapsed ? "true" : "false";
-
-    const header = document.createElement("div");
-    header.className = "cat-header";
-    header.dataset.category = cat;
-    header.innerHTML = `<span><span class="chev"></span><span class="cat-title">${escapeHtml(cat)}</span></span><span class="cat-count">${entries.length}</span>`;
-    group.appendChild(header);
-
-    const bodyEl = document.createElement("div");
-    bodyEl.className = "cat-body";
-    const inner = document.createElement("div");
-    inner.className = "cat-body-inner grid-cells";
-
-    // Alphabetize within the category for grid layout. Helper preserves
-    // input order so list view stays unaffected.
-    const sortedEntries = [...entries].sort((a, b) => {
-      const an = a.item?.name ?? a.entry[0];
-      const bn = b.item?.name ?? b.entry[0];
-      return an.localeCompare(bn);
-    });
-
-    for (const { entry, item } of sortedEntries) {
-      const cell = renderCell(entry, item, handlers, state.tracker);
-      if (cell.dataset.pulse === "received") receivedCells.push(cell);
-      inner.appendChild(cell);
-    }
-    bodyEl.appendChild(inner);
-    group.appendChild(bodyEl);
-
-    container.appendChild(group);
+  for (const { entry, item } of entries) {
+    const cell = renderCell(entry, item, handlers, state.tracker);
+    if (cell.dataset.pulse === "received") receivedCells.push(cell);
+    grid.appendChild(cell);
   }
+
+  container.appendChild(grid);
 
   for (const cell of receivedCells) {
     cell.scrollIntoView?.({

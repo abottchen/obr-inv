@@ -476,13 +476,8 @@ export const LIST_CSS = `
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
   gap: 6px;
-  /* No padding here on purpose: padding inside .cat-body-inner survives
-   * the grid-template-rows: 0fr collapse (it's part of the box) and leaks
-   * a strip under the header. Visual breathing room lives on .cat-group
-   * margin instead. */
+  padding: 2px;
 }
-.cat-group:has(.grid-cells) { margin-bottom: 8px; }
-.cat-group:has(.grid-cells) .cat-header { padding-bottom: 4px; }
 .inv-cell {
   position: relative;
   aspect-ratio: 1;

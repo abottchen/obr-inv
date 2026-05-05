@@ -379,7 +379,6 @@ export function mountShell(
         items: working.items,
         catalog: cat,
         search: search.value,
-        collapsed,
         ghosts,
         tracker,
         phantomRemoves,
