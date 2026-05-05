@@ -2695,5 +2695,14 @@
     "description": "Weight: 5 lb. A thick monograph by Volothamp Geddarm cataloguing the appearance, habits, and lairs of exotic creatures. Consulting it grants a +5 bonus to Int (Arcana, Nature, or Religion) checks made to recall information about monsters.",
     "rarity": "common",
     "weight": 5
+  },
+  {
+    "id": "UpgsC2",
+    "name": "Diamond",
+    "category": "Other",
+    "icon": "https://bg3.wiki/w/images/5/52/GEM_Diamond_Unfaded.png",
+    "description": "A diamond worth 200gp",
+    "rarity": null,
+    "weight": 0.1
   }
 ]
