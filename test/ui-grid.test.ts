@@ -19,7 +19,6 @@ function baseState(overrides: Partial<GridState> = {}): GridState {
     items: [],
     catalog,
     search: "",
-    collapsed: new Set<string>(),
     ghosts: new Set<string>(),
     tracker: createPulseTracker(),
     phantomRemoves: new Set<string>(),
@@ -42,34 +41,16 @@ describe("renderGrid", () => {
     document.body.innerHTML = "";
   });
 
-  it("renders one .inv-cell per item, grouped under category headers", () => {
+  it("renders one .inv-cell per item in a flat grid", () => {
     const root = document.createElement("div");
     document.body.appendChild(root);
     renderGrid(root, baseState({ items: [["h1", 2], ["a1", 5]] }), noopHandlers());
 
-    const groups = root.querySelectorAll(".cat-group");
-    expect(groups.length).toBe(2);
+    expect(root.querySelector(".grid-cells")).not.toBeNull();
+    expect(root.querySelectorAll(".cat-group").length).toBe(0);
     expect(root.querySelectorAll(".inv-cell").length).toBe(2);
     expect(cellFor(root, "h1")).not.toBeNull();
     expect(cellFor(root, "a1")).not.toBeNull();
-  });
-
-  it("emits the same .cat-group / .cat-header / .cat-body skeleton as the list view", () => {
-    const root = document.createElement("div");
-    renderGrid(root, baseState({ items: [["h1", 1]] }), noopHandlers());
-    const group = root.querySelector(".cat-group");
-    expect(group?.querySelector(".cat-header")).not.toBeNull();
-    expect(group?.querySelector(".cat-body")).not.toBeNull();
-    expect(group?.getAttribute("data-collapsed")).toBe("false");
-  });
-
-  it("honors collapsed categories via data-collapsed", () => {
-    const root = document.createElement("div");
-    renderGrid(root, baseState({
-      items: [["h1", 1]],
-      collapsed: new Set(["Consumables"]),
-    }), noopHandlers());
-    expect(root.querySelector(".cat-group")?.getAttribute("data-collapsed")).toBe("true");
   });
 
   it("sorts cells alphabetically within each category by item name", () => {
@@ -108,13 +89,12 @@ describe("renderGrid", () => {
     expect(tip?.dataset.rarity).toBe("rare");
   });
 
-  it("renders ❓ for missing-from-catalog items and tags them under 'Unknown'", () => {
+  it("renders ❓ for missing-from-catalog items", () => {
     const root = document.createElement("div");
     renderGrid(root, baseState({ items: [["mystery", 1]] }), noopHandlers());
     const cell = cellFor(root, "mystery");
     expect(cell).not.toBeNull();
     expect(cell?.querySelector(".cell-image")?.textContent).toContain("❓");
-    expect(cell?.closest<HTMLElement>(".cat-group")?.dataset.category).toBe("Unknown");
   });
 
   it("cells carry no inline edit affordances (popover is the sole edit surface)", () => {
