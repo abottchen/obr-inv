@@ -2704,5 +2704,30 @@
     "description": "A diamond worth 200gp",
     "rarity": null,
     "weight": 0.1
+  },
+  {
+    "id": "29u34X",
+    "name": "Raxyg's Ring",
+    "category": "Wondrous Item",
+    "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/79b276f7-6a75-428e-8f66-3c334a201a0f.jpg",
+    "description": "A malachite ring inlaid with electrum.  Speaking the command word causes the ring to emit bright light in a 20ft radius.",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "ZhFPsg",
+    "name": "Water",
+    "category": "Adventuring Gear - Utility & Equipment",
+    "icon": "https://static.wikia.nocookie.net/forgottenrealms/images/f/f7/Create_Water_5e.png",
+    "description": "A gallon of water",
+    "rarity": "common",
+    "weight": 8
+  },
+  {
+    "id": "q1lrxl",
+    "name": "Amulet of Torm",
+    "category": "Other",
+    "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/d6d9a6c1-17f6-464d-b753-c13edc1206db.webp",
+    "description": "An amulet worth 25gp",
+    "rarity": "common"
   }
 ]
