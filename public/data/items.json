@@ -2729,5 +2729,12 @@
     "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/d6d9a6c1-17f6-464d-b753-c13edc1206db.webp",
     "description": "An amulet worth 25gp",
     "rarity": "common"
+  },
+  {
+    "id": "1IQeOe",
+    "name": "Letter to the Order of the Gauntlet",
+    "category": "Other",
+    "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/8b6f5aff-8e71-4c61-9fbe-8a103dd1c461.webp",
+    "description": "A letter addressed to General May Redspire of the Order of the Gauntlet.  It describes the heroic actions of the party in helping Camp Vengeance in its fight against the yellow musk creeper.  It urges their general to reward the party for its efforts.  It is signed by Ord Firebeard, Perne Salhana, and Niles Breakbone."
   }
 ]
