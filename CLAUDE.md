@@ -59,6 +59,32 @@ Use `__testHooks` (from the mock) to set role, player identity, party, and to re
 - **`withOverlay` for user-facing writes**: mutations triggered by user interaction should use `withOverlay()` (`src/ui-mutate.ts`), which shows a spinner, wires up abort/cancel, and translates `ConflictError` / `AbortError` into OBR notifications. Boot-time or background writes skip it.
 - **`pruneZeros` on write**: `writeRecord` in `metadata.ts` automatically prunes zero-count entries before persisting. Decrementing to 0 is intentional (ghost row), but the zero is stripped on the next write that touches that record.
 
+## Git hooks (forbidden-name guard)
+
+Player inventory records in the OBR room metadata carry real player names. This
+is a public repo, so those names must never land in a commit message, the
+catalog, or any tracked file. `.githooks/` holds versioned hooks that enforce
+this:
+
+- `pre-commit` — rejects staged changes that introduce a forbidden name.
+- `commit-msg` — rejects a commit message containing one.
+- `pre-push` — rejects any pushed commit whose message or content matches
+  (backstop for commits made before the hooks, or with `--no-verify`).
+
+The pattern lives in `.githooks/_forbidden-names.sh` as a regex over the
+players' first names: `\b(Simon|Steve|Quinn|Mike|David)[[:space:]]+[A-Z]...`.
+Bare first names are allowed; a first name followed by a capitalized word (a
+likely full name) is refused. Update the alternation when a new player joins.
+
+`core.hooksPath` is per-clone and not checked in — **activate the hooks after
+cloning**:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Bypass for a single commit/push (use sparingly): `--no-verify`.
+
 ## Deploy
 
 GitHub Actions deploys `dist/` to Pages on push to `main`. CI on PRs runs `npm test` + `npm run build`.
