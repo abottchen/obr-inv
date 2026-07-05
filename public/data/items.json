@@ -2736,5 +2736,14 @@
     "category": "Other",
     "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/8b6f5aff-8e71-4c61-9fbe-8a103dd1c461.webp",
     "description": "A letter addressed to General May Redspire of the Order of the Gauntlet.  It describes the heroic actions of the party in helping Camp Vengeance in its fight against the yellow musk creeper.  It urges their general to reward the party for its efforts.  It is signed by Ord Firebeard, Perne Salhana, and Niles Breakbone."
+  },
+  {
+    "id": "0tIC3m",
+    "name": "Command Amulet",
+    "category": "Other",
+    "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/c6906d7c-e16f-4ae7-b7df-99893b32521f.webp",
+    "description": "Each Shield Guardian is magically bound to an amulet. While the guardian and its amulet are on the same plane of existence, the amulet's wearer can telepathically call the guardian to travel to it, and the guardian knows the distance and direction to the amulet. If the guardian is within 60 feet of the amulet's wearer, half of any damage the wearer takes (round up) is transferred to the guardian. A shield guardian's command amulet might be passed down through a magic-using society or family for generations.",
+    "rarity": "uncommon",
+    "weight": 1
   }
 ]
