@@ -2754,5 +2754,13 @@
     "description": "A mysterious box with arcane glyphs and runic carvings.  It feels dormant.",
     "rarity": "very rare",
     "weight": 3
+  },
+  {
+    "id": "KefGhy",
+    "name": "Batiri Ant War Mask",
+    "category": "Wondrous Item",
+    "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/ea9d7380-8445-48ca-bf56-53c70d2af0be.webp",
+    "description": "Batiri warriors wear oversized wooden war masks into combat. Each goblin paints and decorates its own mask to make it look as fearsome as possible. Aside from intimidating enemies, these masks serve the same purpose among the Batiri as coats of arms among noble knights of Faerûn. Batiri of opposing tribes might not know an enemy's given name, but they'll know Snarling Crocodile or Fanged Ape.\n\nWhile wearing this mask, you have darkvision out to a range of 60 feet. If you already have darkvision, wearing the mask increases its range by 60 feet.",
+    "rarity": "uncommon"
   }
 ]
