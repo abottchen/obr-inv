@@ -13,6 +13,13 @@ export const METER_RED_RATIO = 0.90;
 // fetch the catalog from the same domain that hosts the extension.
 export const DEFAULT_CATALOG_URL = "./data/items.json";
 
+// ScorpioTHK plays in a private browser window, so OBR issues him a new
+// playerId every session, orphaning his inventory record. His display name
+// is his only stable identifier, so the GM client auto-merges stray records
+// with this name onto his live id whenever he (re)connects. See src/heal.ts.
+// If he ever changes his OBR display name, update this value.
+export const AUTO_HEAL_NAME = "ScorpioTHK";
+
 export const RARITIES = [
   "common",
   "uncommon",
