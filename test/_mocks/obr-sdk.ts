@@ -9,6 +9,7 @@ let selfName = "Self";
 let selfColor = "#888888";
 let players: Array<{ id: string; name: string; color: string; role: "PLAYER" | "GM" }> = [];
 const metadataListeners: Array<(m: Record<string, unknown>) => void> = [];
+const partyListeners: Array<(p: typeof players) => void> = [];
 
 function baseSetMetadata(patch: Record<string, unknown>): Promise<void> {
   for (const [k, v] of Object.entries(patch)) {
@@ -42,7 +43,16 @@ export const OBR = {
     get id() { return selfId; },
     onChange: vi.fn(() => () => {}),
   },
-  party: { getPlayers: vi.fn(async () => players) },
+  party: {
+    getPlayers: vi.fn(async () => players),
+    onChange: vi.fn((cb: (p: typeof players) => void) => {
+      partyListeners.push(cb);
+      return () => {
+        const i = partyListeners.indexOf(cb);
+        if (i >= 0) partyListeners.splice(i, 1);
+      };
+    }),
+  },
   broadcast: {
     sendMessage: vi.fn(
       async (channel: string, data: unknown, opts?: { destination?: "REMOTE" | "LOCAL" | "ALL" }) => {
@@ -69,6 +79,7 @@ export const __testHooks = {
     broadcasts.length = 0;
     for (const k of Object.keys(broadcastListeners)) delete broadcastListeners[k];
     players = [];
+    partyListeners.length = 0;
     role = "PLAYER";
     selfId = "player-self";
     selfName = "Self";
@@ -83,6 +94,7 @@ export const __testHooks = {
     OBR.player.getName.mockClear();
     OBR.player.getColor.mockClear();
     OBR.party.getPlayers.mockClear();
+    OBR.party.onChange.mockClear();
     OBR.broadcast.sendMessage.mockClear();
     OBR.broadcast.onMessage.mockClear();
     OBR.notification.show.mockClear();
@@ -91,7 +103,7 @@ export const __testHooks = {
   setSelf(id: string, name: string, color: string) {
     selfId = id; selfName = name; selfColor = color;
   },
-  setParty(p: typeof players) { players = p; },
+  setParty(p: typeof players) { players = p; partyListeners.forEach((l) => l(players)); },
   store,
   broadcasts,
 };
