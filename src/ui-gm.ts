@@ -21,6 +21,7 @@ import { totalWeight } from "./inventory";
 import { mountIconSprite, icon as svgIcon } from "./ui-icons";
 import { withOverlay } from "./ui-mutate";
 import { openMergeDialog } from "./ui-merge";
+import { runHeal } from "./heal";
 import {
   BROADCAST_CHANNEL, STORAGE_CAP_BYTES,
   METER_YELLOW_RATIO, METER_RED_RATIO,
@@ -380,15 +381,21 @@ export function mountGmView(opts: GmViewOpts): () => void {
     },
   );
 
+  // Auto-heal: when a private-mode player reconnects under a fresh id, the GM
+  // client merges their orphaned record(s) onto the live id. See src/heal.ts.
+  // Party events (not metadata) drive this, so the heal's own writes can't loop.
+  const unsubParty = OBR.party.onChange((players) => { void runHeal(players); });
+
   // main.ts already calls ensureRecord(selfId, ...) before mounting,
   // so the GM's tab is guaranteed to exist by the time we read here.
   void (async () => {
     records = await listInventoryRecords();
     renderAll();
+    void runHeal(await OBR.party.getPlayers());
   })();
 
   return () => {
-    unsubMeta(); unsubCustoms(); unsubBroadcast(); shellRefs?.destroy();
+    unsubMeta(); unsubCustoms(); unsubBroadcast(); unsubParty(); shellRefs?.destroy();
   };
 }
 
