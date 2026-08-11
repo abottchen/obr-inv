@@ -2770,5 +2770,38 @@
     "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/e75b0e22-1188-44af-8865-51dcbf585bcb.webp",
     "description": "1d6+1 Slashing. Properties: Finesse, Light. Mastery: Nick. You have a +1 bonus to attack and damage rolls made with this magic weapon. (Martial Melee Weapon)",
     "rarity": "uncommon"
+  },
+  {
+    "id": "szDVJX",
+    "name": "+1 Arrows",
+    "category": "Ammunition",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/quiver.svg",
+    "description": "+1 arrows",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "SgfDiU",
+    "name": "Tyrannosaurus Rex Tooth Knife",
+    "category": "Weapon",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/bone-knife.svg",
+    "description": "A knife made of a tyrannosaurus rex tooth worth 70gp.",
+    "rarity": "common"
+  },
+  {
+    "id": "hRlMEG",
+    "name": "Ohelo Berries",
+    "category": "Other",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/berries-bowl.svg",
+    "description": "Ohelo berries",
+    "rarity": "common"
+  },
+  {
+    "id": "lKQFi4",
+    "name": "Moradin's Gauntlet",
+    "category": "Wondrous Item",
+    "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/ddfab8c3-407a-4bb1-bfe0-4284f414d7ab.webp",
+    "description": "A gauntlet made of gold and sized for an adult dwarf. The dwarves of Chult call it Moradin's Gauntlet, and it is customarily worn by the overseers of Hrakhamar.\n\nWhile wearing these gauntlets, you have the following effects:\n\nDwarvish. You know Dwarvish.\n\nFriend of Dwarvenkind. You have Advantage on Charisma (Persuasion) checks made to interact with dwarves and duergar.\n\nToughness. Your Constitution increases by 2, to a maximum of 20.In addition, while attuned to the belt, you have a 50 percent chance each day at dawn of growing a full beard if you can grow one, or a thicker beard if you already have one.If you aren't a dwarf or duergar, you gain the following additional benefits while wearing the belt:\n\nDarkvision. You have Darkvision with a range of 60 feet.\n\nResilience. You have Resistance to Poison damage. You also have Advantage on saving throws you make to avoid or end the Poisoned condition.",
+    "rarity": "rare",
+    "weight": 1
   }
 ]
