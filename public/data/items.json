@@ -2790,7 +2790,7 @@
   {
     "id": "hRlMEG",
     "name": "Ohelo Berries",
-    "category": "Other",
+    "category": "Consumable",
     "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/berries-bowl.svg",
     "description": "The bright red berries from Ohelo (oh-HEH-loh) shrubs grow in volcanic areas, even on lava flows. The shrubs grow 1 to 4 feet tall and have small green oval leaves. The berries taste similar to cranberries. Fresh berries restore 1 hit point if eaten within 24 hours of being picked.",
     "rarity": "common"
@@ -2800,14 +2800,14 @@
     "name": "Moradin's Gauntlet",
     "category": "Wondrous Item",
     "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/ddfab8c3-407a-4bb1-bfe0-4284f414d7ab.webp",
-    "description": "A gauntlet made of gold and sized for an adult dwarf. The dwarves of Chult call it Moradin's Gauntlet, and it is customarily worn by the overseers of Hrakhamar.\n\nWhile wearing these gauntlets, you have the following effects:\n\nDwarvish. You know Dwarvish.\n\nFriend of Dwarvenkind. You have Advantage on Charisma (Persuasion) checks made to interact with dwarves and duergar.\n\nToughness. Your Constitution increases by 2, to a maximum of 20.In addition, while attuned to the belt, you have a 50 percent chance each day at dawn of growing a full beard if you can grow one, or a thicker beard if you already have one.If you aren't a dwarf or duergar, you gain the following additional benefits while wearing the belt:\n\nDarkvision. You have Darkvision with a range of 60 feet.\n\nResilience. You have Resistance to Poison damage. You also have Advantage on saving throws you make to avoid or end the Poisoned condition.",
+    "description": "A gauntlet made of gold and sized for an adult dwarf. The dwarves of Chult call it Moradin's Gauntlet, and it is customarily worn by the overseers of Hrakhamar.\n\nWhile wearing this gauntlet, you have the following effects:\n\nDwarvish. You know Dwarvish.\n\nFriend of Dwarvenkind. You have Advantage on Charisma (Persuasion) checks made to interact with dwarves and duergar.\n\nToughness. Your Constitution increases by 2, to a maximum of 20. In addition, while attuned to the gauntlet, you have a 50 percent chance each day at dawn of growing a full beard if you can grow one, or a thicker beard if you already have one. If you aren't a dwarf or duergar, you gain the following additional benefits while wearing the gauntlet:\n\nDarkvision. You have Darkvision with a range of 60 feet.\n\nResilience. You have Resistance to Poison damage. You also have Advantage on saving throws you make to avoid or end the Poisoned condition.",
     "rarity": "rare",
     "weight": 1
   },
   {
     "id": "rgP1mz",
     "name": "Akia Berries",
-    "category": "Other",
+    "category": "Consumable",
     "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/berry-bush.svg",
     "description": "Akia (ah-KEE-ah) plants and berries look very similar to the Ohelo plant and only trained observers can tell the difference. Unlike the Ohelo berries, Akia berries are poisonous. If a creature ingests one or more berries, it must make a DC 10 Constitution saving throw or be poisoned for the next hour. Failure by more than 5 causes the creature to enter a catatonic state (incapacitated) while poisoned.",
     "rarity": "common"
@@ -2815,7 +2815,7 @@
   {
     "id": "ycnrYM",
     "name": "Leponene Berries",
-    "category": "Other",
+    "category": "Consumable",
     "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/grapes.svg",
     "description": "Leponene (leh-poh-NAY-nay) also grows on a small shrub, but the berries are black. The berries are processed by the dwarves to make a morning drink, which not only stimulates the mind, but also the bowels. The Leponene berries has been used for centuries as a laxative, but mostly makes the dwarves flatulent. Being regular has its benefits, consuming fresh Leponene drink (also called \"Nene\" or \"Poop Drink\" for short) gives a creature +1 to constitution saving throws for the next 8 hours, starting 10 minutes after ingestion.",
     "rarity": "common"
