@@ -2819,5 +2819,13 @@
     "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/grapes.svg",
     "description": "Leponene (leh-poh-NAY-nay) also grows on a small shrub, but the berries are black. The berries are processed by the dwarves to make a morning drink, which not only stimulates the mind, but also the bowels. The Leponene berries has been used for centuries as a laxative, but mostly makes the dwarves flatulent. Being regular has its benefits, consuming fresh Leponene drink (also called \"Nene\" or \"Poop Drink\" for short) gives a creature +1 to constitution saving throws for the next 8 hours, starting 10 minutes after ingestion.",
     "rarity": "common"
+  },
+  {
+    "id": "RC3pky",
+    "name": "Monkey Fruit Distillate",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/fizzing-flask.svg",
+    "description": "Distilled from Dancing Monkey Fruit. As a Bonus Action, coat one melee weapon or one arrow. On the first hit after applying, the target must succeed on a Con save (DC 12) or spend its action dancing for 1 round, with Disadvantage on its attacks, Advantage on attacks against it, and Speed 0. Regardless of the save, the target takes an extra 1 Poison damage.",
+    "rarity": "common"
   }
 ]
