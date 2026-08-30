@@ -61,3 +61,31 @@ export const THEME = {
   warn: "#d68a2a",
   bad: "#c4564a",
 } as const;
+
+// Display order for inventory category groups, most-reached-for first.
+// Alphabetical order buried ammunition and consumables under the
+// Adventuring Gear blocks; this puts what you grab mid-encounter on top.
+// Tiers render in the order listed here, and each tier declares whether
+// its groups start collapsed. Any category absent from this table — a
+// GM-invented custom category, or a catalog category added later —
+// falls into a trailing tier that renders last, alphabetically, and
+// starts collapsed.
+export const CATEGORY_TIERS: ReadonlyArray<{
+  readonly collapsed: boolean;
+  readonly categories: readonly string[];
+}> = [
+  {
+    collapsed: false,
+    categories: [
+      "Ammunition",
+      "Consumable",
+      "Adventuring Gear - Spell Scrolls",
+      "Wondrous Item",
+      "Other",
+      // Bucket for inventory ids with no catalog entry. A broken item is
+      // worth seeing, not burying at the bottom of a collapsed group.
+      "Unknown",
+    ],
+  },
+  { collapsed: true, categories: ["Weapon", "Armor"] },
+];
