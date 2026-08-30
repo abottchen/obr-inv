@@ -2827,5 +2827,30 @@
     "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/fizzing-flask.svg",
     "description": "Distilled from Dancing Monkey Fruit. As a Bonus Action, coat one melee weapon or one arrow. On the first hit after applying, the target must succeed on a Con save (DC 12) or spend its action dancing for 1 round, with Disadvantage on its attacks, Advantage on attacks against it, and Speed 0. Regardless of the save, the target takes an extra 1 Poison damage.",
     "rarity": "common"
+  },
+  {
+    "id": "vC35mX",
+    "name": "Adamantium Ingot",
+    "category": "Other",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/gold-stack.svg",
+    "description": "An ingot of pure adamantium. Worth 10gp.",
+    "rarity": "common",
+    "weight": 1
+  },
+  {
+    "id": "WHL1Gw",
+    "name": "Scroll of Lesser Restoration",
+    "category": "Adventuring Gear - Spell Scrolls",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/tied-scroll.svg",
+    "description": "Casts Lesser Restoration",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "3Igrz4",
+    "name": "Charter of Exploration",
+    "category": "Tool",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/wax-seal.svg",
+    "description": "Grants the owner the right to explore Chult with the blessing of the Flaming Fist. In exchange, the Fist expect 50% of all riches plundered to be handed over to continue to fuel their efforts.",
+    "rarity": "common"
   }
 ]
