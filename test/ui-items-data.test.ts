@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { groupByCategory, type ItemsDataState } from "../src/ui-items-data";
+import { groupByCategory, flatSorted, type ItemsDataState } from "../src/ui-items-data";
 import type { CatalogItem } from "../src/types";
 
 const catalog: CatalogItem[] = [
@@ -32,7 +32,7 @@ describe("groupByCategory", () => {
     expect(groups[1][1].map((g) => g.entry[0])).toEqual(["a1"]);
   });
 
-  it("sorts categories alphabetically", () => {
+  it("sorts unranked categories alphabetically", () => {
     const groups = groupByCategory(baseState({
       items: [["a1", 1], ["g1", 1], ["h1", 1]],
     }));
@@ -112,5 +112,92 @@ describe("groupByCategory", () => {
       search: "xyzzy",
     }));
     expect(groups).toEqual([]);
+  });
+});
+
+// Fixture using the catalog's real category names, so the tier table in
+// constants.ts actually applies. The fixture above deliberately uses
+// invented names ("Consumables", "Weapons") that fall in the unranked tail.
+const tierCatalog: CatalogItem[] = [
+  { id: "t-ammo",   name: "Arrows",             category: "Ammunition",        icon: "u", description: "" },
+  { id: "t-potion", name: "Potion of Healing",  category: "Consumable",        icon: "u", description: "" },
+  { id: "t-scroll", name: "Scroll of Fireball", category: "Adventuring Gear - Spell Scrolls", icon: "u", description: "" },
+  { id: "t-wond",   name: "Bag of Holding",     category: "Wondrous Item",     icon: "u", description: "" },
+  { id: "t-other",  name: "Odd Trinket",        category: "Other",             icon: "u", description: "" },
+  { id: "t-weapon", name: "Longsword",          category: "Weapon",            icon: "u", description: "" },
+  { id: "t-armor",  name: "Chain Mail",         category: "Armor",             icon: "u", description: "" },
+  { id: "t-tool",   name: "Thieves' Tools",     category: "Tool",              icon: "u", description: "" },
+  { id: "t-cloak",  name: "Cloak",              category: "Clothing",          icon: "u", description: "" },
+  { id: "t-mule",   name: "Mule",               category: "Animal",            icon: "u", description: "" },
+  { id: "t-focus",  name: "Holy Symbol",        category: "Spellcasting Focus", icon: "u", description: "" },
+  { id: "t-arrow2", name: "+1 Arrows",          category: "Ammunition",        icon: "u", description: "" },
+];
+
+const allTierItems: ItemsDataState["items"] =
+  tierCatalog.map((c) => [c.id, 1] as [string, number]);
+
+describe("groupByCategory tier ordering", () => {
+  it("orders category groups by tier, not alphabetically", () => {
+    const groups = groupByCategory(baseState({
+      catalog: tierCatalog, items: allTierItems,
+    }));
+    expect(groups.map(([c]) => c)).toEqual([
+      "Ammunition",
+      "Consumable",
+      "Adventuring Gear - Spell Scrolls",
+      "Wondrous Item",
+      "Other",
+      "Weapon",
+      "Armor",
+      "Animal",
+      "Clothing",
+      "Spellcasting Focus",
+      "Tool",
+    ]);
+  });
+
+  it("sorts the unranked tail alphabetically behind the ranked categories", () => {
+    const groups = groupByCategory(baseState({
+      catalog: tierCatalog,
+      items: [["t-tool", 1], ["t-mule", 1], ["t-weapon", 1], ["t-ammo", 1]],
+    }));
+    expect(groups.map(([c]) => c)).toEqual(["Ammunition", "Weapon", "Animal", "Tool"]);
+  });
+
+  it("places the Unknown bucket in the quick-access tier, above Weapon", () => {
+    const groups = groupByCategory(baseState({
+      catalog: tierCatalog,
+      items: [["t-weapon", 1], ["mystery-id", 1], ["t-tool", 1]],
+    }));
+    expect(groups.map(([c]) => c)).toEqual(["Unknown", "Weapon", "Tool"]);
+  });
+});
+
+describe("flatSorted tier ordering", () => {
+  it("orders entries by category tier, then by item name within a category", () => {
+    const ordered = flatSorted(baseState({
+      catalog: tierCatalog, items: allTierItems,
+    }));
+    expect(ordered.map((g) => g.entry[0])).toEqual([
+      "t-arrow2", "t-ammo",          // Ammunition: "+1 Arrows" before "Arrows"
+      "t-potion",                    // Consumable
+      "t-scroll",                    // Spell Scrolls
+      "t-wond",                      // Wondrous Item
+      "t-other",                     // Other
+      "t-weapon",                    // Weapon
+      "t-armor",                     // Armor
+      "t-mule",                      // Animal   ─┐
+      "t-cloak",                     // Clothing  │ unranked tail,
+      "t-focus",                     // Focus     │ alphabetical by category
+      "t-tool",                      // Tool     ─┘
+    ]);
+  });
+
+  it("keeps missing-from-catalog entries in the quick-access tier", () => {
+    const ordered = flatSorted(baseState({
+      catalog: tierCatalog,
+      items: [["t-tool", 1], ["mystery-id", 1], ["t-weapon", 1]],
+    }));
+    expect(ordered.map((g) => g.entry[0])).toEqual(["mystery-id", "t-weapon", "t-tool"]);
   });
 });

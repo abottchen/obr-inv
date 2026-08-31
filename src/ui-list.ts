@@ -16,7 +16,9 @@ export interface ListState {
   items: InventoryEntry[];
   catalog: CatalogItem[];
   search: string;
-  collapsed: Set<string>;
+  /** Effective collapse state for a category group, tier default
+   *  merged with any stored user override. */
+  isCollapsed: (cat: string) => boolean;
   ghosts: Set<string>;
   tracker: PulseTracker;
   phantomRemoves: Set<string>;
@@ -68,7 +70,11 @@ export function renderList(
   const receivedRows: HTMLElement[] = [];
 
   for (const [cat, entries] of sortedCats) {
-    const collapsed = state.collapsed.has(cat);
+    // While searching, always show matching groups open — otherwise a
+    // hit inside a collapsed group renders as a header with a count and
+    // no visible row. Mirrors ui-add-dialog. The stored state is
+    // untouched, so groups snap back when the query clears.
+    const collapsed = search ? false : state.isCollapsed(cat);
 
     const group = document.createElement("div");
     group.className = "cat-group";

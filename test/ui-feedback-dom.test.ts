@@ -65,6 +65,9 @@ describe("ui-feedback DOM integration", () => {
   beforeEach(() => {
     __testHooks.reset();
     document.body.innerHTML = "";
+    // Collapse overrides persist to localStorage, so clear them between
+    // tests — markReceived writes one, which would leak into later cases.
+    localStorage.clear();
     vi.useRealTimers();
   });
 
@@ -181,10 +184,7 @@ describe("ui-feedback DOM integration", () => {
     document.body.appendChild(root);
     const refs = mountShell(root, rec([["h1", 3]]), catalog, makeHandlers());
 
-    const header = root.querySelector(
-      '.cat-header[data-category="Consumables"]',
-    ) as HTMLElement;
-    header.click();
+    // "Consumables" is not in CATEGORY_TIERS, so it starts collapsed.
     expect(
       root.querySelector('.cat-group[data-category="Consumables"]')
         ?.getAttribute("data-collapsed"),

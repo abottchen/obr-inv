@@ -1,4 +1,5 @@
 import type { CatalogItem, InventoryEntry } from "./types";
+import { categoryRank } from "./category-order";
 
 export interface ItemsDataState {
   items: InventoryEntry[];
@@ -23,11 +24,24 @@ export function groupByCategory(state: ItemsDataState): GroupedByCategory {
     if (!byCat.has(cat)) byCat.set(cat, []);
     byCat.get(cat)!.push(ge);
   }
-  return [...byCat.entries()].sort(([a], [b]) => a.localeCompare(b));
+  // Tier first (see CATEGORY_TIERS), then alphabetical to break ties
+  // among the unranked tail, which all share one rank.
+  return [...byCat.entries()].sort(
+    ([a], [b]) => categoryRank(a) - categoryRank(b) || a.localeCompare(b),
+  );
 }
 
 export function flatSorted(state: ItemsDataState): GroupedEntry[] {
+  // Grid view has no category headers, so it mirrors the list's group
+  // order implicitly: cells run tier by tier, alphabetically by name
+  // inside each category.
   return resolveEntries(state).sort((a, b) => {
+    const ac = a.item?.category ?? "Unknown";
+    const bc = b.item?.category ?? "Unknown";
+    const byTier = categoryRank(ac) - categoryRank(bc);
+    if (byTier !== 0) return byTier;
+    const byCat = ac.localeCompare(bc);
+    if (byCat !== 0) return byCat;
     const an = a.item?.name ?? a.entry[0];
     const bn = b.item?.name ?? b.entry[0];
     return an.localeCompare(bn);

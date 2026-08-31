@@ -1,5 +1,6 @@
 import { renderList, type ListState } from "./ui-list";
 import { renderGrid, type GridState } from "./ui-grid";
+import { loadCollapseState } from "./collapse-state";
 import { totalWeight } from "./inventory";
 import { createPulseTracker, type PulseTracker } from "./ui-feedback";
 import { mountIconSprite, icon } from "./ui-icons";
@@ -306,7 +307,10 @@ export function mountShell(
   root.appendChild(wrap);
 
   let viewMode: ViewMode = readViewMode();
-  const collapsed = new Set<string>();
+  // Category collapse state, seeded from the tier defaults and the
+  // user's stored per-browser overrides. Persists to localStorage on
+  // every toggle; never touches room metadata.
+  const collapse = loadCollapseState();
   const ghosts = new Set<string>();
   const tracker: PulseTracker = createPulseTracker();
   // prevRecord starts null so the very first rerender (from initial mount
@@ -389,7 +393,7 @@ export function mountShell(
         items: working.items,
         catalog: cat,
         search: search.value,
-        collapsed,
+        isCollapsed: collapse.isCollapsed,
         ghosts,
         tracker,
         phantomRemoves,
@@ -411,13 +415,17 @@ export function mountShell(
     if (!headerEl) return;
     const cat = headerEl.dataset.category;
     if (!cat) return;
-    const willCollapse = !collapsed.has(cat);
-    if (willCollapse) collapsed.add(cat); else collapsed.delete(cat);
     // Toggle data-collapsed on the persistent .cat-group element so the
     // CSS grid-rows transition animates. A full rerender would replace
     // the DOM and skip the transition.
     const group = headerEl.closest<HTMLElement>(".cat-group");
-    if (group) group.dataset.collapsed = willCollapse ? "true" : "false";
+    if (!group) return;
+    // Read the rendered state rather than the stored one: during a search
+    // every group renders expanded, and the click should act on what the
+    // user is actually looking at.
+    const willCollapse = group.dataset.collapsed !== "true";
+    collapse.set(cat, willCollapse);
+    group.dataset.collapsed = willCollapse ? "true" : "false";
   });
   // Segmented control: each button selects its mode. Clicking the already-
   // active button is a no-op.
@@ -433,13 +441,14 @@ export function mountShell(
   collapseAllBtn.onclick = () => {
     body.querySelectorAll<HTMLElement>(".cat-group").forEach((group) => {
       const cat = group.dataset.category;
-      if (cat) collapsed.add(cat);
+      if (cat) collapse.set(cat, true);
       group.dataset.collapsed = "true";
     });
   };
   expandAllBtn.onclick = () => {
-    collapsed.clear();
     body.querySelectorAll<HTMLElement>(".cat-group").forEach((group) => {
+      const cat = group.dataset.category;
+      if (cat) collapse.set(cat, false);
       group.dataset.collapsed = "false";
     });
   };
@@ -455,7 +464,10 @@ export function mountShell(
       // happen here. Schedule a render immediately so the pulse is visible
       // even if the metadata event never lands (broadcast-only path).
       const item = currentCatalog.find((c) => c.id === itemId);
-      if (item) collapsed.delete(item.category);
+      // Record an explicit expand rather than clearing the override:
+      // clearing would restore the tier default, which for Weapon and
+      // the unranked tail is collapsed — hiding the item just received.
+      if (item) collapse.set(item.category, false);
       rerender(currentRecord, currentCatalog);
     },
     destroy: () => { root.innerHTML = ""; },
