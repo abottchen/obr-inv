@@ -2760,7 +2760,7 @@
     "name": "Batiri War Mask",
     "category": "Wondrous Item",
     "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/00d8d00f-c754-450f-8c83-65b8043f103f.webp",
-    "description": "Batiri warriors wear oversized wooden war masks into combat. Each goblin paints and decorates its own mask to make it look as fearsome as possible. Aside from intimidating enemies, these masks serve the same purpose among the Batiri as coats of arms among noble knights of Faerûn. Batiri of opposing tribes might not know an enemy's given name, but they'll know Snarling Crocodile or Fanged Ape.\n\nWhile wearing this mask, you have darkvision out to a range of 60 feet. If you already have darkvision, wearing the mask increases its range by 60 feet.",
+    "description": "Batiri warriors wear oversized wooden war masks into combat. Each goblin paints and decorates its own mask to make it look as fearsome as possible. Aside from intimidating enemies, these masks serve the same purpose among the Batiri as coats of arms among noble knights of Faerûn. Batiri of opposing tribes might not know an enemy's given name, but they'll know Snarling Crocodile or Fanged Ape.\n\nWhile wearing this mask, you have Advantage on Wisdom (Perception) checks that rely on sight. In conditions of clear visibility, you can make out details of even extremely distant creatures and objects as small as 2 feet across.",
     "rarity": "uncommon"
   },
   {
