@@ -2852,5 +2852,38 @@
     "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/wax-seal.svg",
     "description": "Grants the owner the right to explore Chult with the blessing of the Flaming Fist. In exchange, the Fist expect 50% of all riches plundered to be handed over to continue to fuel their efforts.",
     "rarity": "common"
+  },
+  {
+    "id": "KHc5ZK",
+    "name": "Wyvern Poison",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/poison-bottle.svg",
+    "description": "A creature subjected to Wyvern Poison makes a DC 14 Constitution saving throw, taking 24 (7d6) Poison damage on a failed save or half as much damage on a successful one.",
+    "rarity": "common"
+  },
+  {
+    "id": "bNjdUm",
+    "name": "+1 Arcane Grimoire",
+    "category": "Wondrous Item",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/book-aura.svg",
+    "description": "Requires attunement by a wizard. While you are holding this leather-bound book, you can use it as a spellcasting focus for your wizard spells, and you gain a +1 bonus to spell attack rolls and to the saving throw DCs of your wizard spells. You can use this book as a spellbook. In addition, when you use your Arcane Recovery feature, you can increase the number of spell slot levels you regain by 1.",
+    "rarity": "uncommon",
+    "weight": 3
+  },
+  {
+    "id": "0Hlb62",
+    "name": "+1 Trident",
+    "category": "Weapon",
+    "icon": "https://5e.tools/img/items/XPHB/Trident.webp",
+    "description": "1d8+1 Piercing. Properties: Thrown (Range 20/60), Versatile (1d10+1). Mastery: Topple. You have a +1 bonus to attack and damage rolls made with this magic weapon. (Martial Melee Weapon)",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "U5x6qw",
+    "name": "Batiri Mask",
+    "category": "Clothing",
+    "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/00d8d00f-c754-450f-8c83-65b8043f103f.webp",
+    "description": "Batiri warriors wear oversized wooden war masks into combat. Each goblin paints and decorates its own mask to make it look as fearsome as possible. Aside from intimidating enemies, these masks serve the same purpose among the Batiri as coats of arms among noble knights of Faerûn. Batiri of opposing tribes might not know an enemy's given name, but they'll know Snarling Crocodile or Fanged Ape.",
+    "rarity": "common"
   }
 ]
