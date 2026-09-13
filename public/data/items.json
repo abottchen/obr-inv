@@ -2885,5 +2885,54 @@
     "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/00d8d00f-c754-450f-8c83-65b8043f103f.webp",
     "description": "Batiri warriors wear oversized wooden war masks into combat. Each goblin paints and decorates its own mask to make it look as fearsome as possible. Aside from intimidating enemies, these masks serve the same purpose among the Batiri as coats of arms among noble knights of Faerûn. Batiri of opposing tribes might not know an enemy's given name, but they'll know Snarling Crocodile or Fanged Ape.",
     "rarity": "common"
+  },
+  {
+    "id": "5Rctxg",
+    "name": "Charm of Animal Conjuring",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/wolf-howl.svg",
+    "description": "This Charm allows you to cast Conjure Animals. Once used three times, the Charm vanishes from you."
+  },
+  {
+    "id": "Ikw86x",
+    "name": "Charm of Darkvision",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/semi-closed-eye.svg",
+    "description": "This Charm allows you to cast Darkvision. Once used three times, the Charm vanishes from you."
+  },
+  {
+    "id": "Fb6UwR",
+    "name": "Charm of Feather Falling",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/feather.svg",
+    "description": "This Charm grants you the benefits of a Ring of Feather Falling. These benefits last for 10 days, after which the Charm vanishes from you."
+  },
+  {
+    "id": "91wqCT",
+    "name": "Charm of Heroism",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/muscle-up.svg",
+    "description": "This Charm allows you to give yourself the benefit of a Potion of Heroism as a Magic action. Once you do so, the Charm vanishes from you."
+  },
+  {
+    "id": "RRzpbC",
+    "name": "Charm of Restoration",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/glowing-hands.svg",
+    "description": "This Charm has 3 charges. You can expend some of its charges to cast one of the following spells: Greater Restoration (2 charges) or Lesser Restoration (1 charge). Once all its charges have been expended, the Charm vanishes from you."
+  },
+  {
+    "id": "XkpGRZ",
+    "name": "Charm of the Slayer",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/relic-blade.svg",
+    "description": "One weapon in your possession becomes a Dragon Slayer or Giant Slayer (DM's choice) for the next 9 days. The Charm then vanishes from you, and the weapon returns to normal."
+  },
+  {
+    "id": "9ig5XP",
+    "name": "Charm of Vitality",
+    "category": "Consumable",
+    "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/heart-inside.svg",
+    "description": "This Charm allows you to give yourself the benefit of a Potion of Vitality as a Magic action. Once you do so, the Charm vanishes from you."
   }
 ]
