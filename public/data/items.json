@@ -2934,5 +2934,14 @@
     "category": "Consumable",
     "icon": "https://game-icons.net/icons/ffffff/000000/1x1/lorc/heart-inside.svg",
     "description": "This Charm allows you to give yourself the benefit of a Potion of Vitality as a Magic action. Once you do so, the Charm vanishes from you."
+  },
+  {
+    "id": "lcIs1a",
+    "name": "+1 Rod of the Pact Keeper",
+    "category": "Wondrous Item",
+    "icon": "https://images.owlbear.rodeo/f50dd18d-41a0-4eb0-9f7c-aa07e43a1f94/items/c519b98b-cc40-49cf-b679-842fdc5f6d2a.webp",
+    "description": "Requires attunement by a warlock. While holding this rod, you gain a +1 bonus to spell attack rolls and to the saving throw DCs of your Warlock spells. In addition, you can regain one spell slot as a Magic action while holding the rod. You can't use this property again until you finish a Long Rest.",
+    "rarity": "uncommon",
+    "weight": 2
   }
 ]
