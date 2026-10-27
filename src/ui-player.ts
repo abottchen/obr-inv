@@ -14,6 +14,8 @@ import { showOverlay, closeOverlay, setOverlayDescription, setOverlayState } fro
 import { parseWriter } from "./atomic";
 import { withOverlay } from "./ui-mutate";
 import { resolvedCatalog } from "./catalog";
+import { selectStashes } from "./stash";
+import { openStash, updateStash, closeStash } from "./ui-stash";
 import { BROADCAST_CHANNEL } from "./constants";
 import type {
   CatalogItem, CustomItemsRecord, PlayerInventoryRecord, BroadcastMessage,
@@ -107,6 +109,7 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
 
   // records snapshot for overlay conflict-name lookup. Updated by onRoomMetadataChange.
   let records: Record<string, PlayerInventoryRecord> = {};
+  let metaSeen = false;
 
   const refs = mountShell(opts.root, current, merged, {
     onIncrement: async (id) => {
@@ -133,6 +136,10 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
         writeRecord(opts.playerId, () => ({ ...snap, currency: { ...snap.currency, [f]: v } }), wopts),
       );
     },
+    onStashClick: () => {
+      const stashes = selectStashes(records);
+      if (stashes.length > 0) openStash({ stashes, catalog: merged });
+    },
     onAddClick: () => {
       openAddDialog({
         catalog: merged,
@@ -158,8 +165,16 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
     },
   });
 
+  const syncStash = () => {
+    const stashes = selectStashes(records);
+    refs.setStashVisible(stashes.length > 0);
+    updateStash(stashes, merged);
+  };
+
   const unsubMeta = onRoomMetadataChange((incoming) => {
     records = incoming;
+    metaSeen = true;
+    syncStash();
     const me = incoming[opts.playerId];
     if (!me) return;
     current = me;
@@ -171,6 +186,7 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
     merged = resolvedCatalog(opts.catalog, customs);
     byId = new Map(merged.map((c) => [c.id, c]));
     refs.rerender(current, merged);
+    syncStash();
   });
 
   const unsubBroadcast = OBR.broadcast.onMessage(
@@ -198,9 +214,15 @@ export function mountPlayerView(opts: PlayerViewOpts): () => void {
     },
   );
 
+  void listInventoryRecords()
+    .then((all) => {
+      if (!metaSeen) { records = all; syncStash(); }
+    })
+    .catch((e) => console.warn("[obr-inv] stash seed read failed", e));
+
   function rethrowIfNotCap(e: unknown) {
     if (!(e instanceof OverCapError)) throw e;
   }
 
-  return () => { unsubMeta(); unsubCustoms(); unsubBroadcast(); refs.destroy(); };
+  return () => { unsubMeta(); unsubCustoms(); unsubBroadcast(); closeStash(); refs.destroy(); };
 }
