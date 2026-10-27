@@ -49,12 +49,27 @@ export interface ShellHandlers {
    *  player view to suppress the button; the shell hides it when
    *  this handler is not provided. */
   onCreateCustomClick?: () => void;
+  /** Entry point for the read-only party stash view. Omit to suppress
+   *  the Stash button; it starts hidden until setStashVisible(true). */
+  onStashClick?: () => void;
+}
+
+export interface ShellOptions {
+  /** No Add/Create buttons; coin inputs are non-editable. */
+  readOnly?: boolean;
+  /** Brand title. Default "Tome of Holdings". */
+  title?: string;
+  /** Brand subtitle. Default: the record's name. */
+  subtitle?: string;
+  /** When set, renders a close button at the end of the brand row. */
+  onClose?: () => void;
 }
 
 export interface ShellRefs {
   rerender: (record: PlayerInventoryRecord, catalog: CatalogItem[]) => void;
   markReceived: (itemId: string, quantity: number) => void;
   destroy: () => void;
+  setStashVisible: (visible: boolean) => void;
 }
 
 export function mountShell(
@@ -62,7 +77,9 @@ export function mountShell(
   initialRecord: PlayerInventoryRecord,
   catalog: CatalogItem[],
   handlers: ShellHandlers,
+  options?: ShellOptions,
 ): ShellRefs {
+  const readOnly = options?.readOnly === true;
   root.innerHTML = "";
   mountIconSprite();
 
@@ -80,12 +97,21 @@ export function mountShell(
   brand.appendChild(brandMark);
   const brandTitle = document.createElement("span");
   brandTitle.className = "brand-title font-display";
-  brandTitle.textContent = "Tome of Holdings";
+  brandTitle.textContent = options?.title ?? "Tome of Holdings";
   brand.appendChild(brandTitle);
   const brandSub = document.createElement("span");
   brandSub.className = "brand-sub";
-  brandSub.textContent = initialRecord.name;
+  brandSub.textContent = options?.subtitle ?? initialRecord.name;
   brand.appendChild(brandSub);
+  if (options?.onClose) {
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "brand-close";
+    closeBtn.title = "Close";
+    closeBtn.appendChild(icon("i-x"));
+    closeBtn.onclick = options.onClose;
+    brand.appendChild(closeBtn);
+  }
   header.appendChild(brand);
 
   // Controls row. Wrapper splits the header into [brand], then [controls];
@@ -233,7 +259,8 @@ export function mountShell(
   // the always-present "+ Add to inventory" button.
   const actions = document.createElement("div");
   actions.className = "shell-actions";
-  if (handlers.onCreateCustomClick) {
+  let stashBtn: HTMLButtonElement | null = null;
+  if (!readOnly && handlers.onCreateCustomClick) {
     const createBtn = document.createElement("button");
     createBtn.className = "btn-create font-display";
     createBtn.textContent = "Create item";
@@ -241,16 +268,29 @@ export function mountShell(
     createBtn.onclick = handlers.onCreateCustomClick;
     actions.appendChild(createBtn);
   }
-  const addBtn = document.createElement("button");
-  addBtn.className = "btn-add font-display";
-  addBtn.textContent = "Add to inventory";
-  addBtn.onclick = handlers.onAddClick;
-  actions.appendChild(addBtn);
+  if (!readOnly && handlers.onStashClick) {
+    stashBtn = document.createElement("button");
+    stashBtn.type = "button";
+    stashBtn.className = "btn-stash font-display";
+    stashBtn.textContent = "Stash";
+    stashBtn.title = "View the party stash";
+    stashBtn.hidden = true;
+    stashBtn.onclick = handlers.onStashClick;
+    actions.appendChild(stashBtn);
+  }
+  if (!readOnly) {
+    const addBtn = document.createElement("button");
+    addBtn.className = "btn-add font-display";
+    addBtn.textContent = "Add to inventory";
+    addBtn.onclick = handlers.onAddClick;
+    actions.appendChild(addBtn);
+  }
   footer.appendChild(actions);
   wrap.appendChild(footer);
 
   const gold = document.createElement("div");
   gold.className = "gold-strip pouch";
+  if (readOnly) gold.dataset.readonly = "true";
   const ccyInputs = {} as Record<"pp" | "gp" | "sp" | "cp", HTMLInputElement>;
   const tip = "Type a number to set, +N to add, -N to subtract";
   for (const f of ["pp", "gp", "sp", "cp"] as const) {
@@ -286,18 +326,23 @@ export function mountShell(
       inp.value = String(clamped);
       void handlers.onCurrencyChange(f, clamped);
     };
-    inp.onchange = commit;
-    inp.onfocus = () => inp.select();
-    inp.onkeydown = (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        commit();
-        inp.blur();
-      } else if (e.key === "Escape") {
-        inp.value = String(currentValue());
-        inp.blur();
-      }
-    };
+    if (readOnly) {
+      inp.readOnly = true;
+      inp.tabIndex = -1;
+    } else {
+      inp.onchange = commit;
+      inp.onfocus = () => inp.select();
+      inp.onkeydown = (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          commit();
+          inp.blur();
+        } else if (e.key === "Escape") {
+          inp.value = String(currentValue());
+          inp.blur();
+        }
+      };
+    }
     cell.appendChild(inp);
     gold.appendChild(cell);
     ccyInputs[f] = inp;
@@ -471,6 +516,7 @@ export function mountShell(
       rerender(currentRecord, currentCatalog);
     },
     destroy: () => { root.innerHTML = ""; },
+    setStashVisible: (v) => { if (stashBtn) stashBtn.hidden = !v; },
   };
 }
 

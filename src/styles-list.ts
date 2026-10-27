@@ -40,6 +40,17 @@ export const LIST_CSS = `
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   max-width: 50%;
 }
+.brand-close {
+  background: transparent; border: none;
+  color: var(--text-dim);
+  width: 22px; height: 22px;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  margin-left: 8px;
+  align-self: center;
+}
+.brand-close svg { width: 13px; height: 13px; }
+.brand-close:hover { color: var(--text); }
 
 .shell-controls {
   display: grid;
@@ -346,7 +357,7 @@ export const LIST_CSS = `
 .btn-add:active { transform: translateY(1px); }
 
 /* Secondary action ("Create item", GM only) — subtler, ghost on dark. */
-.btn-create {
+.btn-create, .btn-stash {
   background: rgba(0,0,0,0.3);
   color: var(--text);
   border: 1px solid var(--border);
@@ -357,7 +368,7 @@ export const LIST_CSS = `
   letter-spacing: 0.04em;
   cursor: pointer;
 }
-.btn-create:hover {
+.btn-create:hover, .btn-stash:hover {
   color: var(--accent-soft);
   border-color: var(--accent-soft);
 }
@@ -432,6 +443,7 @@ export const LIST_CSS = `
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
+.gold-strip[data-readonly="true"] .coin-input { color: var(--text-dim); cursor: default; }
 
 .empty-state {
   padding: 36px 24px;
