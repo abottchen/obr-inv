@@ -1,7 +1,7 @@
 export const DIALOG_CSS = `
 /* ─── Generic popover ──────────────────────────────────────────────── */
 .popover {
-  position: absolute; z-index: 50;
+  position: absolute; z-index: 70;
   background: var(--bg-2); color: var(--text);
   border: 1px solid var(--border); border-radius: 6px;
   box-shadow: 0 18px 38px -12px rgba(0,0,0,0.85),
@@ -797,6 +797,23 @@ export const DIALOG_CSS = `
 }
 .customs-panel-footer[data-state="yellow"] .usage { color: var(--warn); }
 .customs-panel-footer[data-state="red"] .usage { color: var(--bad); }
+
+/* ─── Stash window ─────────────────────────────────────────────────── */
+.stash-panel {
+  width: min(500px, calc(100vw - 24px));
+  height: min(660px, calc(100vh - 24px));
+  max-width: none; padding: 0;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.stash-tabs { display: flex; gap: 6px; padding: 8px 12px 0; flex-wrap: wrap; }
+.stash-tab {
+  background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+  border-radius: 99px; padding: 3px 10px; font-size: 11px;
+  color: var(--text-dim); cursor: pointer;
+}
+.stash-tab.active { color: var(--accent-soft); border-color: var(--accent-soft); }
+.stash-shell-host { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.stash-shell-host > .shell { flex: 1 1 auto; min-height: 0; height: auto; }
 
 .customs-confirm-list {
   margin: 8px 0 0 0;
