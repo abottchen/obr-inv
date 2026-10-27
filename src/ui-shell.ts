@@ -292,7 +292,7 @@ export function mountShell(
   gold.className = "gold-strip pouch";
   if (readOnly) gold.dataset.readonly = "true";
   const ccyInputs = {} as Record<"pp" | "gp" | "sp" | "cp", HTMLInputElement>;
-  const tip = "Type a number to set, +N to add, -N to subtract";
+  const tip = readOnly ? "Read only" : "Type a number to set, +N to add, -N to subtract";
   for (const f of ["pp", "gp", "sp", "cp"] as const) {
     const cell = document.createElement("div");
     cell.className = "gold-cell coin";
@@ -377,7 +377,7 @@ export function mountShell(
     currentCatalog = cat;
     hideTooltip();
     for (const f of ["pp","gp","sp","cp"] as const) {
-      if (document.activeElement !== ccyInputs[f]) {
+      if (readOnly || document.activeElement !== ccyInputs[f]) {
         ccyInputs[f].value = String(record.currency[f] ?? 0);
       }
     }

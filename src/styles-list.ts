@@ -46,6 +46,7 @@ export const LIST_CSS = `
   width: 22px; height: 22px;
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer;
+  flex-shrink: 0;
   margin-left: 8px;
   align-self: center;
 }

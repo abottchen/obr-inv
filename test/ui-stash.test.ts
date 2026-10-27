@@ -160,4 +160,25 @@ describe("ui-stash window", () => {
     expect(rows.length).toBe(1);
     expect(rows[0].querySelector(".inv-name")!.textContent).toContain("missing from catalog");
   });
+
+  it("Escape closes an open description popover first, then the window", async () => {
+    openStash({ stashes: [stompy()], catalog });
+    q(".inv-row").dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 0)); // popover registers its Escape listener on a 0ms timer
+    expect(q(".description-popover")).not.toBeNull();
+    esc(document.body);
+    expect(q(".description-popover")).toBeNull();
+    expect(q(".stash-panel")).not.toBeNull();
+    esc(document.body);
+    expect(q(".stash-panel")).toBeNull();
+  });
+
+  it("remounting on rename closes a stale description popover", () => {
+    openStash({ stashes: [stompy()], catalog });
+    q(".inv-row").dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(q(".description-popover")).not.toBeNull();
+    updateStash([stompy({ name: "Sir Stompy" })], catalog);
+    expect(q(".description-popover")).toBeNull();
+    expect(text(".stash-panel .brand-title")).toBe("Sir Stompy");
+  });
 });

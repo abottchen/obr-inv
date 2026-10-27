@@ -118,4 +118,33 @@ describe("ui-shell read-only mode and stash hooks", () => {
     expect(() => refs.setStashVisible(true)).not.toThrow();
     expect(root.querySelector(".btn-stash")).toBeNull();
   });
+
+  it("read-only: a focused coin input still refreshes on rerender", () => {
+    const { root, refs } = mount(noopHandlers(), { readOnly: true });
+    const gp = root.querySelector('[data-ccy="gp"] .coin-input') as HTMLInputElement;
+    gp.focus();
+    refs.rerender({ ...record, currency: { ...record.currency, gp: 999 } }, catalog);
+    expect(gp.value).toBe("999");
+  });
+
+  it("default mode: a focused coin input is protected from rerender", () => {
+    const { root, refs } = mount(noopHandlers());
+    const gp = root.querySelector('[data-ccy="gp"] .coin-input') as HTMLInputElement;
+    gp.focus();
+    refs.rerender({ ...record, currency: { ...record.currency, gp: 999 } }, catalog);
+    expect(gp.value).toBe("0");
+  });
+
+  it("read-only coins say Read only; default keeps the edit tip", () => {
+    const ro = mount(noopHandlers(), { readOnly: true }).root;
+    const inputs = Array.from(ro.querySelectorAll(".coin-input")) as HTMLElement[];
+    const cells = Array.from(ro.querySelectorAll(".gold-cell")) as HTMLElement[];
+    expect(inputs.length).toBeGreaterThan(0);
+    expect(cells.length).toBeGreaterThan(0);
+    for (const el of [...inputs, ...cells]) expect(el.title).toBe("Read only");
+    const def = mount(noopHandlers()).root;
+    for (const el of Array.from(def.querySelectorAll(".coin-input")) as HTMLElement[]) {
+      expect(el.title.startsWith("Type a number")).toBe(true);
+    }
+  });
 });

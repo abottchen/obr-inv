@@ -85,6 +85,9 @@ function onKey(e: KeyboardEvent): void {
   if (t?.classList?.contains("shell-search") && (t as HTMLInputElement).value) {
     return; // the shell clears the search first
   }
+  if (document.querySelector(".description-popover")) {
+    return; // the popover's own Escape handler closes it first
+  }
   closeStash();
 }
 
@@ -116,6 +119,7 @@ function renderTabs(): void {
 function mountSelected(): void {
   const entry = stashes.find((s) => s.id === selectedId);
   if (!entry || !host) return;
+  closeDescription();
   shell?.destroy();
   mountedName = entry.record.name;
   const handlers: ShellHandlers = {
