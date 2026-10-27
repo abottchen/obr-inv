@@ -29,7 +29,7 @@ Owlbear Rodeo (OBR) extension — a single popover that renders a role-aware inv
 Three data sources merge at runtime:
 
 1. **Catalog** (`public/data/items.json`) — static item definitions served from the same origin. Loaded once at boot via `fetchCatalog()`.
-2. **Room metadata** (OBR API) — per-player inventory records at `com.abottchen.obr-inv/v1/<playerId>` and shared custom items at `com.abottchen.obr-inv/v1/customs`. This is the only mutable state.
+2. **Room metadata** (OBR API) — per-player inventory records at `com.abottchen.obr-inv/v1/<playerId>` and shared custom items at `com.abottchen.obr-inv/v1/customs`. This is the only mutable state. Records whose id starts with `npc-` are party stashes, created by hand, shown read-only to every player via the Stash button, and otherwise treated as ordinary records.
 3. **Resolved catalog** — in-memory union of catalog + customs (catalog wins on ID collision). Built at boot, updated when customs change.
 
 ### Atomic writes (`src/atomic.ts`)

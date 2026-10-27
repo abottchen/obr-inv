@@ -4,6 +4,9 @@ export const CONFIG_KEY = `${EXTENSION_ID}/config`;
 export const BROADCAST_CHANNEL = `${EXTENSION_ID}/events`;
 export const CUSTOMS_KEY = `${METADATA_KEY_PREFIX}customs`;
 
+// Inventory records whose player id starts with this prefix are party stashes.
+export const STASH_ID_PREFIX = "npc-";
+
 export const STORAGE_CAP_BYTES = 8192;
 export const METER_YELLOW_RATIO = 0.75;
 export const METER_RED_RATIO = 0.90;
